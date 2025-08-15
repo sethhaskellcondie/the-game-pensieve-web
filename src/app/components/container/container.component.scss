@@ -1,0 +1,46 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 100vh;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-white);
+  padding: 40px;
+}
+
+.seed-button-container {
+  text-align: center;
+}
+
+.right-sidebar {
+  width: 200px;
+  background-color: var(--background-white);
+  
+  /* Hide on smaller screens, keep space for future content */
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+  }
+  
+  .content-area {
+    padding: 20px;
+  }
+}
