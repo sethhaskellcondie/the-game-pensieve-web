@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "Bash(ng generate component:*)",
+      "Bash(ng serve:*)",
+      "WebSearch",
+      "Bash(ng generate service:*)"
+    ],
+    "deny": []
+  }
+}
