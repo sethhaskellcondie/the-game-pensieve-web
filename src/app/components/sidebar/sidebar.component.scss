@@ -1,8 +1,9 @@
 .sidebar {
   background-color: var(--sidebar-black);
   width: 200px;
-  height: 100%;
+  height: 100vh;
   padding: 20px 0;
+  overflow-y: auto;
 }
 
 .nav-list {

@@ -1,12 +1,12 @@
 .app-layout {
   display: flex;
-  flex-direction: column;
   height: 100vh;
   min-height: 100vh;
 }
 
-.main-container {
+.main-content {
   display: flex;
+  flex-direction: column;
   flex: 1;
   overflow: hidden;
 }
