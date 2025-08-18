@@ -6,7 +6,8 @@
       "Bash(ng generate component:*)",
       "Bash(ng serve:*)",
       "WebSearch",
-      "Bash(ng generate service:*)"
+      "Bash(ng generate service:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
