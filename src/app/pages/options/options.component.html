@@ -1,3 +1,17 @@
-<div class="placeholder-content">
-  <p>Options hasn't been implemented yet.</p>
+<div class="options-container">
+  <div class="api-section">
+    <h2>API Tools</h2>
+    <div class="button-group">
+      <button 
+        type="button" 
+        class="api-button" 
+        (click)="checkHeartbeat()" 
+        [disabled]="isChecking">
+        {{isChecking ? 'Checking...' : 'API Heartbeat Check'}}
+      </button>
+      <div class="result-message" *ngIf="heartbeatResult">
+        <span class="status" [class]="heartbeatStatus">{{heartbeatResult}}</span>
+      </div>
+    </div>
+  </div>
 </div>

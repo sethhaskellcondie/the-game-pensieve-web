@@ -5,6 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The goal is to create a sleek modern web interface for a program to manage a collection of video games, board games, and toys.
 The color scheme is based around blue (#0370ec) and grey (#9e9e9e) but can include other colors.
 
+Documentation of the API can be found in these two files
+backend.postman_collection.json
+backend_openapi_documentation.yaml
+
 ## Common Development Commands
 
 - **Development server**: `npm start` or `ng serve` - starts dev server on http://localhost:4200/
