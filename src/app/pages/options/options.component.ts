@@ -14,6 +14,10 @@ export class OptionsComponent {
   heartbeatResult = '';
   heartbeatStatus: 'success' | 'error' = 'success';
 
+  isSeeding = false;
+  seedResult = '';
+  seedStatus: 'success' | 'error' = 'success';
+
   constructor(private apiService: ApiService) {}
 
   checkHeartbeat(): void {
@@ -30,6 +34,29 @@ export class OptionsComponent {
         this.heartbeatResult = `API connection failed: ${error.message || 'Unknown error'}`;
         this.heartbeatStatus = 'error';
         this.isChecking = false;
+      }
+    });
+  }
+
+  seedSampleData(): void {
+    this.isSeeding = true;
+    this.seedResult = '';
+    
+    this.apiService.seedSampleData().subscribe({
+      next: (response) => {
+        if (response.errors) {
+          this.seedResult = `Seeding failed: ${JSON.stringify(response.errors)}`;
+          this.seedStatus = 'error';
+        } else {
+          this.seedResult = 'Sample data seeded successfully!';
+          this.seedStatus = 'success';
+        }
+        this.isSeeding = false;
+      },
+      error: (error) => {
+        this.seedResult = `Seeding failed: ${error.message || 'Unknown error'}`;
+        this.seedStatus = 'error';
+        this.isSeeding = false;
       }
     });
   }

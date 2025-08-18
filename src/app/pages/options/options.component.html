@@ -12,6 +12,17 @@
       <div class="result-message" *ngIf="heartbeatResult">
         <span class="status" [class]="heartbeatStatus">{{heartbeatResult}}</span>
       </div>
+      
+      <button 
+        type="button" 
+        class="api-button seed-button" 
+        (click)="seedSampleData()" 
+        [disabled]="isSeeding">
+        {{isSeeding ? 'Seeding...' : 'Seed Sample Data'}}
+      </button>
+      <div class="result-message" *ngIf="seedResult">
+        <span class="status" [class]="seedStatus">{{seedResult}}</span>
+      </div>
     </div>
   </div>
 </div>
