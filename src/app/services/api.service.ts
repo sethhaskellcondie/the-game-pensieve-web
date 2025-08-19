@@ -15,6 +15,24 @@ export interface CustomField {
   entityKey: string;
 }
 
+export interface CustomFieldValue {
+  customFieldId: number;
+  customFieldName: string;
+  customFieldType: 'text' | 'number' | 'boolean' | 'timestamp';
+  value: string;
+}
+
+export interface Toy {
+  key: string;
+  id: number;
+  name: string;
+  set: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  customFieldValues: CustomFieldValue[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,6 +55,15 @@ export class ApiService {
 
   getCustomFields(): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields`)
+      .pipe(
+        map(response => response.data || [])
+      );
+  }
+
+  getToys(): Observable<Toy[]> {
+    return this.http.post<{data: Toy[], errors: any}>(`${this.baseUrl}/toys/function/search`, {
+      filters: []
+    })
       .pipe(
         map(response => response.data || [])
       );
