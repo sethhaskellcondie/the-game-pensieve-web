@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 interface ApiResponse {
@@ -21,7 +21,9 @@ export class ApiService {
     });
   }
 
-  seedSampleData(): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.baseUrl}/function/seedSampleData`, {});
+  seedSampleData(): Observable<HttpResponse<ApiResponse>> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/function/seedSampleData`, {}, {
+      observe: 'response'
+    });
   }
 }

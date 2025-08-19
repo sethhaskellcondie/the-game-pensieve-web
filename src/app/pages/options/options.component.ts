@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpResponse } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
 
 @Component({
@@ -43,18 +44,38 @@ export class OptionsComponent {
     this.seedResult = '';
     
     this.apiService.seedSampleData().subscribe({
-      next: (response) => {
-        if (response.errors) {
-          this.seedResult = `Seeding failed: ${JSON.stringify(response.errors)}`;
-          this.seedStatus = 'error';
-        } else {
-          this.seedResult = 'Sample data seeded successfully!';
+      next: (httpResponse) => {
+        if (httpResponse.status === 200) {
+          const responseBody = httpResponse.body;
+          if (responseBody?.data) {
+            this.seedResult = `Sample data seeded successfully:\n${JSON.stringify(responseBody.data, null, 2)}`;
+          } else {
+            this.seedResult = 'Sample data seeded successfully!';
+          }
           this.seedStatus = 'success';
+        } else {
+          const responseBody = httpResponse.body;
+          if (responseBody?.errors) {
+            this.seedResult = `Seeding failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`;
+          } else {
+            this.seedResult = `Seeding failed with status code: ${httpResponse.status}`;
+          }
+          this.seedStatus = 'error';
         }
         this.isSeeding = false;
       },
       error: (error) => {
-        this.seedResult = `Seeding failed: ${error.message || 'Unknown error'}`;
+        // Handle HTTP error responses (4xx, 5xx)
+        let errorMessage = 'Unknown error';
+        if (error.error?.errors) {
+          errorMessage = JSON.stringify(error.error.errors);
+        } else if (error.message) {
+          errorMessage = error.message;
+        } else if (error.status) {
+          errorMessage = `HTTP ${error.status} ${error.statusText || ''}`;
+        }
+        
+        this.seedResult = `Seeding failed: ${errorMessage}`;
         this.seedStatus = 'error';
         this.isSeeding = false;
       }
