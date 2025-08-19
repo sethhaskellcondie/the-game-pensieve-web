@@ -14,10 +14,10 @@
 .content-area {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background-color: var(--background-white);
-  padding: 40px;
+  padding: 0;
+  overflow-y: auto;
 }
 
 .seed-button-container {
