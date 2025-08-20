@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ApiService, VideoGame } from '../../services/api.service';
+import { ApiService, BoardGame } from '../../services/api.service';
 
 @Component({
-  selector: 'app-video-games',
+  selector: 'app-board-games-individual',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './video-games.component.html',
-  styleUrl: './video-games.component.scss'
+  templateUrl: './board-games-individual.component.html',
+  styleUrl: './board-games-individual.component.scss'
 })
-export class VideoGamesComponent implements OnInit {
-  videoGames: VideoGame[] = [];
+export class BoardGamesIndividualComponent implements OnInit {
+  boardGames: BoardGame[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -19,24 +19,24 @@ export class VideoGamesComponent implements OnInit {
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadVideoGames();
+    this.loadBoardGames();
   }
 
-  loadVideoGames(): void {
+  loadBoardGames(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getVideoGames().subscribe({
-      next: (videoGames) => {
-        console.log('Video games received:', videoGames);
-        console.log('Number of video games:', videoGames.length);
-        this.videoGames = videoGames;
+    this.apiService.getBoardGames().subscribe({
+      next: (boardGames) => {
+        console.log('Board games received:', boardGames);
+        console.log('Number of board games:', boardGames.length);
+        this.boardGames = boardGames;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading video games:', error);
-        this.errorMessage = `Failed to load video games: ${error.message || 'Unknown error'}`;
+        console.error('Error loading board games:', error);
+        this.errorMessage = `Failed to load board games: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
       }
     });
@@ -45,7 +45,7 @@ export class VideoGamesComponent implements OnInit {
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
-    this.videoGames.forEach(game => {
+    this.boardGames.forEach(game => {
       game.customFieldValues.forEach(cfv => {
         fieldNamesSet.add(cfv.customFieldName);
       });
@@ -55,12 +55,12 @@ export class VideoGamesComponent implements OnInit {
     console.log('Custom field names:', this.customFieldNames);
   }
 
-  getCustomFieldValue(game: VideoGame, fieldName: string): string {
+  getCustomFieldValue(game: BoardGame, fieldName: string): string {
     const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
   }
 
   swapView(): void {
-    this.router.navigate(['/video-game-boxes']);
+    this.router.navigate(['/board-games']);
   }
 }

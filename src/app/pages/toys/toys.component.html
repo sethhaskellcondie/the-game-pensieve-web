@@ -1,3 +1,48 @@
-<div class="placeholder-content">
-  <p>Toys hasn't been implemented yet.</p>
+<div class="toys-container">
+  <div class="header-section">
+    <h1>Toys</h1>
+    <button type="button" class="refresh-button" (click)="loadToys()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Refresh'}}
+    </button>
+  </div>
+
+  <div class="content-section">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-message">
+      <p>Loading toys...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-message">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <!-- Toys List -->
+    <div *ngIf="!isLoading && !errorMessage" class="toys-list">
+      <div *ngIf="toys.length === 0" class="no-toys-message">
+        <p>No toys found.</p>
+      </div>
+      
+      <div *ngIf="toys.length > 0" class="table-container">
+        <table class="toys-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Set</th>
+              <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let toy of toys" class="table-row">
+              <td class="toy-name">{{toy.name}}</td>
+              <td class="toy-set">{{toy.set}}</td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+                {{getCustomFieldValue(toy, fieldName)}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

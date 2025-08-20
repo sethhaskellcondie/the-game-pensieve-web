@@ -1,4 +1,4 @@
-.board-games-container {
+.video-game-boxes-container {
   padding: 20px;
   width: 100%;
   max-width: none;
@@ -68,7 +68,7 @@
   margin-top: 20px;
 }
 
-.board-games-table {
+.video-game-boxes-table {
   width: 100%;
   border-collapse: collapse;
   
@@ -115,7 +115,12 @@
         font-size: 1rem;
       }
 
-      &.game-expansion, &.game-standalone {
+      &.game-system {
+        color: #666;
+        font-size: 1rem;
+      }
+
+      &.game-physical, &.game-collection {
         text-align: center;
       }
 
@@ -128,7 +133,7 @@
   }
 }
 
-.expansion-badge, .standalone-badge {
+.physical-badge, .collection-badge {
   display: inline-block;
   font-weight: 600;
   padding: 4px 8px;
@@ -136,26 +141,26 @@
   font-size: 0.8rem;
 }
 
-.expansion-badge {
-  &.expansion-yes {
-    background-color: #fff3e0;
-    color: #f57c00;
-  }
-  
-  &.expansion-no {
-    background-color: #e3f2fd;
-    color: #1976d2;
-  }
-}
-
-.standalone-badge {
-  &.standalone-yes {
+.physical-badge {
+  &.physical-yes {
     background-color: #e8f5e8;
     color: #388e3c;
   }
   
-  &.standalone-no {
-    background-color: #ffebee;
-    color: #d32f2f;
+  &.physical-no {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+}
+
+.collection-badge {
+  &.collection-yes {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.collection-no {
+    background-color: #fff3e0;
+    color: #f57c00;
   }
 }

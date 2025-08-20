@@ -24,15 +24,6 @@
   text-align: center;
 }
 
-.right-sidebar {
-  width: 200px;
-  background-color: var(--background-white);
-  
-  /* Hide on smaller screens, keep space for future content */
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

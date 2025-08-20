@@ -1,0 +1,60 @@
+<div class="video-game-boxes-container">
+  <div class="header-section">
+    <h1>Video Games (Shelf View)</h1>
+    <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Swap View'}}
+    </button>
+  </div>
+
+  <div class="content-section">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-message">
+      <p>Loading video game boxes...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-message">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <!-- Video Game Boxes List -->
+    <div *ngIf="!isLoading && !errorMessage" class="video-game-boxes-list">
+      <div *ngIf="videoGameBoxes.length === 0" class="no-games-message">
+        <p>No video game boxes found.</p>
+      </div>
+      
+      <div *ngIf="videoGameBoxes.length > 0" class="table-container">
+        <table class="video-game-boxes-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>System</th>
+              <th>Physical</th>
+              <th>Collection</th>
+              <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let box of videoGameBoxes" class="table-row">
+              <td class="game-title">{{box.title}}</td>
+              <td class="game-system">{{box.system.name}}</td>
+              <td class="game-physical">
+                <span class="physical-badge" [class]="box.isPhysical ? 'physical-yes' : 'physical-no'">
+                  {{box.isPhysical ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td class="game-collection">
+                <span class="collection-badge" [class]="box.isCollection ? 'collection-yes' : 'collection-no'">
+                  {{box.isCollection ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+                {{getCustomFieldValue(box, fieldName)}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
