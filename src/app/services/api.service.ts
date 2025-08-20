@@ -71,6 +71,27 @@ export interface BoardGameBox {
   customFieldValues: CustomFieldValue[];
 }
 
+export interface VideoGame {
+  key: string;
+  id: number;
+  title: string;
+  system: System;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  customFieldValues: CustomFieldValue[];
+}
+
+export interface BoardGame {
+  key: string;
+  id: number;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  customFieldValues: CustomFieldValue[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -127,6 +148,24 @@ export class ApiService {
 
   getBoardGameBoxes(): Observable<BoardGameBox[]> {
     return this.http.post<{data: BoardGameBox[], errors: any}>(`${this.baseUrl}/boardGameBoxes/function/search`, {
+      filters: []
+    })
+      .pipe(
+        map(response => response.data || [])
+      );
+  }
+
+  getVideoGames(): Observable<VideoGame[]> {
+    return this.http.post<{data: VideoGame[], errors: any}>(`${this.baseUrl}/videoGames/function/search`, {
+      filters: []
+    })
+      .pipe(
+        map(response => response.data || [])
+      );
+  }
+
+  getBoardGames(): Observable<BoardGame[]> {
+    return this.http.post<{data: BoardGame[], errors: any}>(`${this.baseUrl}/boardGames/function/search`, {
       filters: []
     })
       .pipe(

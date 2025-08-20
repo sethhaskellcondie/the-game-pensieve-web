@@ -1,8 +1,8 @@
 <div class="board-games-container">
   <div class="header-section">
-    <h1>Board Games</h1>
-    <button type="button" class="refresh-button" (click)="loadBoardGameBoxes()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Refresh'}}
+    <h1>Board Games (Shelf View)</h1>
+    <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Swap View'}}
     </button>
   </div>
 
@@ -20,7 +20,7 @@
     <!-- Board Games List -->
     <div *ngIf="!isLoading && !errorMessage" class="board-games-list">
       <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
-        <p>No board games found.</p>
+        <p>No board game boxes found.</p>
       </div>
       
       <div *ngIf="boardGameBoxes.length > 0" class="table-container">

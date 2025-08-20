@@ -1,4 +1,4 @@
-.video-games-container {
+.video-game-boxes-container {
   padding: 20px;
   width: 100%;
   max-width: none;
@@ -68,7 +68,7 @@
   margin-top: 20px;
 }
 
-.video-games-table {
+.video-game-boxes-table {
   width: 100%;
   border-collapse: collapse;
   
@@ -120,6 +120,9 @@
         font-size: 1rem;
       }
 
+      &.game-physical, &.game-collection {
+        text-align: center;
+      }
 
       &.custom-field-value {
         color: #666;
@@ -130,3 +133,34 @@
   }
 }
 
+.physical-badge, .collection-badge {
+  display: inline-block;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.physical-badge {
+  &.physical-yes {
+    background-color: #e8f5e8;
+    color: #388e3c;
+  }
+  
+  &.physical-no {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+  }
+}
+
+.collection-badge {
+  &.collection-yes {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+  
+  &.collection-no {
+    background-color: #fff3e0;
+    color: #f57c00;
+  }
+}

@@ -1,4 +1,4 @@
-.video-games-container {
+.board-games-individual-container {
   padding: 20px;
   width: 100%;
   max-width: none;
@@ -68,7 +68,7 @@
   margin-top: 20px;
 }
 
-.video-games-table {
+.board-games-table {
   width: 100%;
   border-collapse: collapse;
   
@@ -115,12 +115,6 @@
         font-size: 1rem;
       }
 
-      &.game-system {
-        color: #666;
-        font-size: 1rem;
-      }
-
-
       &.custom-field-value {
         color: #666;
         font-size: 0.9rem;
@@ -129,4 +123,3 @@
     }
   }
 }
-
