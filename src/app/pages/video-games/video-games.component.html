@@ -1,3 +1,60 @@
-<div class="placeholder-content">
-  <p>Video Games hasn't been implemented yet.</p>
+<div class="video-games-container">
+  <div class="header-section">
+    <h1>Video Games</h1>
+    <button type="button" class="refresh-button" (click)="loadVideoGameBoxes()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Refresh'}}
+    </button>
+  </div>
+
+  <div class="content-section">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-message">
+      <p>Loading video games...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-message">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <!-- Video Games List -->
+    <div *ngIf="!isLoading && !errorMessage" class="video-games-list">
+      <div *ngIf="videoGameBoxes.length === 0" class="no-games-message">
+        <p>No video games found.</p>
+      </div>
+      
+      <div *ngIf="videoGameBoxes.length > 0" class="table-container">
+        <table class="video-games-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>System</th>
+              <th>Physical</th>
+              <th>Collection</th>
+              <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let box of videoGameBoxes" class="table-row">
+              <td class="game-title">{{box.title}}</td>
+              <td class="game-system">{{box.system.name}}</td>
+              <td class="game-physical">
+                <span class="physical-badge" [class]="box.isPhysical ? 'physical-yes' : 'physical-no'">
+                  {{box.isPhysical ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td class="game-collection">
+                <span class="collection-badge" [class]="box.isCollection ? 'collection-yes' : 'collection-no'">
+                  {{box.isCollection ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+                {{getCustomFieldValue(box, fieldName)}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

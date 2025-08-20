@@ -1,3 +1,58 @@
-<div class="placeholder-content">
-  <p>Board Games hasn't been implemented yet.</p>
+<div class="board-games-container">
+  <div class="header-section">
+    <h1>Board Games</h1>
+    <button type="button" class="refresh-button" (click)="loadBoardGameBoxes()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Refresh'}}
+    </button>
+  </div>
+
+  <div class="content-section">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-message">
+      <p>Loading board games...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-message">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <!-- Board Games List -->
+    <div *ngIf="!isLoading && !errorMessage" class="board-games-list">
+      <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
+        <p>No board games found.</p>
+      </div>
+      
+      <div *ngIf="boardGameBoxes.length > 0" class="table-container">
+        <table class="board-games-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Expansion</th>
+              <th>Standalone</th>
+              <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let box of boardGameBoxes" class="table-row">
+              <td class="game-title">{{box.title}}</td>
+              <td class="game-expansion">
+                <span class="expansion-badge" [class]="box.isExpansion ? 'expansion-yes' : 'expansion-no'">
+                  {{box.isExpansion ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td class="game-standalone">
+                <span class="standalone-badge" [class]="box.isStandAlone ? 'standalone-yes' : 'standalone-no'">
+                  {{box.isStandAlone ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+                {{getCustomFieldValue(box, fieldName)}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

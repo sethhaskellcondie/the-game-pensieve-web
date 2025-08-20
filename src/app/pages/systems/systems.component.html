@@ -1,3 +1,54 @@
-<div class="placeholder-content">
-  <p>Systems hasn't been implemented yet.</p>
+<div class="systems-container">
+  <div class="header-section">
+    <h1>Systems</h1>
+    <button type="button" class="refresh-button" (click)="loadSystems()" [disabled]="isLoading">
+      {{isLoading ? 'Loading...' : 'Refresh'}}
+    </button>
+  </div>
+
+  <div class="content-section">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-message">
+      <p>Loading systems...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="error-message">
+      <p>{{errorMessage}}</p>
+    </div>
+
+    <!-- Systems List -->
+    <div *ngIf="!isLoading && !errorMessage" class="systems-list">
+      <div *ngIf="systems.length === 0" class="no-systems-message">
+        <p>No systems found.</p>
+      </div>
+      
+      <div *ngIf="systems.length > 0" class="table-container">
+        <table class="systems-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Generation</th>
+              <th>Handheld</th>
+              <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let system of systems" class="table-row">
+              <td class="system-name">{{system.name}}</td>
+              <td class="system-generation">{{system.generation}}</td>
+              <td class="system-handheld">
+                <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
+                  {{system.handheld ? 'Yes' : 'No'}}
+                </span>
+              </td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+                {{getCustomFieldValue(system, fieldName)}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
