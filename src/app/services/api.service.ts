@@ -146,6 +146,15 @@ export class ApiService {
       );
   }
 
+  createToy(toy: { name: string; set: string; customFieldValues: any[] }): Observable<Toy> {
+    return this.http.post<{data: Toy, errors: any}>(`${this.baseUrl}/toys`, {
+      toy: toy
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
   getSystems(): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
       filters: []
