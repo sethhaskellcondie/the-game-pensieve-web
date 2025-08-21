@@ -34,13 +34,54 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let system of systems" class="table-row">
-              <td class="system-name">{{system.name}}</td>
-              <td class="system-generation">{{system.generation}}</td>
+            <tr *ngFor="let system of systems" class="table-row" (click)="startEditingSystem(system)">
+              <td class="system-name">
+                <div *ngIf="editingSystemId !== system.id" class="system-name-display">
+                  {{system.name}}
+                </div>
+                <div *ngIf="editingSystemId === system.id" class="system-name-edit">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="editingSystemName"
+                    (keyup.enter)="moveToNextField()"
+                    (keyup.escape)="cancelEditing()"
+                    class="edit-input name-input"
+                    #nameInput>
+                </div>
+              </td>
+              <td class="system-generation">
+                <div *ngIf="editingSystemId !== system.id" class="system-generation-display">
+                  {{system.generation}}
+                </div>
+                <div *ngIf="editingSystemId === system.id" class="system-generation-edit">
+                  <input 
+                    type="number" 
+                    [ngModel]="editingSystemGeneration"
+                    (ngModelChange)="editingSystemGeneration = +$event"
+                    (keyup.enter)="moveToNextField()"
+                    (keyup.escape)="cancelEditing()"
+                    min="1"
+                    class="edit-input generation-input"
+                    #generationInput>
+                </div>
+              </td>
               <td class="system-handheld">
-                <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
-                  {{system.handheld ? 'Yes' : 'No'}}
-                </span>
+                <div *ngIf="editingSystemId !== system.id" class="system-handheld-display">
+                  <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
+                    {{system.handheld ? 'Yes' : 'No'}}
+                  </span>
+                </div>
+                <div *ngIf="editingSystemId === system.id" class="system-handheld-edit">
+                  <label class="checkbox-label-inline">
+                    <input 
+                      type="checkbox" 
+                      [(ngModel)]="editingSystemHandheld"
+                      (change)="saveSystem(system)"
+                      (keyup.escape)="cancelEditing()"
+                      class="checkbox-input-inline">
+                    <span class="checkbox-text-inline">Handheld</span>
+                  </label>
+                </div>
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 {{getCustomFieldValue(system, fieldName)}}

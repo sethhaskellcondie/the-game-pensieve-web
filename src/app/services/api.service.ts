@@ -182,6 +182,15 @@ export class ApiService {
       );
   }
 
+  updateSystem(systemId: number, system: { name: string; generation: number; handheld: boolean; customFieldValues: any[] }): Observable<System> {
+    return this.http.put<{data: System, errors: any}>(`${this.baseUrl}/systems/${systemId}`, {
+      system: system
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
   getVideoGameBoxes(): Observable<VideoGameBox[]> {
     return this.http.post<{data: VideoGameBox[], errors: any}>(`${this.baseUrl}/videoGameBoxes/function/search`, {
       filters: []

@@ -23,6 +23,12 @@ export class SystemsComponent implements OnInit {
     generation: null as number | null,
     handheld: false
   };
+  
+  editingSystemId: number | null = null;
+  editingSystemName = '';
+  editingSystemGeneration = 1;
+  editingSystemHandheld = false;
+  isUpdating = false;
 
   constructor(private apiService: ApiService) {}
 
@@ -111,6 +117,95 @@ export class SystemsComponent implements OnInit {
         console.error('Error creating system:', error);
         this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
         this.isCreating = false;
+      }
+    });
+  }
+
+  startEditingSystem(system: System): void {
+    this.editingSystemId = system.id;
+    this.editingSystemName = system.name;
+    this.editingSystemGeneration = system.generation;
+    this.editingSystemHandheld = system.handheld;
+    
+    // Focus the name input first
+    setTimeout(() => {
+      const input = document.querySelector('.name-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  cancelEditing(): void {
+    this.editingSystemId = null;
+    this.editingSystemName = '';
+    this.editingSystemGeneration = 1;
+    this.editingSystemHandheld = false;
+  }
+
+  moveToNextField(): void {
+    // Move from name to generation, or from generation to save
+    const currentFocus = document.activeElement;
+    if (currentFocus?.classList.contains('name-input')) {
+      // Move to generation field
+      setTimeout(() => {
+        const input = document.querySelector('.generation-input') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 0);
+    } else {
+      // Save from generation field
+      const system = this.systems.find(s => s.id === this.editingSystemId);
+      if (system) {
+        this.saveSystem(system);
+      }
+    }
+  }
+
+  saveSystem(system: System): void {
+    if (this.isUpdating || !this.editingSystemName.trim() || this.editingSystemGeneration < 1) {
+      this.cancelEditing();
+      return;
+    }
+
+    // If values haven't changed, just cancel editing
+    if (this.editingSystemName.trim() === system.name && 
+        this.editingSystemGeneration === system.generation && 
+        this.editingSystemHandheld === system.handheld) {
+      this.cancelEditing();
+      return;
+    }
+
+    this.isUpdating = true;
+
+    const updatedSystem = {
+      name: this.editingSystemName.trim(),
+      generation: this.editingSystemGeneration,
+      handheld: this.editingSystemHandheld,
+      customFieldValues: system.customFieldValues // Keep existing custom field values
+    };
+
+    this.apiService.updateSystem(system.id, updatedSystem).subscribe({
+      next: (updatedSystemResponse) => {
+        console.log('System updated successfully:', updatedSystemResponse);
+        // Update the local system
+        const index = this.systems.findIndex(s => s.id === system.id);
+        if (index !== -1) {
+          this.systems[index].name = updatedSystemResponse.name;
+          this.systems[index].generation = updatedSystemResponse.generation;
+          this.systems[index].handheld = updatedSystemResponse.handheld;
+        }
+        this.isUpdating = false;
+        this.cancelEditing();
+      },
+      error: (error) => {
+        console.error('Error updating system:', error);
+        this.errorMessage = `Failed to update system: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+        this.cancelEditing();
       }
     });
   }
