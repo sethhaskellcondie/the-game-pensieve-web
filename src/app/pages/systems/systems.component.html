@@ -1,8 +1,8 @@
 <div class="systems-container">
   <div class="header-section">
     <h1>Systems</h1>
-    <button type="button" class="refresh-button" (click)="loadSystems()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Refresh'}}
+    <button type="button" class="new-button" (click)="openNewSystemModal()">
+      New
     </button>
   </div>
 
@@ -49,6 +49,73 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- New System Modal -->
+  <div *ngIf="showNewSystemModal" class="modal-overlay" (click)="closeNewSystemModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create New System</h2>
+        <button type="button" class="close-button" (click)="closeNewSystemModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitNewSystem()" #systemForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="name">Name *</label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            [(ngModel)]="newSystem.name"
+            #nameField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter system name (e.g. Nintendo Switch)">
+          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+            Name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="generation">Generation *</label>
+          <input 
+            type="number" 
+            id="generation" 
+            name="generation" 
+            [(ngModel)]="newSystem.generation"
+            #generationField="ngModel"
+            required
+            min="1"
+            class="form-input"
+            placeholder="Enter generation number (e.g. 9)">
+          <div *ngIf="generationField.invalid && generationField.touched" class="error-text">
+            Generation is required and must be a positive number
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              id="handheld" 
+              name="handheld" 
+              [(ngModel)]="newSystem.handheld"
+              class="checkbox-input">
+            <span class="checkbox-text">Handheld</span>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeNewSystemModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!systemForm.form.valid || isCreating">
+            {{isCreating ? 'Creating...' : 'Create'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
@@ -14,6 +15,14 @@ export class SystemsComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  
+  showNewSystemModal = false;
+  isCreating = false;
+  newSystem = {
+    name: '',
+    generation: null as number | null,
+    handheld: false
+  };
 
   constructor(private apiService: ApiService) {}
 
@@ -57,5 +66,52 @@ export class SystemsComponent implements OnInit {
   getCustomFieldValue(system: System, fieldName: string): string {
     const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  openNewSystemModal(): void {
+    this.showNewSystemModal = true;
+    this.newSystem = {
+      name: '',
+      generation: null,
+      handheld: false
+    };
+  }
+
+  closeNewSystemModal(): void {
+    this.showNewSystemModal = false;
+    this.newSystem = {
+      name: '',
+      generation: null,
+      handheld: false
+    };
+  }
+
+  onSubmitNewSystem(): void {
+    if (this.isCreating || !this.newSystem.name || this.newSystem.generation === null) {
+      return;
+    }
+    
+    this.isCreating = true;
+    
+    const systemData = {
+      name: this.newSystem.name,
+      generation: this.newSystem.generation,
+      handheld: this.newSystem.handheld,
+      customFieldValues: [] // Empty array (no custom fields yet)
+    };
+    
+    this.apiService.createSystem(systemData).subscribe({
+      next: (response) => {
+        console.log('System created successfully:', response);
+        this.isCreating = false;
+        this.closeNewSystemModal();
+        this.loadSystems(); // Refresh the systems list
+      },
+      error: (error) => {
+        console.error('Error creating system:', error);
+        this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
+        this.isCreating = false;
+      }
+    });
   }
 }
