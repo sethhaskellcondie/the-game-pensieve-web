@@ -22,6 +22,11 @@ export class ToysComponent implements OnInit {
     name: '',
     set: ''
   };
+  
+  editingToyId: number | null = null;
+  editingToyName = '';
+  editingToySet = '';
+  isUpdating = false;
 
   constructor(private apiService: ApiService) {
     console.log('ToysComponent constructor called');
@@ -109,6 +114,79 @@ export class ToysComponent implements OnInit {
         console.error('Error creating toy:', error);
         this.errorMessage = `Failed to create toy: ${error.message || 'Unknown error'}`;
         this.isCreating = false;
+      }
+    });
+  }
+
+  startEditingToy(toy: Toy): void {
+    this.editingToyId = toy.id;
+    this.editingToyName = toy.name;
+    this.editingToySet = toy.set;
+    
+    // Focus the name input first
+    setTimeout(() => {
+      const input = document.querySelector('.name-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  cancelEditing(): void {
+    this.editingToyId = null;
+    this.editingToyName = '';
+    this.editingToySet = '';
+  }
+
+  saveNextField(toy: Toy): void {
+    // Move to set field when Enter is pressed in name field
+    setTimeout(() => {
+      const input = document.querySelector('.set-input') as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 0);
+  }
+
+  saveToy(toy: Toy): void {
+    if (this.isUpdating || (!this.editingToyName.trim() || !this.editingToySet.trim())) {
+      this.cancelEditing();
+      return;
+    }
+
+    // If values haven't changed, just cancel editing
+    if (this.editingToyName.trim() === toy.name && this.editingToySet.trim() === toy.set) {
+      this.cancelEditing();
+      return;
+    }
+
+    this.isUpdating = true;
+
+    const updatedToy = {
+      name: this.editingToyName.trim(),
+      set: this.editingToySet.trim(),
+      customFieldValues: toy.customFieldValues // Keep existing custom field values
+    };
+
+    this.apiService.updateToy(toy.id, updatedToy).subscribe({
+      next: (updatedToyResponse) => {
+        console.log('Toy updated successfully:', updatedToyResponse);
+        // Update the local toy
+        const index = this.toys.findIndex(t => t.id === toy.id);
+        if (index !== -1) {
+          this.toys[index].name = updatedToyResponse.name;
+          this.toys[index].set = updatedToyResponse.set;
+        }
+        this.isUpdating = false;
+        this.cancelEditing();
+      },
+      error: (error) => {
+        console.error('Error updating toy:', error);
+        this.errorMessage = `Failed to update toy: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+        this.cancelEditing();
       }
     });
   }

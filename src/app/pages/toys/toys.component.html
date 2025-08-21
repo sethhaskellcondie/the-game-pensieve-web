@@ -33,9 +33,36 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let toy of toys" class="table-row">
-              <td class="toy-name">{{toy.name}}</td>
-              <td class="toy-set">{{toy.set}}</td>
+            <tr *ngFor="let toy of toys" class="table-row" (click)="startEditingToy(toy)">
+              <td class="toy-name">
+                <div *ngIf="editingToyId !== toy.id" class="toy-name-display">
+                  {{toy.name}}
+                </div>
+                <div *ngIf="editingToyId === toy.id" class="toy-name-edit">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="editingToyName"
+                    (keyup.enter)="saveNextField(toy)"
+                    (keyup.escape)="cancelEditing()"
+                    class="edit-input name-input"
+                    #nameInput>
+                </div>
+              </td>
+              <td class="toy-set">
+                <div *ngIf="editingToyId !== toy.id" class="toy-set-display">
+                  {{toy.set}}
+                </div>
+                <div *ngIf="editingToyId === toy.id" class="toy-set-edit">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="editingToySet"
+                    (keyup.enter)="saveToy(toy)"
+                    (keyup.escape)="cancelEditing()"
+                    (blur)="saveToy(toy)"
+                    class="edit-input set-input"
+                    #setInput>
+                </div>
+              </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 {{getCustomFieldValue(toy, fieldName)}}
               </td>

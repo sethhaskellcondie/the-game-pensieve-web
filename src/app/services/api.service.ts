@@ -155,6 +155,15 @@ export class ApiService {
       );
   }
 
+  updateToy(toyId: number, toy: { name: string; set: string; customFieldValues: any[] }): Observable<Toy> {
+    return this.http.put<{data: Toy, errors: any}>(`${this.baseUrl}/toys/${toyId}`, {
+      toy: toy
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
   getSystems(): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
       filters: []
