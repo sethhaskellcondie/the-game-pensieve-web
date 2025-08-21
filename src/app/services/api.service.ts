@@ -18,7 +18,7 @@ export interface CustomField {
 export interface CustomFieldValue {
   customFieldId: number;
   customFieldName: string;
-  customFieldType: 'text' | 'number' | 'boolean' | 'timestamp';
+  customFieldType: 'text' | 'number' | 'boolean';
   value: string;
 }
 
@@ -116,6 +116,24 @@ export class ApiService {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields`)
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  createCustomField(customField: { name: string; type: string; entityKey: string }): Observable<CustomField> {
+    return this.http.post<{data: CustomField, errors: any}>(`${this.baseUrl}/custom_fields`, {
+      custom_field: customField
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateCustomFieldName(customFieldId: number, name: string): Observable<CustomField> {
+    return this.http.patch<{data: CustomField, errors: any}>(`${this.baseUrl}/custom_fields/${customFieldId}`, {
+      name: name
+    })
+      .pipe(
+        map(response => response.data)
       );
   }
 
