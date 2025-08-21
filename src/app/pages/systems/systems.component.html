@@ -34,7 +34,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let system of systems" class="table-row" (click)="startEditingSystem(system)">
+            <tr *ngFor="let system of systems" class="table-row" (click)="editingSystemId !== system.id && startEditingSystem(system)">
               <td class="system-name">
                 <div *ngIf="editingSystemId !== system.id" class="system-name-display">
                   {{system.name}}
@@ -45,6 +45,7 @@
                     [(ngModel)]="editingSystemName"
                     (keyup.enter)="moveToNextField()"
                     (keyup.escape)="cancelEditing()"
+                    (click)="$event.stopPropagation()"
                     class="edit-input name-input"
                     #nameInput>
                 </div>
@@ -57,9 +58,11 @@
                   <input 
                     type="number" 
                     [ngModel]="editingSystemGeneration"
-                    (ngModelChange)="editingSystemGeneration = +$event"
+                    (ngModelChange)="onGenerationChange($event)"
+                    (input)="onGenerationInput($event)"
                     (keyup.enter)="moveToNextField()"
                     (keyup.escape)="cancelEditing()"
+                    (click)="$event.stopPropagation()"
                     min="1"
                     class="edit-input generation-input"
                     #generationInput>
@@ -72,11 +75,12 @@
                   </span>
                 </div>
                 <div *ngIf="editingSystemId === system.id" class="system-handheld-edit">
-                  <label class="checkbox-label-inline">
+                  <label class="checkbox-label-inline" (click)="$event.stopPropagation()">
                     <input 
                       type="checkbox" 
                       [(ngModel)]="editingSystemHandheld"
                       (keyup.escape)="cancelEditing()"
+                      (click)="$event.stopPropagation()"
                       class="checkbox-input-inline">
                     <span class="checkbox-text-inline">Handheld</span>
                   </label>

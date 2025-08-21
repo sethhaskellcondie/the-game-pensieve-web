@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
@@ -10,7 +10,7 @@ import { ApiService, System } from '../../services/api.service';
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
-export class SystemsComponent implements OnInit {
+export class SystemsComponent implements OnInit, OnDestroy {
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
@@ -29,11 +29,16 @@ export class SystemsComponent implements OnInit {
   editingSystemGeneration = 1;
   editingSystemHandheld = false;
   isUpdating = false;
+  private documentClickListener?: () => void;
 
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.loadSystems();
+  }
+
+  ngOnDestroy(): void {
+    this.removeDocumentClickListener();
   }
 
   loadSystems(): void {
@@ -127,6 +132,9 @@ export class SystemsComponent implements OnInit {
     this.editingSystemGeneration = system.generation;
     this.editingSystemHandheld = system.handheld;
     
+    // Add document click listener to save when clicking outside
+    this.addDocumentClickListener(system);
+    
     // Focus the name input first
     setTimeout(() => {
       const input = document.querySelector('.name-input') as HTMLInputElement;
@@ -138,10 +146,20 @@ export class SystemsComponent implements OnInit {
   }
 
   cancelEditing(): void {
+    this.removeDocumentClickListener();
     this.editingSystemId = null;
     this.editingSystemName = '';
     this.editingSystemGeneration = 1;
     this.editingSystemHandheld = false;
+  }
+
+  onGenerationChange(value: any): void {
+    this.editingSystemGeneration = +value || 1;
+  }
+
+  onGenerationInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.editingSystemGeneration = +target.value || 1;
   }
 
   moveToNextField(): void {
@@ -208,5 +226,35 @@ export class SystemsComponent implements OnInit {
         this.cancelEditing();
       }
     });
+  }
+
+  private addDocumentClickListener(system: System): void {
+    // Remove any existing listener first
+    this.removeDocumentClickListener();
+    
+    this.documentClickListener = (event: Event) => {
+      const target = event.target as HTMLElement;
+      const editingRow = target.closest('.table-row');
+      
+      // Check if the click is outside the current editing row
+      if (!editingRow || !editingRow.contains(target.closest('.system-name-edit, .system-generation-edit, .system-handheld-edit'))) {
+        // Save the current edits
+        this.saveSystem(system);
+      }
+    };
+    
+    // Add the listener after a small delay to avoid immediate triggering
+    setTimeout(() => {
+      if (this.documentClickListener) {
+        document.addEventListener('click', this.documentClickListener);
+      }
+    }, 100);
+  }
+
+  private removeDocumentClickListener(): void {
+    if (this.documentClickListener) {
+      document.removeEventListener('click', this.documentClickListener);
+      this.documentClickListener = undefined;
+    }
   }
 }
