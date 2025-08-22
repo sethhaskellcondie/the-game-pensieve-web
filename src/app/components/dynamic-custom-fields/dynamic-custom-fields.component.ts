@@ -18,6 +18,7 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
   @Input() entityKey!: string;
   @Input() customFieldValues: CustomFieldValue[] = [];
   @Output() customFieldValuesChange = new EventEmitter<CustomFieldValue[]>();
+  @Output() enterPressed = new EventEmitter<void>();
 
   customFields: CustomField[] = [];
   fieldValues: DynamicFieldValue = {};
@@ -105,6 +106,10 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
 
   onFieldValueChange(): void {
     this.emitCustomFieldValues();
+  }
+
+  onEnterPressed(): void {
+    this.enterPressed.emit();
   }
 
   private emitCustomFieldValues(): void {

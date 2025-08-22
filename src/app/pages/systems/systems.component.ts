@@ -30,6 +30,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   editingSystemName = '';
   editingSystemGeneration = 1;
   editingSystemHandheld = false;
+  editingSystemCustomFieldValues: any[] = [];
   isUpdating = false;
   private documentClickListener?: (event: Event) => void;
 
@@ -131,10 +132,25 @@ export class SystemsComponent implements OnInit, OnDestroy {
   }
 
   startEditingSystem(system: System): void {
+    // If we're already editing this system, don't reset the custom field values
+    if (this.editingSystemId === system.id) {
+      // Just focus the name input
+      setTimeout(() => {
+        const input = document.querySelector('.name-input') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 0);
+      return;
+    }
+
     this.editingSystemId = system.id;
     this.editingSystemName = system.name;
     this.editingSystemGeneration = system.generation;
     this.editingSystemHandheld = system.handheld;
+    // Only reset custom field values if we weren't already editing this system
+    this.editingSystemCustomFieldValues = [...system.customFieldValues];
     
     // Add document click listener to save when clicking outside
     this.addDocumentClickListener(system);
@@ -155,6 +171,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.editingSystemName = '';
     this.editingSystemGeneration = 1;
     this.editingSystemHandheld = false;
+    this.editingSystemCustomFieldValues = [];
   }
 
   onGenerationChange(value: any): void {
@@ -207,21 +224,16 @@ export class SystemsComponent implements OnInit, OnDestroy {
       name: this.editingSystemName.trim(),
       generation: this.editingSystemGeneration,
       handheld: this.editingSystemHandheld,
-      customFieldValues: system.customFieldValues // Keep existing custom field values
+      customFieldValues: this.editingSystemCustomFieldValues
     };
 
     this.apiService.updateSystem(system.id, updatedSystem).subscribe({
       next: (updatedSystemResponse) => {
         console.log('System updated successfully:', updatedSystemResponse);
-        // Update the local system
-        const index = this.systems.findIndex(s => s.id === system.id);
-        if (index !== -1) {
-          this.systems[index].name = updatedSystemResponse.name;
-          this.systems[index].generation = updatedSystemResponse.generation;
-          this.systems[index].handheld = updatedSystemResponse.handheld;
-        }
         this.isUpdating = false;
         this.cancelEditing();
+        // Refresh the systems list to get the latest data from server
+        this.loadSystems();
       },
       error: (error) => {
         console.error('Error updating system:', error);
@@ -232,6 +244,15 @@ export class SystemsComponent implements OnInit, OnDestroy {
     });
   }
 
+  onCustomFieldEnterPressed(): void {
+    if (this.editingSystemId !== null) {
+      const system = this.systems.find(s => s.id === this.editingSystemId);
+      if (system) {
+        this.saveSystem(system);
+      }
+    }
+  }
+
   private addDocumentClickListener(system: System): void {
     // Remove any existing listener first
     this.removeDocumentClickListener();
@@ -239,9 +260,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.documentClickListener = (event: Event) => {
       const target = event.target as HTMLElement;
       const editingRow = target.closest('.table-row');
+      const customFieldsRow = target.closest('.custom-fields-edit-row');
       
-      // Check if the click is outside the current editing row
-      if (!editingRow || !editingRow.contains(target.closest('.system-name-edit, .system-generation-edit, .system-handheld-edit'))) {
+      // Check if the click is outside both the main editing row and custom fields row
+      if (!editingRow && !customFieldsRow) {
         // Save the current edits
         this.saveSystem(system);
       }

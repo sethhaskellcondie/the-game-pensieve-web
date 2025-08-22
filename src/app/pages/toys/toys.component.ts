@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Toy } from '../../services/api.service';
@@ -11,7 +11,7 @@ import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fi
   templateUrl: './toys.component.html',
   styleUrl: './toys.component.scss'
 })
-export class ToysComponent implements OnInit {
+export class ToysComponent implements OnInit, OnDestroy {
   toys: Toy[] = [];
   isLoading = false;
   errorMessage = '';
@@ -28,7 +28,9 @@ export class ToysComponent implements OnInit {
   editingToyId: number | null = null;
   editingToyName = '';
   editingToySet = '';
+  editingToyCustomFieldValues: any[] = [];
   isUpdating = false;
+  private documentClickListener?: (event: Event) => void;
 
   constructor(private apiService: ApiService) {
     console.log('ToysComponent constructor called');
@@ -37,6 +39,10 @@ export class ToysComponent implements OnInit {
   ngOnInit(): void {
     console.log('ToysComponent ngOnInit called');
     this.loadToys();
+  }
+
+  ngOnDestroy(): void {
+    this.removeDocumentClickListener();
   }
 
   loadToys(): void {
@@ -123,9 +129,27 @@ export class ToysComponent implements OnInit {
   }
 
   startEditingToy(toy: Toy): void {
+    // If we're already editing this toy, don't reset the custom field values
+    if (this.editingToyId === toy.id) {
+      // Just focus the name input
+      setTimeout(() => {
+        const input = document.querySelector('.name-input') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 0);
+      return;
+    }
+
     this.editingToyId = toy.id;
     this.editingToyName = toy.name;
     this.editingToySet = toy.set;
+    // Only reset custom field values if we weren't already editing this toy
+    this.editingToyCustomFieldValues = [...toy.customFieldValues];
+    
+    // Add document click listener to save when clicking outside
+    this.addDocumentClickListener(toy);
     
     // Focus the name input first
     setTimeout(() => {
@@ -138,9 +162,11 @@ export class ToysComponent implements OnInit {
   }
 
   cancelEditing(): void {
+    this.removeDocumentClickListener();
     this.editingToyId = null;
     this.editingToyName = '';
     this.editingToySet = '';
+    this.editingToyCustomFieldValues = [];
   }
 
   saveNextField(toy: Toy): void {
@@ -152,6 +178,15 @@ export class ToysComponent implements OnInit {
         input.select();
       }
     }, 0);
+  }
+
+  onCustomFieldEnterPressed(): void {
+    if (this.editingToyId !== null) {
+      const toy = this.toys.find(t => t.id === this.editingToyId);
+      if (toy) {
+        this.saveToy(toy);
+      }
+    }
   }
 
   saveToy(toy: Toy): void {
@@ -171,20 +206,16 @@ export class ToysComponent implements OnInit {
     const updatedToy = {
       name: this.editingToyName.trim(),
       set: this.editingToySet.trim(),
-      customFieldValues: toy.customFieldValues // Keep existing custom field values
+      customFieldValues: this.editingToyCustomFieldValues
     };
 
     this.apiService.updateToy(toy.id, updatedToy).subscribe({
       next: (updatedToyResponse) => {
         console.log('Toy updated successfully:', updatedToyResponse);
-        // Update the local toy
-        const index = this.toys.findIndex(t => t.id === toy.id);
-        if (index !== -1) {
-          this.toys[index].name = updatedToyResponse.name;
-          this.toys[index].set = updatedToyResponse.set;
-        }
         this.isUpdating = false;
         this.cancelEditing();
+        // Refresh the toys list to get the latest data from server
+        this.loadToys();
       },
       error: (error) => {
         console.error('Error updating toy:', error);
@@ -193,5 +224,36 @@ export class ToysComponent implements OnInit {
         this.cancelEditing();
       }
     });
+  }
+
+  private addDocumentClickListener(toy: Toy): void {
+    // Remove any existing listener first
+    this.removeDocumentClickListener();
+    
+    this.documentClickListener = (event: Event) => {
+      const target = event.target as HTMLElement;
+      const editingRow = target.closest('.table-row');
+      const customFieldsRow = target.closest('.custom-fields-edit-row');
+      
+      // Check if the click is outside both the main editing row and custom fields row
+      if (!editingRow && !customFieldsRow) {
+        // Save the current edits
+        this.saveToy(toy);
+      }
+    };
+    
+    // Add the listener after a small delay to avoid immediate triggering
+    setTimeout(() => {
+      if (this.documentClickListener) {
+        document.addEventListener('click', this.documentClickListener);
+      }
+    }, 100);
+  }
+
+  private removeDocumentClickListener(): void {
+    if (this.documentClickListener) {
+      document.removeEventListener('click', this.documentClickListener);
+      this.documentClickListener = undefined;
+    }
   }
 }

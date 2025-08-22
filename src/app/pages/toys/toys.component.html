@@ -58,13 +58,29 @@
                     [(ngModel)]="editingToySet"
                     (keyup.enter)="saveToy(toy)"
                     (keyup.escape)="cancelEditing()"
-                    (blur)="saveToy(toy)"
                     class="edit-input set-input"
                     #setInput>
                 </div>
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(toy, fieldName)}}
+                <div *ngIf="editingToyId !== toy.id">
+                  {{getCustomFieldValue(toy, fieldName)}}
+                </div>
+                <div *ngIf="editingToyId === toy.id" class="custom-field-edit">
+                  <!-- Custom fields will be shown in a dedicated row when editing -->
+                </div>
+              </td>
+            </tr>
+            <!-- Custom Fields Edit Row -->
+            <tr *ngIf="editingToyId !== null" class="custom-fields-edit-row">
+              <td [attr.colspan]="2 + customFieldNames.length" class="custom-fields-edit-cell">
+                <div class="custom-fields-edit-container">
+                  <app-dynamic-custom-fields 
+                    entityKey="toy" 
+                    [(customFieldValues)]="editingToyCustomFieldValues"
+                    (enterPressed)="onCustomFieldEnterPressed()">
+                  </app-dynamic-custom-fields>
+                </div>
               </td>
             </tr>
           </tbody>

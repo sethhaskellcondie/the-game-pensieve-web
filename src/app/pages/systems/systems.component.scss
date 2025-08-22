@@ -54,6 +54,20 @@
   color: #dc3545;
 }
 
+// Custom fields editing styles
+.custom-fields-edit-row {
+  background-color: #f8f9fa !important;
+  
+  .custom-fields-edit-cell {
+    padding: 15px !important;
+    border-top: 2px solid #e9ecef !important;
+  }
+  
+  .custom-fields-edit-container {
+    margin: 0;
+  }
+}
+
 .table-container {
   background: white;
   border-radius: 8px;
