@@ -19,20 +19,14 @@ export class SystemsComponent implements OnInit, OnDestroy {
   
   showNewSystemModal = false;
   isCreating = false;
+  isUpdateMode = false;
+  systemToUpdate: System | null = null;
   newSystem = {
     name: '',
     generation: null as number | null,
     handheld: false,
     customFieldValues: [] as any[]
   };
-  
-  editingSystemId: number | null = null;
-  editingSystemName = '';
-  editingSystemGeneration = 1;
-  editingSystemHandheld = false;
-  editingSystemCustomFieldValues: any[] = [];
-  isUpdating = false;
-  private documentClickListener?: (event: Event) => void;
 
   constructor(private apiService: ApiService) {}
 
@@ -41,7 +35,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.removeDocumentClickListener();
+    // Component cleanup
   }
 
   loadSystems(): void {
@@ -83,6 +77,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
   }
 
   openNewSystemModal(): void {
+    this.isUpdateMode = false;
+    this.systemToUpdate = null;
     this.showNewSystemModal = true;
     this.newSystem = {
       name: '',
@@ -92,8 +88,22 @@ export class SystemsComponent implements OnInit, OnDestroy {
     };
   }
 
+  openUpdateSystemModal(system: System): void {
+    this.isUpdateMode = true;
+    this.systemToUpdate = system;
+    this.showNewSystemModal = true;
+    this.newSystem = {
+      name: system.name,
+      generation: system.generation,
+      handheld: system.handheld,
+      customFieldValues: [...system.customFieldValues]
+    };
+  }
+
   closeNewSystemModal(): void {
     this.showNewSystemModal = false;
+    this.isUpdateMode = false;
+    this.systemToUpdate = null;
     this.newSystem = {
       name: '',
       generation: null,
@@ -116,171 +126,37 @@ export class SystemsComponent implements OnInit, OnDestroy {
       customFieldValues: this.newSystem.customFieldValues
     };
     
-    this.apiService.createSystem(systemData).subscribe({
-      next: (response) => {
-        console.log('System created successfully:', response);
-        this.isCreating = false;
-        this.closeNewSystemModal();
-        this.loadSystems(); // Refresh the systems list
-      },
-      error: (error) => {
-        console.error('Error creating system:', error);
-        this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
-        this.isCreating = false;
-      }
-    });
-  }
-
-  startEditingSystem(system: System): void {
-    // If we're already editing this system, don't reset the custom field values
-    if (this.editingSystemId === system.id) {
-      // Just focus the name input
-      setTimeout(() => {
-        const input = document.querySelector('.name-input') as HTMLInputElement;
-        if (input) {
-          input.focus();
-          input.select();
+    if (this.isUpdateMode && this.systemToUpdate) {
+      // Update existing system
+      this.apiService.updateSystem(this.systemToUpdate.id, systemData).subscribe({
+        next: (response) => {
+          console.log('System updated successfully:', response);
+          this.isCreating = false;
+          this.closeNewSystemModal();
+          this.loadSystems(); // Refresh the systems list
+        },
+        error: (error) => {
+          console.error('Error updating system:', error);
+          this.errorMessage = `Failed to update system: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
         }
-      }, 0);
-      return;
-    }
-
-    this.editingSystemId = system.id;
-    this.editingSystemName = system.name;
-    this.editingSystemGeneration = system.generation;
-    this.editingSystemHandheld = system.handheld;
-    // Only reset custom field values if we weren't already editing this system
-    this.editingSystemCustomFieldValues = [...system.customFieldValues];
-    
-    // Add document click listener to save when clicking outside
-    this.addDocumentClickListener(system);
-    
-    // Focus the name input first
-    setTimeout(() => {
-      const input = document.querySelector('.name-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 0);
-  }
-
-  cancelEditing(): void {
-    this.removeDocumentClickListener();
-    this.editingSystemId = null;
-    this.editingSystemName = '';
-    this.editingSystemGeneration = 1;
-    this.editingSystemHandheld = false;
-    this.editingSystemCustomFieldValues = [];
-  }
-
-  onGenerationChange(value: any): void {
-    this.editingSystemGeneration = +value || 1;
-  }
-
-  onGenerationInput(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.editingSystemGeneration = +target.value || 1;
-  }
-
-  moveToNextField(): void {
-    // Move from name to generation, or from generation to save
-    const currentFocus = document.activeElement;
-    if (currentFocus?.classList.contains('name-input')) {
-      // Move to generation field
-      setTimeout(() => {
-        const input = document.querySelector('.generation-input') as HTMLInputElement;
-        if (input) {
-          input.focus();
-          input.select();
-        }
-      }, 0);
+      });
     } else {
-      // Save from generation field
-      const system = this.systems.find(s => s.id === this.editingSystemId);
-      if (system) {
-        this.saveSystem(system);
-      }
+      // Create new system
+      this.apiService.createSystem(systemData).subscribe({
+        next: (response) => {
+          console.log('System created successfully:', response);
+          this.isCreating = false;
+          this.closeNewSystemModal();
+          this.loadSystems(); // Refresh the systems list
+        },
+        error: (error) => {
+          console.error('Error creating system:', error);
+          this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
+        }
+      });
     }
   }
 
-  saveSystem(system: System): void {
-    if (this.isUpdating || !this.editingSystemName.trim() || this.editingSystemGeneration < 1) {
-      this.cancelEditing();
-      return;
-    }
-
-    // If values haven't changed, just cancel editing
-    if (this.editingSystemName.trim() === system.name && 
-        this.editingSystemGeneration === system.generation && 
-        this.editingSystemHandheld === system.handheld) {
-      this.cancelEditing();
-      return;
-    }
-
-    this.isUpdating = true;
-
-    const updatedSystem = {
-      name: this.editingSystemName.trim(),
-      generation: this.editingSystemGeneration,
-      handheld: this.editingSystemHandheld,
-      customFieldValues: this.editingSystemCustomFieldValues
-    };
-
-    this.apiService.updateSystem(system.id, updatedSystem).subscribe({
-      next: (updatedSystemResponse) => {
-        console.log('System updated successfully:', updatedSystemResponse);
-        this.isUpdating = false;
-        this.cancelEditing();
-        // Refresh the systems list to get the latest data from server
-        this.loadSystems();
-      },
-      error: (error) => {
-        console.error('Error updating system:', error);
-        this.errorMessage = `Failed to update system: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-        this.cancelEditing();
-      }
-    });
-  }
-
-  onCustomFieldEnterPressed(): void {
-    if (this.editingSystemId !== null) {
-      const system = this.systems.find(s => s.id === this.editingSystemId);
-      if (system) {
-        this.saveSystem(system);
-      }
-    }
-  }
-
-  private addDocumentClickListener(system: System): void {
-    // Remove any existing listener first
-    this.removeDocumentClickListener();
-    
-    this.documentClickListener = (event: Event) => {
-      const target = event.target as HTMLElement;
-      const editingRow = target.closest('.table-row');
-      const customFieldsRow = target.closest('.custom-fields-edit-row');
-      
-      // Check if the click is outside both the main editing row and custom fields row
-      if (!editingRow && !customFieldsRow) {
-        // Save the current edits
-        this.saveSystem(system);
-      }
-    };
-    
-    // Add the listener after a small delay to avoid immediate triggering
-    setTimeout(() => {
-      if (this.documentClickListener) {
-        document.addEventListener('click', this.documentClickListener);
-      }
-    }, 100);
-  }
-
-  private removeDocumentClickListener(): void {
-    if (this.documentClickListener) {
-      document.removeEventListener('click', this.documentClickListener);
-      this.documentClickListener = undefined;
-    }
-  }
 }

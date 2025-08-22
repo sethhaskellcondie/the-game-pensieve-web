@@ -54,19 +54,6 @@
   color: #dc3545;
 }
 
-// Custom fields editing styles
-.custom-fields-edit-row {
-  background-color: #f8f9fa !important;
-  
-  .custom-fields-edit-cell {
-    padding: 15px !important;
-    border-top: 2px solid #e9ecef !important;
-  }
-  
-  .custom-fields-edit-container {
-    margin: 0;
-  }
-}
 
 .table-container {
   background: white;
@@ -103,6 +90,7 @@
     .table-row {
       transition: background-color 0.2s ease;
       border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
       
       &:hover {
         background-color: #f8f9fa;
@@ -336,71 +324,3 @@
   color: #333;
 }
 
-// Inline editing styles
-.system-name-display, .system-generation-display, .system-handheld-display {
-  transition: all 0.2s ease;
-}
-
-.system-name-edit, .system-generation-edit, .system-handheld-edit {
-  .edit-input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 2px solid #0370ec;
-    border-radius: 4px;
-    font-size: 1rem;
-    background-color: white;
-    outline: none;
-    box-sizing: border-box;
-    
-    &:focus {
-      border-color: #0256c7;
-      box-shadow: 0 0 0 2px rgba(3, 112, 236, 0.1);
-    }
-  }
-  
-  .name-input {
-    font-weight: 600;
-    color: #0370ec;
-  }
-  
-  .generation-input {
-    color: #666;
-    text-align: center;
-  }
-}
-
-.checkbox-label-inline {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin: 0 !important;
-  font-weight: 500 !important;
-  user-select: none;
-}
-
-.checkbox-input-inline {
-  width: 18px !important;
-  height: 18px;
-  margin-right: 8px;
-  accent-color: #0370ec;
-  cursor: pointer;
-  
-  &:focus {
-    outline: 2px solid rgba(3, 112, 236, 0.2);
-    outline-offset: 2px;
-  }
-}
-
-.checkbox-text-inline {
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.table-row {
-  &.editing {
-    background-color: #f8f9fa;
-  }
-
-  cursor: pointer;
-}

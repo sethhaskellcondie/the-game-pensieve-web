@@ -33,54 +33,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let toy of toys" class="table-row" (click)="startEditingToy(toy)">
+            <tr *ngFor="let toy of toys" class="table-row" (click)="openUpdateToyModal(toy)">
               <td class="toy-name">
-                <div *ngIf="editingToyId !== toy.id" class="toy-name-display">
-                  {{toy.name}}
-                </div>
-                <div *ngIf="editingToyId === toy.id" class="toy-name-edit">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="editingToyName"
-                    (keyup.enter)="saveNextField(toy)"
-                    (keyup.escape)="cancelEditing()"
-                    class="edit-input name-input"
-                    #nameInput>
-                </div>
+                {{toy.name}}
               </td>
               <td class="toy-set">
-                <div *ngIf="editingToyId !== toy.id" class="toy-set-display">
-                  {{toy.set}}
-                </div>
-                <div *ngIf="editingToyId === toy.id" class="toy-set-edit">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="editingToySet"
-                    (keyup.enter)="saveToy(toy)"
-                    (keyup.escape)="cancelEditing()"
-                    class="edit-input set-input"
-                    #setInput>
-                </div>
+                {{toy.set}}
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                <div *ngIf="editingToyId !== toy.id">
-                  {{getCustomFieldValue(toy, fieldName)}}
-                </div>
-                <div *ngIf="editingToyId === toy.id" class="custom-field-edit">
-                  <!-- Custom fields will be shown in a dedicated row when editing -->
-                </div>
-              </td>
-            </tr>
-            <!-- Custom Fields Edit Row -->
-            <tr *ngIf="editingToyId !== null" class="custom-fields-edit-row">
-              <td [attr.colspan]="2 + customFieldNames.length" class="custom-fields-edit-cell">
-                <div class="custom-fields-edit-container">
-                  <app-dynamic-custom-fields 
-                    entityKey="toy" 
-                    [(customFieldValues)]="editingToyCustomFieldValues"
-                    (enterPressed)="onCustomFieldEnterPressed()">
-                  </app-dynamic-custom-fields>
-                </div>
+                {{getCustomFieldValue(toy, fieldName)}}
               </td>
             </tr>
           </tbody>
@@ -93,7 +54,7 @@
   <div *ngIf="showNewToyModal" class="modal-overlay" (click)="closeNewToyModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Create New Toy</h2>
+        <h2>{{isUpdateMode ? 'Update Existing Toy' : 'Create New Toy'}}</h2>
         <button type="button" class="close-button" (click)="closeNewToyModal()">×</button>
       </div>
       
@@ -142,7 +103,7 @@
             Cancel
           </button>
           <button type="submit" class="create-button" [disabled]="!toyForm.form.valid || isCreating">
-            {{isCreating ? 'Creating...' : 'Create'}}
+            {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
           </button>
         </div>
       </form>

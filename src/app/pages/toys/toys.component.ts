@@ -19,18 +19,13 @@ export class ToysComponent implements OnInit, OnDestroy {
   
   showNewToyModal = false;
   isCreating = false;
+  isUpdateMode = false;
+  toyToUpdate: Toy | null = null;
   newToy = {
     name: '',
     set: '',
     customFieldValues: [] as any[]
   };
-  
-  editingToyId: number | null = null;
-  editingToyName = '';
-  editingToySet = '';
-  editingToyCustomFieldValues: any[] = [];
-  isUpdating = false;
-  private documentClickListener?: (event: Event) => void;
 
   constructor(private apiService: ApiService) {
     console.log('ToysComponent constructor called');
@@ -42,7 +37,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.removeDocumentClickListener();
+    // Component cleanup
   }
 
   loadToys(): void {
@@ -86,6 +81,8 @@ export class ToysComponent implements OnInit, OnDestroy {
   }
 
   openNewToyModal(): void {
+    this.isUpdateMode = false;
+    this.toyToUpdate = null;
     this.showNewToyModal = true;
     this.newToy = {
       name: '',
@@ -94,8 +91,21 @@ export class ToysComponent implements OnInit, OnDestroy {
     };
   }
 
+  openUpdateToyModal(toy: Toy): void {
+    this.isUpdateMode = true;
+    this.toyToUpdate = toy;
+    this.showNewToyModal = true;
+    this.newToy = {
+      name: toy.name,
+      set: toy.set,
+      customFieldValues: [...toy.customFieldValues]
+    };
+  }
+
   closeNewToyModal(): void {
     this.showNewToyModal = false;
+    this.isUpdateMode = false;
+    this.toyToUpdate = null;
     this.newToy = {
       name: '',
       set: '',
@@ -113,147 +123,37 @@ export class ToysComponent implements OnInit, OnDestroy {
       customFieldValues: this.newToy.customFieldValues
     };
     
-    this.apiService.createToy(toyData).subscribe({
-      next: (response) => {
-        console.log('Toy created successfully:', response);
-        this.isCreating = false;
-        this.closeNewToyModal();
-        this.loadToys(); // Refresh the toys list
-      },
-      error: (error) => {
-        console.error('Error creating toy:', error);
-        this.errorMessage = `Failed to create toy: ${error.message || 'Unknown error'}`;
-        this.isCreating = false;
-      }
-    });
-  }
-
-  startEditingToy(toy: Toy): void {
-    // If we're already editing this toy, don't reset the custom field values
-    if (this.editingToyId === toy.id) {
-      // Just focus the name input
-      setTimeout(() => {
-        const input = document.querySelector('.name-input') as HTMLInputElement;
-        if (input) {
-          input.focus();
-          input.select();
+    if (this.isUpdateMode && this.toyToUpdate) {
+      // Update existing toy
+      this.apiService.updateToy(this.toyToUpdate.id, toyData).subscribe({
+        next: (response) => {
+          console.log('Toy updated successfully:', response);
+          this.isCreating = false;
+          this.closeNewToyModal();
+          this.loadToys(); // Refresh the toys list
+        },
+        error: (error) => {
+          console.error('Error updating toy:', error);
+          this.errorMessage = `Failed to update toy: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
         }
-      }, 0);
-      return;
-    }
-
-    this.editingToyId = toy.id;
-    this.editingToyName = toy.name;
-    this.editingToySet = toy.set;
-    // Only reset custom field values if we weren't already editing this toy
-    this.editingToyCustomFieldValues = [...toy.customFieldValues];
-    
-    // Add document click listener to save when clicking outside
-    this.addDocumentClickListener(toy);
-    
-    // Focus the name input first
-    setTimeout(() => {
-      const input = document.querySelector('.name-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 0);
-  }
-
-  cancelEditing(): void {
-    this.removeDocumentClickListener();
-    this.editingToyId = null;
-    this.editingToyName = '';
-    this.editingToySet = '';
-    this.editingToyCustomFieldValues = [];
-  }
-
-  saveNextField(toy: Toy): void {
-    // Move to set field when Enter is pressed in name field
-    setTimeout(() => {
-      const input = document.querySelector('.set-input') as HTMLInputElement;
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 0);
-  }
-
-  onCustomFieldEnterPressed(): void {
-    if (this.editingToyId !== null) {
-      const toy = this.toys.find(t => t.id === this.editingToyId);
-      if (toy) {
-        this.saveToy(toy);
-      }
+      });
+    } else {
+      // Create new toy
+      this.apiService.createToy(toyData).subscribe({
+        next: (response) => {
+          console.log('Toy created successfully:', response);
+          this.isCreating = false;
+          this.closeNewToyModal();
+          this.loadToys(); // Refresh the toys list
+        },
+        error: (error) => {
+          console.error('Error creating toy:', error);
+          this.errorMessage = `Failed to create toy: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
+        }
+      });
     }
   }
 
-  saveToy(toy: Toy): void {
-    if (this.isUpdating || (!this.editingToyName.trim() || !this.editingToySet.trim())) {
-      this.cancelEditing();
-      return;
-    }
-
-    // If values haven't changed, just cancel editing
-    if (this.editingToyName.trim() === toy.name && this.editingToySet.trim() === toy.set) {
-      this.cancelEditing();
-      return;
-    }
-
-    this.isUpdating = true;
-
-    const updatedToy = {
-      name: this.editingToyName.trim(),
-      set: this.editingToySet.trim(),
-      customFieldValues: this.editingToyCustomFieldValues
-    };
-
-    this.apiService.updateToy(toy.id, updatedToy).subscribe({
-      next: (updatedToyResponse) => {
-        console.log('Toy updated successfully:', updatedToyResponse);
-        this.isUpdating = false;
-        this.cancelEditing();
-        // Refresh the toys list to get the latest data from server
-        this.loadToys();
-      },
-      error: (error) => {
-        console.error('Error updating toy:', error);
-        this.errorMessage = `Failed to update toy: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-        this.cancelEditing();
-      }
-    });
-  }
-
-  private addDocumentClickListener(toy: Toy): void {
-    // Remove any existing listener first
-    this.removeDocumentClickListener();
-    
-    this.documentClickListener = (event: Event) => {
-      const target = event.target as HTMLElement;
-      const editingRow = target.closest('.table-row');
-      const customFieldsRow = target.closest('.custom-fields-edit-row');
-      
-      // Check if the click is outside both the main editing row and custom fields row
-      if (!editingRow && !customFieldsRow) {
-        // Save the current edits
-        this.saveToy(toy);
-      }
-    };
-    
-    // Add the listener after a small delay to avoid immediate triggering
-    setTimeout(() => {
-      if (this.documentClickListener) {
-        document.addEventListener('click', this.documentClickListener);
-      }
-    }, 100);
-  }
-
-  private removeDocumentClickListener(): void {
-    if (this.documentClickListener) {
-      document.removeEventListener('click', this.documentClickListener);
-      this.documentClickListener = undefined;
-    }
-  }
 }

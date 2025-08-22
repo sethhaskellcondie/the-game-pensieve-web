@@ -34,77 +34,20 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let system of systems" class="table-row" (click)="editingSystemId !== system.id && startEditingSystem(system)">
+            <tr *ngFor="let system of systems" class="table-row" (click)="openUpdateSystemModal(system)">
               <td class="system-name">
-                <div *ngIf="editingSystemId !== system.id" class="system-name-display">
-                  {{system.name}}
-                </div>
-                <div *ngIf="editingSystemId === system.id" class="system-name-edit">
-                  <input 
-                    type="text" 
-                    [(ngModel)]="editingSystemName"
-                    (keyup.enter)="moveToNextField()"
-                    (keyup.escape)="cancelEditing()"
-                    (click)="$event.stopPropagation()"
-                    class="edit-input name-input"
-                    #nameInput>
-                </div>
+                {{system.name}}
               </td>
               <td class="system-generation">
-                <div *ngIf="editingSystemId !== system.id" class="system-generation-display">
-                  {{system.generation}}
-                </div>
-                <div *ngIf="editingSystemId === system.id" class="system-generation-edit">
-                  <input 
-                    type="number" 
-                    [ngModel]="editingSystemGeneration"
-                    (ngModelChange)="onGenerationChange($event)"
-                    (input)="onGenerationInput($event)"
-                    (keyup.enter)="moveToNextField()"
-                    (keyup.escape)="cancelEditing()"
-                    (click)="$event.stopPropagation()"
-                    min="1"
-                    class="edit-input generation-input"
-                    #generationInput>
-                </div>
+                {{system.generation}}
               </td>
               <td class="system-handheld">
-                <div *ngIf="editingSystemId !== system.id" class="system-handheld-display">
-                  <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
-                    {{system.handheld ? 'Yes' : 'No'}}
-                  </span>
-                </div>
-                <div *ngIf="editingSystemId === system.id" class="system-handheld-edit">
-                  <label class="checkbox-label-inline" (click)="$event.stopPropagation()">
-                    <input 
-                      type="checkbox" 
-                      [(ngModel)]="editingSystemHandheld"
-                      (keyup.escape)="cancelEditing()"
-                      (click)="$event.stopPropagation()"
-                      class="checkbox-input-inline">
-                    <span class="checkbox-text-inline">Handheld</span>
-                  </label>
-                </div>
+                <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
+                  {{system.handheld ? 'Yes' : 'No'}}
+                </span>
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                <div *ngIf="editingSystemId !== system.id">
-                  {{getCustomFieldValue(system, fieldName)}}
-                </div>
-                <div *ngIf="editingSystemId === system.id" class="custom-field-edit">
-                  <!-- Custom fields will be shown in a dedicated row when editing -->
-                </div>
-              </td>
-            </tr>
-            <!-- Custom Fields Edit Row -->
-            <tr *ngIf="editingSystemId !== null" class="custom-fields-edit-row">
-              <td [attr.colspan]="3 + customFieldNames.length" class="custom-fields-edit-cell">
-                <div class="custom-fields-edit-container">
-                  <app-dynamic-custom-fields 
-                    entityKey="system" 
-                    [(customFieldValues)]="editingSystemCustomFieldValues"
-                    (enterPressed)="onCustomFieldEnterPressed()">
-                  </app-dynamic-custom-fields>
-                </div>
+                {{getCustomFieldValue(system, fieldName)}}
               </td>
             </tr>
           </tbody>
@@ -117,7 +60,7 @@
   <div *ngIf="showNewSystemModal" class="modal-overlay" (click)="closeNewSystemModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Create New System</h2>
+        <h2>{{isUpdateMode ? 'Update Existing System' : 'Create New System'}}</h2>
         <button type="button" class="close-button" (click)="closeNewSystemModal()">×</button>
       </div>
       
@@ -179,7 +122,7 @@
             Cancel
           </button>
           <button type="submit" class="create-button" [disabled]="!systemForm.form.valid || isCreating">
-            {{isCreating ? 'Creating...' : 'Create'}}
+            {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
           </button>
         </div>
       </form>
