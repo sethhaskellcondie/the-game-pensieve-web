@@ -1,0 +1,63 @@
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-message">
+  <p>Loading custom fields...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="errorMessage && !isLoading" class="error-message">
+  <p>{{errorMessage}}</p>
+</div>
+
+<!-- Custom Fields -->
+<div *ngIf="!isLoading && !errorMessage && customFields.length > 0" class="custom-fields-container">
+  <div *ngFor="let field of customFields" class="custom-field-group">
+    <!-- Text Field -->
+    <div *ngIf="field.type === 'text'">
+      <label [for]="'field-' + field.id" class="custom-field-label">
+        {{field.name}}
+      </label>
+      <input 
+        type="text"
+        [id]="'field-' + field.id"
+        [name]="'field-' + field.id"
+        [(ngModel)]="fieldValues[field.id]"
+        (ngModelChange)="onFieldValueChange()"
+        class="custom-field-input"
+        [placeholder]="'Enter ' + field.name.toLowerCase()">
+    </div>
+    
+    <!-- Number Field -->
+    <div *ngIf="field.type === 'number'">
+      <label [for]="'field-' + field.id" class="custom-field-label">
+        {{field.name}}
+      </label>
+      <input 
+        type="number"
+        [id]="'field-' + field.id"
+        [name]="'field-' + field.id"
+        [(ngModel)]="fieldValues[field.id]"
+        (ngModelChange)="onFieldValueChange()"
+        class="custom-field-input"
+        [placeholder]="'Enter ' + field.name.toLowerCase()">
+    </div>
+    
+    <!-- Boolean Field - No separate label -->
+    <div *ngIf="field.type === 'boolean'" class="custom-field-checkbox-group">
+      <label class="custom-field-checkbox-label">
+        <input 
+          type="checkbox"
+          [id]="'field-' + field.id"
+          [name]="'field-' + field.id"
+          [(ngModel)]="fieldValues[field.id]"
+          (ngModelChange)="onFieldValueChange()"
+          class="custom-field-checkbox">
+        <span class="custom-field-checkbox-text">{{field.name}}</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- No Custom Fields -->
+<div *ngIf="!isLoading && !errorMessage && customFields.length === 0" class="no-fields-message">
+  <p>No additional fields configured for this type.</p>
+</div>

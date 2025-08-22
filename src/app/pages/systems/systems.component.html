@@ -151,6 +151,12 @@
           </label>
         </div>
 
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="system" 
+          [(customFieldValues)]="newSystem.customFieldValues">
+        </app-dynamic-custom-fields>
+
         <div class="modal-actions">
           <button type="button" class="cancel-button" (click)="closeNewSystemModal()">
             Cancel

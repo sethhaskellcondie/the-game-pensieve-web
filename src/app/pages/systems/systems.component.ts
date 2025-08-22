@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
+import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
@@ -21,7 +22,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
   newSystem = {
     name: '',
     generation: null as number | null,
-    handheld: false
+    handheld: false,
+    customFieldValues: [] as any[]
   };
   
   editingSystemId: number | null = null;
@@ -29,7 +31,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   editingSystemGeneration = 1;
   editingSystemHandheld = false;
   isUpdating = false;
-  private documentClickListener?: () => void;
+  private documentClickListener?: (event: Event) => void;
 
   constructor(private apiService: ApiService) {}
 
@@ -84,7 +86,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.newSystem = {
       name: '',
       generation: null,
-      handheld: false
+      handheld: false,
+      customFieldValues: [] as any[]
     };
   }
 
@@ -93,7 +96,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.newSystem = {
       name: '',
       generation: null,
-      handheld: false
+      handheld: false,
+      customFieldValues: [] as any[]
     };
   }
 
@@ -108,7 +112,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
       name: this.newSystem.name,
       generation: this.newSystem.generation,
       handheld: this.newSystem.handheld,
-      customFieldValues: [] // Empty array (no custom fields yet)
+      customFieldValues: this.newSystem.customFieldValues
     };
     
     this.apiService.createSystem(systemData).subscribe({

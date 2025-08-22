@@ -119,6 +119,13 @@ export class ApiService {
       );
   }
 
+  getCustomFieldsByEntity(entityKey: string): Observable<CustomField[]> {
+    return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields/entity/${entityKey}`)
+      .pipe(
+        map(response => response.data || [])
+      );
+  }
+
   createCustomField(customField: { name: string; type: string; entityKey: string }): Observable<CustomField> {
     return this.http.post<{data: CustomField, errors: any}>(`${this.baseUrl}/custom_fields`, {
       custom_field: customField

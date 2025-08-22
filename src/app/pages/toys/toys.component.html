@@ -115,6 +115,12 @@
           </div>
         </div>
 
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="toy" 
+          [(customFieldValues)]="newToy.customFieldValues">
+        </app-dynamic-custom-fields>
+
         <div class="modal-actions">
           <button type="button" class="cancel-button" (click)="closeNewToyModal()">
             Cancel

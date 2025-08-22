@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Toy } from '../../services/api.service';
+import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 
 @Component({
   selector: 'app-toys',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
   templateUrl: './toys.component.html',
   styleUrl: './toys.component.scss'
 })
@@ -20,7 +21,8 @@ export class ToysComponent implements OnInit {
   isCreating = false;
   newToy = {
     name: '',
-    set: ''
+    set: '',
+    customFieldValues: [] as any[]
   };
   
   editingToyId: number | null = null;
@@ -81,7 +83,8 @@ export class ToysComponent implements OnInit {
     this.showNewToyModal = true;
     this.newToy = {
       name: '',
-      set: ''
+      set: '',
+      customFieldValues: [] as any[]
     };
   }
 
@@ -89,7 +92,8 @@ export class ToysComponent implements OnInit {
     this.showNewToyModal = false;
     this.newToy = {
       name: '',
-      set: ''
+      set: '',
+      customFieldValues: [] as any[]
     };
   }
 
@@ -100,7 +104,7 @@ export class ToysComponent implements OnInit {
     
     const toyData = {
       ...this.newToy,
-      customFieldValues: [] // Empty array as requested (no custom fields yet)
+      customFieldValues: this.newToy.customFieldValues
     };
     
     this.apiService.createToy(toyData).subscribe({
