@@ -19,9 +19,11 @@ export class VideoGameBoxesComponent implements OnInit {
   errorMessage = '';
   customFieldNames: string[] = [];
   
+  showDetailVideoGameBoxModal = false;
   showNewVideoGameBoxModal = false;
   isCreating = false;
   isUpdateMode = false;
+  selectedVideoGameBox: VideoGameBox | null = null;
   videoGameBoxToUpdate: VideoGameBox | null = null;
   newVideoGameBox = {
     title: '',
@@ -171,6 +173,32 @@ export class VideoGameBoxesComponent implements OnInit {
           this.isCreating = false;
         }
       });
+    }
+  }
+
+  openDetailVideoGameBoxModal(videoGameBox: VideoGameBox): void {
+    this.selectedVideoGameBox = videoGameBox;
+    this.showDetailVideoGameBoxModal = true;
+  }
+
+  closeDetailVideoGameBoxModal(): void {
+    this.showDetailVideoGameBoxModal = false;
+    this.selectedVideoGameBox = null;
+  }
+
+  openEditFromDetail(): void {
+    if (this.selectedVideoGameBox) {
+      const videoGameBoxToEdit = this.selectedVideoGameBox;
+      this.closeDetailVideoGameBoxModal();
+      this.openUpdateVideoGameBoxModal(videoGameBoxToEdit);
+    }
+  }
+
+  openDetailFromEdit(): void {
+    if (this.videoGameBoxToUpdate) {
+      const videoGameBoxToDetail = this.videoGameBoxToUpdate;
+      this.closeNewVideoGameBoxModal();
+      this.openDetailVideoGameBoxModal(videoGameBoxToDetail);
     }
   }
 
