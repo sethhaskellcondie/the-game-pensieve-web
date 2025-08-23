@@ -64,8 +64,7 @@
               "buildTarget": "the-game-pensive-web:build:production"
             },
             "development": {
-              "buildTarget": "the-game-pensive-web:build:development",
-              "proxyConfig": "proxy.conf.json"
+              "buildTarget": "the-game-pensive-web:build:development"
             }
           },
           "defaultConfiguration": "development"

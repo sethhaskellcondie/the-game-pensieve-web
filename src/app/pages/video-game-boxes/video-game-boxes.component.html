@@ -1,9 +1,14 @@
 <div class="video-game-boxes-container">
   <div class="header-section">
     <h1>Video Games (Shelf View)</h1>
-    <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Swap View'}}
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewVideoGameBoxModal()">
+        New
+      </button>
+      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+        {{isLoading ? 'Loading...' : 'Swap View'}}
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -35,7 +40,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of videoGameBoxes" class="table-row">
+            <tr *ngFor="let box of videoGameBoxes" class="table-row" (click)="openUpdateVideoGameBoxModal(box)">
               <td class="game-title">{{box.title}}</td>
               <td class="game-system">{{box.system.name}}</td>
               <td class="game-physical">
@@ -55,6 +60,93 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- New Video Game Box Modal -->
+  <div *ngIf="showNewVideoGameBoxModal" class="modal-overlay" (click)="closeNewVideoGameBoxModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{isUpdateMode ? 'Update Existing Video Game Box' : 'Create New Video Game Box'}}</h2>
+        <button type="button" class="close-button" (click)="closeNewVideoGameBoxModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitNewVideoGameBox()" #videoGameBoxForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            [(ngModel)]="newVideoGameBox.title"
+            #titleField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter game title">
+          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="systemId">System *</label>
+          <select 
+            id="systemId" 
+            name="systemId" 
+            [(ngModel)]="newVideoGameBox.systemId"
+            #systemField="ngModel"
+            required
+            class="form-select">
+            <option value="">Select a system</option>
+            <option *ngFor="let system of systems" [value]="system.id">
+              {{system.name}} (Gen {{system.generation}})
+            </option>
+          </select>
+          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
+            System selection is required
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              id="isPhysical" 
+              name="isPhysical" 
+              [(ngModel)]="newVideoGameBox.isPhysical"
+              class="checkbox-input">
+            <span class="checkbox-text">Physical</span>
+          </label>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              id="isCollection" 
+              name="isCollection" 
+              [(ngModel)]="newVideoGameBox.isCollection"
+              class="checkbox-input">
+            <span class="checkbox-text">Collection</span>
+          </label>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="videoGameBox" 
+          [(customFieldValues)]="newVideoGameBox.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeNewVideoGameBoxModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!videoGameBoxForm.form.valid || isCreating">
+            {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

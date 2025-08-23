@@ -50,6 +50,7 @@ export interface VideoGameBox {
   id: number;
   title: string;
   system: System;
+  videoGames: VideoGame[];
   isPhysical: boolean;
   isCollection: boolean;
   createdAt: string;
@@ -231,6 +232,48 @@ export class ApiService {
     })
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  createVideoGame(videoGame: { title: string; systemId: number; customFieldValues: any[] }): Observable<VideoGame> {
+    return this.http.post<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames`, {
+      title: videoGame.title,
+      systemId: videoGame.systemId,
+      customFieldValues: videoGame.customFieldValues
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateVideoGame(id: number, videoGame: { title: string; systemId: number; customFieldValues: any[] }): Observable<VideoGame> {
+    return this.http.put<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames/${id}`, {
+      videoGame: videoGame
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createVideoGameBox(videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; customFieldValues: any[] }): Observable<VideoGameBox> {
+    return this.http.post<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes`, {
+      title: videoGameBox.title,
+      systemId: videoGameBox.systemId,
+      isPhysical: videoGameBox.isPhysical,
+      isCollection: videoGameBox.isCollection,
+      customFieldValues: videoGameBox.customFieldValues
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateVideoGameBox(id: number, videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; customFieldValues: any[] }): Observable<VideoGameBox> {
+    return this.http.put<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`, {
+      videoGameBox: videoGameBox
+    })
+      .pipe(
+        map(response => response.data)
       );
   }
 }

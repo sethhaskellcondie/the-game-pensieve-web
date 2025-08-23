@@ -37,8 +37,11 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
     if (changes['entityKey'] && !changes['entityKey'].firstChange) {
       this.loadCustomFields();
     }
-    if (changes['customFieldValues'] && !changes['customFieldValues'].firstChange) {
-      this.populateFieldValues();
+    if (changes['customFieldValues']) {
+      // Always try to populate field values when they change, including first time
+      if (this.customFields.length > 0) {
+        this.populateFieldValues();
+      }
     }
   }
 
@@ -52,6 +55,11 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
       next: (fields) => {
         this.customFields = fields;
         this.initializeFieldValues();
+        // If we have custom field values waiting to be populated, do it now
+        if (this.customFieldValues.length > 0) {
+          this.populateFieldValues();
+          this.emitCustomFieldValues();
+        }
         this.isLoading = false;
       },
       error: (error) => {
