@@ -256,13 +256,17 @@ export class ApiService {
       );
   }
 
-  createVideoGameBox(videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; customFieldValues: any[] }): Observable<VideoGameBox> {
+  createVideoGameBox(videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; existingVideoGameIds?: number[]; newVideoGames?: any[]; customFieldValues: any[] }): Observable<VideoGameBox> {
     return this.http.post<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes`, {
-      title: videoGameBox.title,
-      systemId: videoGameBox.systemId,
-      isPhysical: videoGameBox.isPhysical,
-      isCollection: videoGameBox.isCollection,
-      customFieldValues: videoGameBox.customFieldValues
+      videoGameBox: {
+        title: videoGameBox.title,
+        systemId: videoGameBox.systemId,
+        isPhysical: videoGameBox.isPhysical,
+        isCollection: videoGameBox.isCollection,
+        existingVideoGameIds: videoGameBox.existingVideoGameIds || [],
+        newVideoGames: videoGameBox.newVideoGames || [],
+        customFieldValues: videoGameBox.customFieldValues
+      }
     })
       .pipe(
         map(response => response.data)

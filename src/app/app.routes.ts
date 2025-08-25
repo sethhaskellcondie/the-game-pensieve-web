@@ -9,7 +9,7 @@ import { CustomFieldsComponent } from './pages/custom-fields/custom-fields.compo
 import { OptionsComponent } from './pages/options/options.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/video-games', pathMatch: 'full' },
+  { path: '', redirectTo: '/video-game-boxes', pathMatch: 'full' },
   { path: 'video-games', component: VideoGamesComponent },
   { path: 'video-game-boxes', component: VideoGameBoxesComponent },
   { path: 'board-games', component: BoardGamesComponent },
