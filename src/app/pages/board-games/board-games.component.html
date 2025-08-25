@@ -1,9 +1,11 @@
-<div class="board-games-container">
+<div class="board-games-individual-container">
   <div class="header-section">
-    <h1>Board Games (Shelf View)</h1>
-    <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Swap View'}}
-    </button>
+    <h1>Board Games (Game View)</h1>
+    <div class="header-buttons">
+      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+        {{isLoading ? 'Loading...' : 'Swap View'}}
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,40 +21,105 @@
 
     <!-- Board Games List -->
     <div *ngIf="!isLoading && !errorMessage" class="board-games-list">
-      <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
-        <p>No board game boxes found.</p>
+      <div *ngIf="boardGames.length === 0" class="no-games-message">
+        <p>No board games found.</p>
       </div>
       
-      <div *ngIf="boardGameBoxes.length > 0" class="table-container">
+      <div *ngIf="boardGames.length > 0" class="table-container">
         <table class="board-games-table">
           <thead>
             <tr>
               <th>Title</th>
-              <th>Expansion</th>
-              <th>Standalone</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of boardGameBoxes" class="table-row">
-              <td class="game-title">{{box.title}}</td>
-              <td class="game-expansion">
-                <span class="expansion-badge" [class]="box.isExpansion ? 'expansion-yes' : 'expansion-no'">
-                  {{box.isExpansion ? 'Yes' : 'No'}}
-                </span>
-              </td>
-              <td class="game-standalone">
-                <span class="standalone-badge" [class]="box.isStandAlone ? 'standalone-yes' : 'standalone-no'">
-                  {{box.isStandAlone ? 'Yes' : 'No'}}
-                </span>
-              </td>
+            <tr *ngFor="let game of boardGames" class="table-row" (click)="openDetailBoardGameModal(game)">
+              <td class="game-title">{{game.title}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(box, fieldName)}}
+                {{getCustomFieldValue(game, fieldName)}}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- Detail Board Game Modal -->
+  <div *ngIf="showDetailBoardGameModal" class="modal-overlay" (click)="closeDetailBoardGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{selectedBoardGame?.title}} Details</h2>
+        <div class="modal-header-actions">
+          <button type="button" class="edit-button" (click)="openEditFromDetail()">
+            Edit
+          </button>
+          <button type="button" class="close-button" (click)="closeDetailBoardGameModal()">×</button>
+        </div>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedBoardGame">
+        <!-- Custom Fields -->
+        <div class="custom-fields-inline" *ngIf="selectedBoardGame.customFieldValues.length > 0">
+          <div class="detail-grid">
+            <div class="detail-item" *ngFor="let field of selectedBoardGame.customFieldValues">
+              <label>{{field.customFieldName}}:</label>
+              <span>{{field.value}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Board Game Modal -->
+  <div *ngIf="showEditBoardGameModal" class="modal-overlay" (click)="closeEditBoardGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Update Board Game</h2>
+        <div class="modal-header-actions">
+          <button type="button" class="details-button" (click)="openDetailFromEdit()">
+            Details
+          </button>
+          <button type="button" class="close-button" (click)="closeEditBoardGameModal()">×</button>
+        </div>
+      </div>
+      
+      <form (ngSubmit)="onSubmitEditBoardGame()" #boardGameForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            [(ngModel)]="editBoardGame.title"
+            #titleField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter game title">
+          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="boardGame" 
+          sectionTitle="Board Game Custom Fields"
+          [(customFieldValues)]="editBoardGame.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditBoardGameModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!boardGameForm.form.valid || isUpdating">
+            {{isUpdating ? 'Updating...' : 'Update'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

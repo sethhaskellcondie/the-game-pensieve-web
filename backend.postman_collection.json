@@ -401,6 +401,15 @@
 			"response": []
 		},
 		{
+			"name": "read custom fields by entity key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/v1/custom_fields/entity/toy"
+			},
+			"response": []
+		},
+		{
 			"name": "patch custom field name",
 			"request": {
 				"method": "PATCH",
@@ -537,12 +546,13 @@
 		},
 		{
 			"name": "update one board game box",
+			"description": "Updates an existing board game box. Note: boardGameId is required and must be greater than 0 for updates. Board game boxes must always have a valid parent board game.",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"boardGameBox\": {\r\n        \"title\": \"Updated Board Game Box Title\",\r\n        \"isExpansion\": false,\r\n        \"isStandAlone\": true,\r\n        \"baseSetId\": null,\r\n        \"boardGameId\": 1,\r\n        \"boardGame\": null,\r\n        \"customFieldValues\": []\r\n    }\r\n}",
+					"raw": "{\r\n    \"boardGameBox\": {\r\n        \"title\": \"Updated Board Game Box Title\",\r\n        \"isExpansion\": false,\r\n        \"isStandAlone\": true,\r\n        \"baseSetId\": null,\r\n        \"boardGameId\": 1,\r\n        \"customFieldValues\": []\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -604,6 +614,69 @@
 					}
 				},
 				"url": "http://localhost:8080/v1/boardGames/1"
+			},
+			"response": []
+		},
+		{
+			"name": "create new metadata",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"metadata\": {\r\n        \"id\": null,\r\n        \"key\": \"user_settings\",\r\n        \"value\": \"{\\\"theme\\\":\\\"dark\\\",\\\"language\\\":\\\"en\\\",\\\"notifications\\\":true}\",\r\n        \"createdAt\": null,\r\n        \"updatedAt\": null,\r\n        \"deletedAt\": null\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/v1/metadata"
+			},
+			"response": []
+		},
+		{
+			"name": "read all metadata",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/v1/metadata"
+			},
+			"response": []
+		},
+		{
+			"name": "read one metadata by key",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/v1/metadata/user_settings"
+			},
+			"response": []
+		},
+		{
+			"name": "update metadata value",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"value\": \"{\\\"theme\\\":\\\"light\\\",\\\"language\\\":\\\"es\\\",\\\"notifications\\\":false}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/v1/metadata/user_settings"
+			},
+			"response": []
+		},
+		{
+			"name": "delete one metadata",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:8080/v1/metadata/user_settings"
 			},
 			"response": []
 		},

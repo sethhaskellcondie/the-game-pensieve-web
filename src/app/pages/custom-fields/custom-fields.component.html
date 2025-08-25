@@ -1,8 +1,8 @@
 <div class="custom-fields-container">
   <div class="header-section">
     <h1>Custom Fields</h1>
-    <button type="button" class="refresh-button" (click)="loadCustomFields()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Refresh'}}
+    <button type="button" class="new-button" (click)="openNewCustomFieldModal()">
+      New
     </button>
   </div>
 
@@ -33,8 +33,22 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let field of customFields" class="table-row">
-              <td class="field-name">{{field.name}}</td>
+            <tr *ngFor="let field of customFields" class="table-row" (click)="startEditingField(field)">
+              <td class="field-name">
+                <div *ngIf="editingFieldId !== field.id" class="field-name-display">
+                  {{field.name}}
+                </div>
+                <div *ngIf="editingFieldId === field.id" class="field-name-edit">
+                  <input 
+                    type="text" 
+                    [(ngModel)]="editingFieldName"
+                    (keyup.enter)="saveFieldName(field)"
+                    (keyup.escape)="cancelEditing()"
+                    (blur)="saveFieldName(field)"
+                    class="edit-input"
+                    #nameInput>
+                </div>
+              </td>
               <td class="field-type">
                 <span class="type-badge" [class]="'type-' + field.type">{{field.type}}</span>
               </td>
@@ -45,6 +59,85 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- New Custom Field Modal -->
+  <div *ngIf="showNewCustomFieldModal" class="modal-overlay" (click)="closeNewCustomFieldModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create New Custom Field</h2>
+        <button type="button" class="close-button" (click)="closeNewCustomFieldModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitNewCustomField()" #customFieldForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="name">Name *</label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            [(ngModel)]="newCustomField.name"
+            #nameField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter custom field name">
+          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+            Name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="type">Type *</label>
+          <select 
+            id="type" 
+            name="type" 
+            [(ngModel)]="newCustomField.type"
+            #typeField="ngModel"
+            required
+            class="form-select">
+            <option value="">Select a type</option>
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="boolean">Boolean</option>
+          </select>
+          <div *ngIf="typeField.invalid && typeField.touched" class="error-text">
+            Type is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="entityKey">Entity Type *</label>
+          <select 
+            id="entityKey" 
+            name="entityKey" 
+            [(ngModel)]="newCustomField.entityKey"
+            #entityKeyField="ngModel"
+            required
+            class="form-select">
+            <option value="">Select an entity type</option>
+            <option value="toy">Toy</option>
+            <option value="system">System</option>
+            <option value="videoGame">Video Game</option>
+            <option value="videoGameBox">Video Game Box</option>
+            <option value="boardGame">Board Game</option>
+            <option value="boardGameBox">Board Game Box</option>
+          </select>
+          <div *ngIf="entityKeyField.invalid && entityKeyField.touched" class="error-text">
+            Entity type is required
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeNewCustomFieldModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!customFieldForm.form.valid || isCreating">
+            {{isCreating ? 'Creating...' : 'Create'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

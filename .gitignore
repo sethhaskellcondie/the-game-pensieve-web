@@ -1,3 +1,4 @@
 .idea
 .angular
 node_modules
+dist

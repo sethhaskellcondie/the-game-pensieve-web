@@ -1,8 +1,8 @@
 <div class="toys-container">
   <div class="header-section">
     <h1>Toys</h1>
-    <button type="button" class="refresh-button" (click)="loadToys()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Refresh'}}
+    <button type="button" class="new-button" (click)="openNewToyModal()">
+      New
     </button>
   </div>
 
@@ -33,9 +33,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let toy of toys" class="table-row">
-              <td class="toy-name">{{toy.name}}</td>
-              <td class="toy-set">{{toy.set}}</td>
+            <tr *ngFor="let toy of toys" class="table-row" (click)="openUpdateToyModal(toy)">
+              <td class="toy-name">
+                {{toy.name}}
+              </td>
+              <td class="toy-set">
+                {{toy.set}}
+              </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 {{getCustomFieldValue(toy, fieldName)}}
               </td>
@@ -43,6 +47,67 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- New Toy Modal -->
+  <div *ngIf="showNewToyModal" class="modal-overlay" (click)="closeNewToyModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{isUpdateMode ? 'Update Existing Toy' : 'Create New Toy'}}</h2>
+        <button type="button" class="close-button" (click)="closeNewToyModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitNewToy()" #toyForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="name">Name *</label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            [(ngModel)]="newToy.name"
+            #nameField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter toy name">
+          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+            Name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="set">Set *</label>
+          <input 
+            type="text" 
+            id="set" 
+            name="set" 
+            [(ngModel)]="newToy.set"
+            #setField="ngModel"
+            required
+            class="form-input"
+            placeholder="Enter toy set or series">
+          <div *ngIf="setField.invalid && setField.touched" class="error-text">
+            Set is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="toy" 
+          sectionTitle="Toy Custom Fields"
+          [(customFieldValues)]="newToy.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeNewToyModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!toyForm.form.valid || isCreating">
+            {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
