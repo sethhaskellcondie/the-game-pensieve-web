@@ -66,6 +66,7 @@ export interface BoardGameBox {
   isExpansion: boolean;
   isStandAlone: boolean;
   baseSetId?: number | null;
+  boardGame?: BoardGame | null;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
@@ -271,6 +272,61 @@ export class ApiService {
   updateVideoGameBox(id: number, videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; customFieldValues: any[] }): Observable<VideoGameBox> {
     return this.http.put<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`, {
       videoGameBox: videoGameBox
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createBoardGameBox(boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; boardGame?: any; customFieldValues: any[] }): Observable<BoardGameBox> {
+    return this.http.post<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes`, {
+      boardGameBox: {
+        title: boardGameBox.title,
+        isExpansion: boardGameBox.isExpansion,
+        isStandAlone: boardGameBox.isStandAlone,
+        baseSetId: boardGameBox.baseSetId ? parseInt(boardGameBox.baseSetId.toString()) : null,
+        boardGameId: boardGameBox.boardGameId ? parseInt(boardGameBox.boardGameId.toString()) : null,
+        boardGame: boardGameBox.boardGame || null,
+        customFieldValues: boardGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateBoardGameBox(id: number, boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; customFieldValues: any[] }): Observable<BoardGameBox> {
+    return this.http.put<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes/${id}`, {
+      boardGameBox: {
+        title: boardGameBox.title,
+        isExpansion: boardGameBox.isExpansion,
+        isStandAlone: boardGameBox.isStandAlone,
+        baseSetId: boardGameBox.baseSetId ? parseInt(boardGameBox.baseSetId.toString()) : null,
+        boardGameId: boardGameBox.boardGameId ? parseInt(boardGameBox.boardGameId.toString()) : null,
+        boardGame: null,
+        customFieldValues: boardGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createBoardGame(boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {
+    return this.http.post<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames`, {
+      boardGame: {
+        title: boardGame.title,
+        customFieldValues: boardGame.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateBoardGame(id: number, boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {
+    return this.http.put<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames/${id}`, {
+      boardGame: boardGame
     })
       .pipe(
         map(response => response.data)

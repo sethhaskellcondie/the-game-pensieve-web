@@ -17,6 +17,7 @@ export interface DynamicFieldValue {
 export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
   @Input() entityKey!: string;
   @Input() customFieldValues: CustomFieldValue[] = [];
+  @Input() sectionTitle?: string;
   @Output() customFieldValuesChange = new EventEmitter<CustomFieldValue[]>();
   @Output() enterPressed = new EventEmitter<void>();
 
@@ -24,6 +25,10 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
   fieldValues: DynamicFieldValue = {};
   isLoading = false;
   errorMessage = '';
+  
+  get hasCustomFields(): boolean {
+    return this.customFields.length > 0;
+  }
 
   constructor(private apiService: ApiService) {}
 
@@ -73,13 +78,13 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
   initializeFieldValues(): void {
     this.fieldValues = {};
     this.customFields.forEach(field => {
-      // Set default values based on field type
+      // Set default values based on field type - use empty/blank defaults
       switch (field.type) {
         case 'text':
           this.fieldValues[field.id] = '';
           break;
         case 'number':
-          this.fieldValues[field.id] = 0;
+          this.fieldValues[field.id] = '';
           break;
         case 'boolean':
           this.fieldValues[field.id] = false;
@@ -134,7 +139,7 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
   private convertValueToString(value: any, type: string): string {
     switch (type) {
       case 'number':
-        return (value || 0).toString();
+        return value === '' || value === null || value === undefined ? '' : value.toString();
       case 'boolean':
         return (!!value).toString();
       default:
