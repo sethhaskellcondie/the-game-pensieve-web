@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService, VideoGameBox, System } from '../../services/api.service';
+import { ApiService, VideoGameBox, System, VideoGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 
 @Component({
@@ -25,11 +25,19 @@ export class VideoGameBoxesComponent implements OnInit {
   isUpdateMode = false;
   selectedVideoGameBox: VideoGameBox | null = null;
   videoGameBoxToUpdate: VideoGameBox | null = null;
+  allVideoGames: VideoGame[] = [];
   newVideoGameBox = {
     title: '',
     systemId: null as number | null,
     isPhysical: false,
     isCollection: false,
+    videoGames: [] as { 
+      type: 'existing' | 'new';
+      existingVideoGameId?: number | null;
+      title?: string; 
+      systemId?: number | null; 
+      customFieldValues: any[] 
+    }[],
     customFieldValues: [] as any[]
   };
 
@@ -93,11 +101,23 @@ export class VideoGameBoxesComponent implements OnInit {
     this.isUpdateMode = false;
     this.videoGameBoxToUpdate = null;
     this.showNewVideoGameBoxModal = true;
+    
+    // Load all video games for the dropdown
+    this.apiService.getVideoGames().subscribe({
+      next: (videoGames) => {
+        this.allVideoGames = videoGames;
+      },
+      error: (error) => {
+        console.error('Error loading video games:', error);
+      }
+    });
+    
     this.newVideoGameBox = {
       title: '',
       systemId: null,
       isPhysical: false,
       isCollection: false,
+      videoGames: [],
       customFieldValues: [] as any[]
     };
   }
@@ -106,11 +126,23 @@ export class VideoGameBoxesComponent implements OnInit {
     this.isUpdateMode = true;
     this.videoGameBoxToUpdate = videoGameBox;
     this.showNewVideoGameBoxModal = true;
+    
+    // Load all video games for the dropdown
+    this.apiService.getVideoGames().subscribe({
+      next: (videoGames) => {
+        this.allVideoGames = videoGames;
+      },
+      error: (error) => {
+        console.error('Error loading video games:', error);
+      }
+    });
+    
     this.newVideoGameBox = {
       title: videoGameBox.title,
       systemId: videoGameBox.system.id,
       isPhysical: videoGameBox.isPhysical,
       isCollection: videoGameBox.isCollection,
+      videoGames: [],
       customFieldValues: [...videoGameBox.customFieldValues]
     };
   }
@@ -124,6 +156,7 @@ export class VideoGameBoxesComponent implements OnInit {
       systemId: null,
       isPhysical: false,
       isCollection: false,
+      videoGames: [],
       customFieldValues: [] as any[]
     };
   }
@@ -132,14 +165,51 @@ export class VideoGameBoxesComponent implements OnInit {
     if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null) {
       return;
     }
+
+    // Validate video games if any are added
+    for (let i = 0; i < this.newVideoGameBox.videoGames.length; i++) {
+      const videoGame = this.newVideoGameBox.videoGames[i];
+      
+      if (videoGame.type === 'existing') {
+        if (!videoGame.existingVideoGameId) {
+          this.errorMessage = `Please select an existing video game for item ${i + 1}.`;
+          return;
+        }
+      } else if (videoGame.type === 'new') {
+        if (!videoGame.title || videoGame.title.trim() === '') {
+          this.errorMessage = `Please enter a title for new video game item ${i + 1}.`;
+          return;
+        }
+        if (!videoGame.systemId) {
+          this.errorMessage = `Please select a system for new video game item ${i + 1}.`;
+          return;
+        }
+      }
+    }
     
     this.isCreating = true;
+    this.errorMessage = '';
+    
+    // Separate existing and new video games
+    const existingVideoGameIds = this.newVideoGameBox.videoGames
+      .filter(game => game.type === 'existing' && game.existingVideoGameId)
+      .map(game => game.existingVideoGameId!);
+    
+    const newVideoGames = this.newVideoGameBox.videoGames
+      .filter(game => game.type === 'new')
+      .map(game => ({
+        title: game.title!,
+        systemId: game.systemId!,
+        customFieldValues: game.customFieldValues
+      }));
     
     const videoGameBoxData = {
       title: this.newVideoGameBox.title,
       systemId: this.newVideoGameBox.systemId,
       isPhysical: this.newVideoGameBox.isPhysical,
       isCollection: this.newVideoGameBox.isCollection,
+      existingVideoGameIds: existingVideoGameIds,
+      newVideoGames: newVideoGames,
       customFieldValues: this.newVideoGameBox.customFieldValues
     };
     
@@ -204,5 +274,64 @@ export class VideoGameBoxesComponent implements OnInit {
 
   swapView(): void {
     this.router.navigate(['/video-games']);
+  }
+
+  addNewVideoGame(): void {
+    // Add a new video game item with default type 'new' but allow user to choose
+    this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
+      next: (customFields: any[]) => {
+        const newVideoGame = {
+          type: 'new' as 'existing' | 'new',
+          existingVideoGameId: null,
+          title: this.newVideoGameBox.title,
+          systemId: this.newVideoGameBox.systemId,
+          customFieldValues: customFields.map((field: any) => ({
+            customFieldId: field.id,
+            customFieldName: field.name,
+            customFieldType: field.type,
+            value: field.type === 'boolean' ? 'false' : ''
+          }))
+        };
+        this.newVideoGameBox.videoGames.push(newVideoGame);
+      },
+      error: (error: any) => {
+        console.error('Error loading custom fields for video game:', error);
+        this.newVideoGameBox.videoGames.push({
+          type: 'new' as 'existing' | 'new',
+          existingVideoGameId: null,
+          title: this.newVideoGameBox.title,
+          systemId: this.newVideoGameBox.systemId,
+          customFieldValues: []
+        });
+      }
+    });
+  }
+
+  removeVideoGame(index: number): void {
+    this.newVideoGameBox.videoGames.splice(index, 1);
+  }
+
+  isVideoGameSelected(videoGame: any): boolean {
+    if (videoGame.type === 'existing') {
+      return !!videoGame.existingVideoGameId;
+    } else if (videoGame.type === 'new') {
+      return !!(videoGame.title && videoGame.title.trim() !== '' && videoGame.systemId);
+    }
+    return false;
+  }
+
+  getVideoGameDisplayText(videoGame: any): string {
+    if (videoGame.type === 'existing' && videoGame.existingVideoGameId) {
+      const selectedGame = this.allVideoGames.find(game => game.id == videoGame.existingVideoGameId);
+      return selectedGame ? `${selectedGame.title} (${selectedGame.system.name})` : 'Unknown Game';
+    } else if (videoGame.type === 'new' && videoGame.title && videoGame.systemId) {
+      const selectedSystem = this.systems.find(system => system.id == videoGame.systemId);
+      return selectedSystem ? `${videoGame.title} (${selectedSystem.name})` : videoGame.title;
+    }
+    return '';
+  }
+
+  getVideoGameTypeLabel(videoGame: any): string {
+    return videoGame.type === 'existing' ? 'Existing' : 'New';
   }
 }

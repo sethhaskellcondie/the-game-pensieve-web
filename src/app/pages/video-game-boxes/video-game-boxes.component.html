@@ -208,9 +208,106 @@
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="videoGameBox" 
-          sectionTitle="Video Game Box Custom Fields"
           [(customFieldValues)]="newVideoGameBox.customFieldValues">
         </app-dynamic-custom-fields>
+
+        <!-- Video Games Section -->
+        <div class="form-group video-games-section">
+          <label>Video Games</label>
+          <div class="new-games-list" *ngIf="newVideoGameBox.videoGames.length > 0">
+            <div class="new-game-item" *ngFor="let videoGame of newVideoGameBox.videoGames; let i = index">
+              
+              <!-- Collapsed View - Show when video game is selected -->
+              <div class="game-collapsed" *ngIf="isVideoGameSelected(videoGame)">
+                <div class="collapsed-content">
+                  <span class="game-title">{{getVideoGameDisplayText(videoGame)}}</span>
+                  <span class="game-type-badge" [class]="videoGame.type === 'existing' ? 'badge-existing' : 'badge-new'">
+                    {{getVideoGameTypeLabel(videoGame)}}
+                  </span>
+                </div>
+                <button type="button" class="remove-button" (click)="removeVideoGame(i)">×</button>
+              </div>
+
+              <!-- Expanded View - Show when video game is not selected -->
+              <div class="game-expanded" *ngIf="!isVideoGameSelected(videoGame)">
+                <div class="game-header">
+                  <div class="video-game-type-selection">
+                    <label class="radio-label">
+                      <input 
+                        type="radio" 
+                        [name]="'videoGameType' + i" 
+                        value="existing"
+                        [(ngModel)]="videoGame.type"
+                        class="radio-input">
+                      <span class="radio-text">Select Existing</span>
+                    </label>
+                    <label class="radio-label">
+                      <input 
+                        type="radio" 
+                        [name]="'videoGameType' + i" 
+                        value="new"
+                        [(ngModel)]="videoGame.type"
+                        class="radio-input">
+                      <span class="radio-text">Create New</span>
+                    </label>
+                  </div>
+                  <button type="button" class="remove-button" (click)="removeVideoGame(i)">×</button>
+                </div>
+                
+                <!-- Existing Video Game Selection -->
+                <div class="form-group" *ngIf="videoGame.type === 'existing'">
+                  <label for="existingGame{{i}}">Select Video Game *</label>
+                  <select 
+                    id="existingGame{{i}}" 
+                    [name]="'existingVideoGameId' + i" 
+                    [(ngModel)]="videoGame.existingVideoGameId"
+                    required
+                    class="form-select">
+                    <option value="">Select a video game</option>
+                    <option *ngFor="let game of allVideoGames" [value]="game.id">
+                      {{game.title}} ({{game.system.name}})
+                    </option>
+                  </select>
+                </div>
+
+                <!-- New Video Game Creation -->
+                <div *ngIf="videoGame.type === 'new'">
+                  <div class="form-group">
+                    <label for="newGameTitle{{i}}">Title *</label>
+                    <input 
+                      type="text"
+                      id="newGameTitle{{i}}"
+                      [(ngModel)]="videoGame.title"
+                      [name]="'newGameTitle' + i"
+                      class="form-input"
+                      placeholder="Enter video game title">
+                  </div>
+                  <div class="form-group">
+                    <label for="newGameSystem{{i}}">System *</label>
+                    <select 
+                      id="newGameSystem{{i}}" 
+                      [name]="'newGameSystemId' + i" 
+                      [(ngModel)]="videoGame.systemId"
+                      required
+                      class="form-select">
+                      <option value="">Select a system</option>
+                      <option *ngFor="let system of systems" [value]="system.id">
+                        {{system.name}} (Gen {{system.generation}})
+                      </option>
+                    </select>
+                  </div>
+                  <app-dynamic-custom-fields 
+                    entityKey="videoGame" 
+                    [(customFieldValues)]="videoGame.customFieldValues">
+                  </app-dynamic-custom-fields>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-game-button" (click)="addNewVideoGame()">
+            + Add Video Game
+          </button>
+        </div>
 
         <div class="modal-actions">
           <button type="button" class="cancel-button" (click)="closeNewVideoGameBoxModal()">
