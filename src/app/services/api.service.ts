@@ -273,9 +273,17 @@ export class ApiService {
       );
   }
 
-  updateVideoGameBox(id: number, videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; customFieldValues: any[] }): Observable<VideoGameBox> {
+  updateVideoGameBox(id: number, videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; existingVideoGameIds?: number[]; newVideoGames?: any[]; customFieldValues: any[] }): Observable<VideoGameBox> {
     return this.http.put<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`, {
-      videoGameBox: videoGameBox
+      videoGameBox: {
+        title: videoGameBox.title,
+        systemId: videoGameBox.systemId,
+        isPhysical: videoGameBox.isPhysical,
+        isCollection: videoGameBox.isCollection,
+        existingVideoGameIds: videoGameBox.existingVideoGameIds || [],
+        newVideoGames: videoGameBox.newVideoGames || [],
+        customFieldValues: videoGameBox.customFieldValues
+      }
     })
       .pipe(
         map(response => response.data)

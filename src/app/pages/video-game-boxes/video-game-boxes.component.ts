@@ -131,20 +131,37 @@ export class VideoGameBoxesComponent implements OnInit {
     this.apiService.getVideoGames().subscribe({
       next: (videoGames) => {
         this.allVideoGames = videoGames;
+        
+        // Convert existing video games to the format we need
+        const existingVideoGames = videoGameBox.videoGames.map(game => ({
+          type: 'existing' as 'existing' | 'new',
+          existingVideoGameId: game.id,
+          title: undefined,
+          systemId: undefined,
+          customFieldValues: []
+        }));
+        
+        this.newVideoGameBox = {
+          title: videoGameBox.title,
+          systemId: videoGameBox.system.id,
+          isPhysical: videoGameBox.isPhysical,
+          isCollection: videoGameBox.isCollection,
+          videoGames: existingVideoGames,
+          customFieldValues: [...videoGameBox.customFieldValues]
+        };
       },
       error: (error) => {
         console.error('Error loading video games:', error);
+        this.newVideoGameBox = {
+          title: videoGameBox.title,
+          systemId: videoGameBox.system.id,
+          isPhysical: videoGameBox.isPhysical,
+          isCollection: videoGameBox.isCollection,
+          videoGames: [],
+          customFieldValues: [...videoGameBox.customFieldValues]
+        };
       }
     });
-    
-    this.newVideoGameBox = {
-      title: videoGameBox.title,
-      systemId: videoGameBox.system.id,
-      isPhysical: videoGameBox.isPhysical,
-      isCollection: videoGameBox.isCollection,
-      videoGames: [],
-      customFieldValues: [...videoGameBox.customFieldValues]
-    };
   }
 
   closeNewVideoGameBoxModal(): void {
