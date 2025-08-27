@@ -20,7 +20,7 @@ export class CustomFieldsComponent implements OnInit {
   errorMessage = '';
   
   // Sorting properties
-  sortColumn: 'name' | 'type' | 'entity' | null = null;
+  sortColumn: 'name' | 'type' | 'entity' | null = 'entity';
   sortDirection: 'asc' | 'desc' = 'asc';
   
   // Dropdown options
