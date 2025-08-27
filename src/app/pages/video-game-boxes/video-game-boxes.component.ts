@@ -42,6 +42,10 @@ export class VideoGameBoxesComponent implements OnInit {
     customFieldValues: [] as any[]
   };
 
+  showDeleteConfirmModal = false;
+  videoGameBoxToDelete: VideoGameBox | null = null;
+  isDeleting = false;
+
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
@@ -382,5 +386,35 @@ export class VideoGameBoxesComponent implements OnInit {
 
   cancelVideoGameEdit(index: number): void {
     this.editingVideoGameIndex = null;
+  }
+
+  confirmDeleteVideoGameBox(videoGameBox: VideoGameBox): void {
+    this.videoGameBoxToDelete = videoGameBox;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.videoGameBoxToDelete = null;
+  }
+
+  deleteVideoGameBox(): void {
+    if (!this.videoGameBoxToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteVideoGameBox(this.videoGameBoxToDelete.id).subscribe({
+      next: () => {
+        console.log('Video game box deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadVideoGameBoxes();
+      },
+      error: (error) => {
+        console.error('Error deleting video game box:', error);
+        this.errorMessage = `Failed to delete video game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
   }
 }

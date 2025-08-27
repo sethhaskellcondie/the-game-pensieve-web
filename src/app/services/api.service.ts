@@ -302,6 +302,10 @@ export class ApiService {
       );
   }
 
+  deleteVideoGameBox(videoGameBoxId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/videoGameBoxes/${videoGameBoxId}`);
+  }
+
   createBoardGameBox(boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; boardGame?: any; customFieldValues: any[] }): Observable<BoardGameBox> {
     return this.http.post<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes`, {
       boardGameBox: {
