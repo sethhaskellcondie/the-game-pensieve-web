@@ -43,12 +43,17 @@
                 {{system.generation}}
               </td>
               <td class="system-handheld" (click)="openUpdateSystemModal(system)">
-                <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
-                  {{system.handheld ? 'Yes' : 'No'}}
-                </span>
+                <app-boolean-display [value]="system.handheld" size="small"></app-boolean-display>
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateSystemModal(system)">
-                {{getCustomFieldValue(system, fieldName)}}
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(system, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(system, fieldName)}}
+                </ng-template>
               </td>
               <td class="field-actions">
                 <button 

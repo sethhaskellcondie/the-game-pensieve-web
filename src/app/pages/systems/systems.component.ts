@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
@@ -78,6 +79,21 @@ export class SystemsComponent implements OnInit, OnDestroy {
   getCustomFieldValue(system: System, fieldName: string): string {
     const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any system that has this field to determine its type
+    for (const system of this.systems) {
+      const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 
   openNewSystemModal(): void {

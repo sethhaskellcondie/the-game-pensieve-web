@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Toy } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 
 @Component({
   selector: 'app-toys',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
   templateUrl: './toys.component.html',
   styleUrl: './toys.component.scss'
 })
@@ -82,6 +83,21 @@ export class ToysComponent implements OnInit, OnDestroy {
   getCustomFieldValue(toy: Toy, fieldName: string): string {
     const customField = toy.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any toy that has this field to determine its type
+    for (const toy of this.toys) {
+      const customField = toy.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 
   openNewToyModal(): void {

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 
 @Component({
   selector: 'app-board-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
   templateUrl: './board-games.component.html',
   styleUrl: './board-games.component.scss'
 })
@@ -145,5 +146,20 @@ export class BoardGamesComponent implements OnInit {
 
   swapView(): void {
     this.router.navigate(['/board-game-boxes']);
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any board game that has this field to determine its type
+    for (const game of this.boardGames) {
+      const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 }

@@ -185,4 +185,28 @@ export class CustomFieldsComponent implements OnInit {
       }
     });
   }
+
+  getEntityDisplayName(entityKey: string): string {
+    const entityNames: { [key: string]: string } = {
+      'toy': 'Toy',
+      'system': 'System',
+      'videoGame': 'Video Game',
+      'videoGameBox': 'Video Game Box',
+      'boardGame': 'Board Game',
+      'boardGameBox': 'Board Game Box'
+    };
+    return entityNames[entityKey] || entityKey;
+  }
+
+  getEntityColor(entityKey: string): string {
+    const entityColors: { [key: string]: string } = {
+      'toy': '#e91e63',           // Pink
+      'system': '#9c27b0',        // Purple  
+      'videoGame': '#3f51b5',     // Indigo
+      'videoGameBox': '#2196f3',  // Blue
+      'boardGame': '#4caf50',     // Green
+      'boardGameBox': '#8bc34a'   // Light Green
+    };
+    return entityColors[entityKey] || '#f57c00'; // Default orange
+  }
 }

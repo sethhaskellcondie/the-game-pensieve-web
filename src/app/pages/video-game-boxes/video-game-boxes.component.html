@@ -45,17 +45,20 @@
               <td class="game-title" (click)="openDetailVideoGameBoxModal(box)">{{box.title}}</td>
               <td class="game-system" (click)="openDetailVideoGameBoxModal(box)">{{box.system.name}}</td>
               <td class="game-physical" (click)="openDetailVideoGameBoxModal(box)">
-                <span class="physical-badge" [class]="box.isPhysical ? 'physical-yes' : 'physical-no'">
-                  {{box.isPhysical ? 'Yes' : 'No'}}
-                </span>
+                <app-boolean-display [value]="box.isPhysical" size="small"></app-boolean-display>
               </td>
               <td class="game-collection" (click)="openDetailVideoGameBoxModal(box)">
-                <span class="collection-badge" [class]="box.isCollection ? 'collection-yes' : 'collection-no'">
-                  {{box.isCollection ? 'Yes' : 'No'}}
-                </span>
+                <app-boolean-display [value]="box.isCollection" size="small"></app-boolean-display>
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailVideoGameBoxModal(box)">
-                {{getCustomFieldValue(box, fieldName)}}
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(box, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(box, fieldName)}}
+                </ng-template>
               </td>
               <td class="field-actions">
                 <button 
@@ -110,7 +113,14 @@
           <div class="detail-grid">
             <div class="detail-item" *ngFor="let field of selectedVideoGameBox.customFieldValues">
               <label>{{field.customFieldName}}:</label>
-              <span>{{field.value}}</span>
+              <app-boolean-display 
+                *ngIf="field.customFieldType === 'boolean'; else textValue"
+                [value]="field.value"
+                size="small">
+              </app-boolean-display>
+              <ng-template #textValue>
+                <span>{{field.value}}</span>
+              </ng-template>
             </div>
           </div>
         </div>
@@ -130,7 +140,15 @@
                 <p><strong>System:</strong> {{game.system.name}}</p>
                 <div *ngIf="game.customFieldValues.length > 0" class="game-custom-fields">
                   <div class="custom-field" *ngFor="let field of game.customFieldValues">
-                    <strong>{{field.customFieldName}}:</strong> {{field.value}}
+                    <strong>{{field.customFieldName}}:</strong> 
+                    <app-boolean-display 
+                      *ngIf="field.customFieldType === 'boolean'; else textValue"
+                      [value]="field.value"
+                      size="small">
+                    </app-boolean-display>
+                    <ng-template #textValue>
+                      {{field.value}}
+                    </ng-template>
                   </div>
                 </div>
               </div>
