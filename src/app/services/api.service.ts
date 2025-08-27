@@ -146,6 +146,10 @@ export class ApiService {
       );
   }
 
+  deleteCustomField(customFieldId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/custom_fields/${customFieldId}`);
+  }
+
   getToys(): Observable<Toy[]> {
     return this.http.post<{data: Toy[], errors: any}>(`${this.baseUrl}/toys/function/search`, {
       filters: []

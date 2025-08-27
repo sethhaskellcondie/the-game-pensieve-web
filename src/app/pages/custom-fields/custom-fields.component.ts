@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, CustomField } from '../../services/api.service';
+import { IconService } from '../../services/icon.service';
+import { SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-custom-fields',
@@ -27,10 +29,18 @@ export class CustomFieldsComponent implements OnInit {
   editingFieldName = '';
   isUpdating = false;
 
-  constructor(private apiService: ApiService) {}
+  showDeleteConfirmModal = false;
+  fieldToDelete: CustomField | null = null;
+  isDeleting = false;
+
+  constructor(private apiService: ApiService, public iconService: IconService) {}
 
   ngOnInit(): void {
     this.loadCustomFields();
+  }
+
+  getIconHtml(iconName: string): SafeHtml {
+    return this.iconService.getIcon(iconName);
   }
 
   loadCustomFields(): void {
@@ -141,6 +151,37 @@ export class CustomFieldsComponent implements OnInit {
         this.errorMessage = `Failed to update custom field: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
         this.cancelEditing();
+      }
+    });
+  }
+
+  confirmDeleteCustomField(field: CustomField): void {
+    this.fieldToDelete = field;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.fieldToDelete = null;
+  }
+
+  deleteCustomField(): void {
+    if (!this.fieldToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteCustomField(this.fieldToDelete.id).subscribe({
+      next: () => {
+        console.log('Custom field deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        // Refresh the data from the server
+        this.loadCustomFields();
+      },
+      error: (error) => {
+        console.error('Error deleting custom field:', error);
+        this.errorMessage = `Failed to delete custom field: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
       }
     });
   }
