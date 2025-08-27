@@ -15,8 +15,13 @@ import { FilterableDropdownComponent, DropdownOption } from '../../components/fi
 })
 export class CustomFieldsComponent implements OnInit {
   customFields: CustomField[] = [];
+  sortedCustomFields: CustomField[] = [];
   isLoading = false;
   errorMessage = '';
+  
+  // Sorting properties
+  sortColumn: 'name' | 'type' | 'entity' | null = null;
+  sortDirection: 'asc' | 'desc' = 'asc';
   
   // Dropdown options
   typeOptions: DropdownOption[] = [
@@ -50,6 +55,11 @@ export class CustomFieldsComponent implements OnInit {
   fieldToDelete: CustomField | null = null;
   isDeleting = false;
 
+  showFilterModal = false;
+  filterEntityKey = '';
+  isFiltering = false;
+  currentFilter: string | null = null;
+
   constructor(private apiService: ApiService, public iconService: IconService) {}
 
   ngOnInit(): void {
@@ -71,6 +81,8 @@ export class CustomFieldsComponent implements OnInit {
         console.log('Custom fields received:', fields);
         console.log('Number of fields:', fields.length);
         this.customFields = fields;
+        this.sortedCustomFields = [...fields];
+        this.applySorting();
         this.isLoading = false;
       },
       error: (error) => {
@@ -170,6 +182,7 @@ export class CustomFieldsComponent implements OnInit {
         }
         this.isUpdating = false;
         this.cancelEditing();
+        this.applySorting();
       },
       error: (error) => {
         console.error('Error updating custom field:', error);
@@ -233,5 +246,104 @@ export class CustomFieldsComponent implements OnInit {
       'boardGameBox': '#8bc34a'   // Light Green
     };
     return entityColors[entityKey] || '#f57c00'; // Default orange
+  }
+
+  sortTable(column: 'name' | 'type' | 'entity'): void {
+    if (this.sortColumn === column) {
+      // Toggle sort direction if clicking the same column
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set new column and default to ascending
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applySorting();
+  }
+
+  applySorting(): void {
+    if (!this.sortColumn) {
+      this.sortedCustomFields = [...this.customFields];
+      return;
+    }
+
+    this.sortedCustomFields = [...this.customFields].sort((a, b) => {
+      let aValue: string;
+      let bValue: string;
+
+      switch (this.sortColumn) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'type':
+          aValue = a.type.toLowerCase();
+          bValue = b.type.toLowerCase();
+          break;
+        case 'entity':
+          aValue = this.getEntityDisplayName(a.entityKey).toLowerCase();
+          bValue = this.getEntityDisplayName(b.entityKey).toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  getSortIcon(column: 'name' | 'type' | 'entity'): string {
+    if (this.sortColumn !== column) {
+      return '↕'; // Up-down arrow for unsorted
+    }
+    return this.sortDirection === 'asc' ? '↑' : '↓';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+    this.filterEntityKey = '';
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+    this.filterEntityKey = '';
+  }
+
+  applyFilter(): void {
+    if (!this.filterEntityKey || this.isFiltering) return;
+
+    this.isFiltering = true;
+    this.currentFilter = this.filterEntityKey;
+
+    this.apiService.getCustomFieldsByEntity(this.filterEntityKey).subscribe({
+      next: (fields) => {
+        console.log('Filtered custom fields received:', fields);
+        this.customFields = fields;
+        this.sortedCustomFields = [...fields];
+        this.applySorting();
+        this.isFiltering = false;
+        this.closeFilterModal();
+      },
+      error: (error) => {
+        console.error('Error filtering custom fields:', error);
+        this.errorMessage = `Failed to filter custom fields: ${error.message || 'Unknown error'}`;
+        this.isFiltering = false;
+      }
+    });
+  }
+
+  clearFilter(): void {
+    this.currentFilter = null;
+    this.loadCustomFields();
+  }
+
+  getFilterDisplayText(): string {
+    if (!this.currentFilter) return '';
+    return this.getEntityDisplayName(this.currentFilter);
   }
 }

@@ -1,9 +1,14 @@
 <div class="custom-fields-container">
   <div class="header-section">
     <h1>Custom Fields</h1>
-    <button type="button" class="new-button" (click)="openNewCustomFieldModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewCustomFieldModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Custom Fields List -->
     <div *ngIf="!isLoading && !errorMessage" class="custom-fields-list">
+      <!-- Filter Status -->
+      <div *ngIf="currentFilter" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilter()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="customFields.length === 0" class="no-fields-message">
         <p>No custom fields found.</p>
       </div>
@@ -27,14 +43,20 @@
         <table class="custom-fields-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Entity</th>
+              <th class="sortable-header" (click)="sortTable('name')">
+                Name <span class="sort-icon">{{getSortIcon('name')}}</span>
+              </th>
+              <th class="sortable-header" (click)="sortTable('type')">
+                Type <span class="sort-icon">{{getSortIcon('type')}}</span>
+              </th>
+              <th class="sortable-header" (click)="sortTable('entity')">
+                Entity <span class="sort-icon">{{getSortIcon('entity')}}</span>
+              </th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let field of customFields" class="table-row">
+            <tr *ngFor="let field of sortedCustomFields" class="table-row">
               <td class="field-name" (click)="startEditingField(field)">
                 <div *ngIf="editingFieldId !== field.id" class="field-name-display">
                   {{field.name}}
@@ -161,6 +183,39 @@
         </button>
         <button type="button" class="delete-confirm-button" (click)="deleteCustomField()" [disabled]="isDeleting">
           {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Modal -->
+  <div *ngIf="showFilterModal" class="modal-overlay" (click)="closeFilterModal()">
+    <div class="modal-content filter-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Filter Custom Fields</h2>
+        <button type="button" class="close-button" (click)="closeFilterModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="filterEntity">Entity *</label>
+          <app-filterable-dropdown
+            id="filterEntity"
+            name="filterEntity"
+            [(ngModel)]="filterEntityKey"
+            [options]="entityOptions"
+            placeholder=""
+            [required]="true">
+          </app-filterable-dropdown>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeFilterModal()">
+          Cancel
+        </button>
+        <button type="button" class="filter-apply-button" (click)="applyFilter()" [disabled]="!filterEntityKey || isFiltering">
+          {{isFiltering ? 'Filtering...' : 'Apply Filter'}}
         </button>
       </div>
     </div>
