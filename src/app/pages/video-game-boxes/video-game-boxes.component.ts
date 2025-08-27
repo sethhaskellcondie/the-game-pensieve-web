@@ -26,6 +26,7 @@ export class VideoGameBoxesComponent implements OnInit {
   selectedVideoGameBox: VideoGameBox | null = null;
   videoGameBoxToUpdate: VideoGameBox | null = null;
   allVideoGames: VideoGame[] = [];
+  editingVideoGameIndex: number | null = null;
   newVideoGameBox = {
     title: '',
     systemId: null as number | null,
@@ -168,6 +169,7 @@ export class VideoGameBoxesComponent implements OnInit {
     this.showNewVideoGameBoxModal = false;
     this.isUpdateMode = false;
     this.videoGameBoxToUpdate = null;
+    this.editingVideoGameIndex = null;
     this.newVideoGameBox = {
       title: '',
       systemId: null,
@@ -294,34 +296,48 @@ export class VideoGameBoxesComponent implements OnInit {
   }
 
   addNewVideoGame(): void {
-    // Add a new video game item with default type 'new' but allow user to choose
-    this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
-      next: (customFields: any[]) => {
-        const newVideoGame = {
-          type: 'new' as 'existing' | 'new',
-          existingVideoGameId: null,
-          title: this.newVideoGameBox.title,
-          systemId: this.newVideoGameBox.systemId,
-          customFieldValues: customFields.map((field: any) => ({
-            customFieldId: field.id,
-            customFieldName: field.name,
-            customFieldType: field.type,
-            value: field.type === 'boolean' ? 'false' : ''
-          }))
-        };
-        this.newVideoGameBox.videoGames.push(newVideoGame);
-      },
-      error: (error: any) => {
-        console.error('Error loading custom fields for video game:', error);
-        this.newVideoGameBox.videoGames.push({
-          type: 'new' as 'existing' | 'new',
-          existingVideoGameId: null,
-          title: this.newVideoGameBox.title,
-          systemId: this.newVideoGameBox.systemId,
-          customFieldValues: []
-        });
-      }
-    });
+    // Default to 'existing' type when in update mode, 'new' when creating
+    const defaultType = this.isUpdateMode ? 'existing' : 'new';
+    
+    if (defaultType === 'existing') {
+      // For existing type, no need to load custom fields
+      this.newVideoGameBox.videoGames.push({
+        type: 'existing' as 'existing' | 'new',
+        existingVideoGameId: null,
+        title: undefined,
+        systemId: undefined,
+        customFieldValues: []
+      });
+    } else {
+      // For new type, load custom fields but leave them empty for manual entry
+      this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
+        next: (customFields: any[]) => {
+          const newVideoGame = {
+            type: 'new' as 'existing' | 'new',
+            existingVideoGameId: null,
+            title: this.newVideoGameBox.title,
+            systemId: this.newVideoGameBox.systemId,
+            customFieldValues: customFields.map((field: any) => ({
+              customFieldId: field.id,
+              customFieldName: field.name,
+              customFieldType: field.type,
+              value: '' // Leave empty for manual entry
+            }))
+          };
+          this.newVideoGameBox.videoGames.push(newVideoGame);
+        },
+        error: (error: any) => {
+          console.error('Error loading custom fields for video game:', error);
+          this.newVideoGameBox.videoGames.push({
+            type: 'new' as 'existing' | 'new',
+            existingVideoGameId: null,
+            title: this.newVideoGameBox.title,
+            systemId: this.newVideoGameBox.systemId,
+            customFieldValues: []
+          });
+        }
+      });
+    }
   }
 
   removeVideoGame(index: number): void {
@@ -350,5 +366,21 @@ export class VideoGameBoxesComponent implements OnInit {
 
   getVideoGameTypeLabel(videoGame: any): string {
     return videoGame.type === 'existing' ? 'Existing' : 'New';
+  }
+
+  editVideoGame(index: number): void {
+    this.editingVideoGameIndex = index;
+  }
+
+  isVideoGameBeingEdited(index: number): boolean {
+    return this.editingVideoGameIndex === index;
+  }
+
+  saveVideoGameEdit(index: number): void {
+    this.editingVideoGameIndex = null;
+  }
+
+  cancelVideoGameEdit(index: number): void {
+    this.editingVideoGameIndex = null;
   }
 }

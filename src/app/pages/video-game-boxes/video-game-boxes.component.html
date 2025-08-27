@@ -217,19 +217,19 @@
           <div class="new-games-list" *ngIf="newVideoGameBox.videoGames.length > 0">
             <div class="new-game-item" *ngFor="let videoGame of newVideoGameBox.videoGames; let i = index">
               
-              <!-- Collapsed View - Show when video game is selected -->
-              <div class="game-collapsed" *ngIf="isVideoGameSelected(videoGame)">
+              <!-- Collapsed View - Show when video game is selected and not being edited -->
+              <div class="game-collapsed" *ngIf="isVideoGameSelected(videoGame) && !isVideoGameBeingEdited(i)" (click)="editVideoGame(i)">
                 <div class="collapsed-content">
                   <span class="game-title">{{getVideoGameDisplayText(videoGame)}}</span>
                   <span class="game-type-badge" [class]="videoGame.type === 'existing' ? 'badge-existing' : 'badge-new'">
                     {{getVideoGameTypeLabel(videoGame)}}
                   </span>
                 </div>
-                <button type="button" class="remove-button" (click)="removeVideoGame(i)">×</button>
+                <button type="button" class="remove-button" (click)="removeVideoGame(i); $event.stopPropagation()">×</button>
               </div>
 
-              <!-- Expanded View - Show when video game is not selected -->
-              <div class="game-expanded" *ngIf="!isVideoGameSelected(videoGame)">
+              <!-- Expanded View - Show when video game is not selected OR being edited -->
+              <div class="game-expanded" *ngIf="!isVideoGameSelected(videoGame) || isVideoGameBeingEdited(i)">
                 <div class="game-header">
                   <div class="video-game-type-selection">
                     <label class="radio-label">
@@ -251,7 +251,13 @@
                       <span class="radio-text">Create New</span>
                     </label>
                   </div>
-                  <button type="button" class="remove-button" (click)="removeVideoGame(i)">×</button>
+                  
+                  <!-- Show save/cancel buttons when editing, otherwise show remove button -->
+                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i)">
+                    <button type="button" class="save-button" (click)="saveVideoGameEdit(i)">✓</button>
+                    <button type="button" class="cancel-button" (click)="cancelVideoGameEdit(i)">×</button>
+                  </div>
+                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i)" (click)="removeVideoGame(i)">×</button>
                 </div>
                 
                 <!-- Existing Video Game Selection -->
