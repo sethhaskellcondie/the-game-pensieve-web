@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, CustomField } from '../../services/api.service';
 import { IconService } from '../../services/icon.service';
 import { SafeHtml } from '@angular/platform-browser';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 
 @Component({
   selector: 'app-custom-fields',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FilterableDropdownComponent],
   templateUrl: './custom-fields.component.html',
   styleUrl: './custom-fields.component.scss'
 })
@@ -16,6 +17,22 @@ export class CustomFieldsComponent implements OnInit {
   customFields: CustomField[] = [];
   isLoading = false;
   errorMessage = '';
+  
+  // Dropdown options
+  typeOptions: DropdownOption[] = [
+    { value: 'text', label: 'Text' },
+    { value: 'number', label: 'Number' },
+    { value: 'boolean', label: 'Boolean' }
+  ];
+  
+  entityOptions: DropdownOption[] = [
+    { value: 'toy', label: 'Toy' },
+    { value: 'system', label: 'System' },
+    { value: 'videoGame', label: 'Video Game' },
+    { value: 'videoGameBox', label: 'Video Game Box' },
+    { value: 'boardGame', label: 'Board Game' },
+    { value: 'boardGameBox', label: 'Board Game Box' }
+  ];
   
   showNewCustomFieldModal = false;
   isCreating = false;
@@ -71,6 +88,14 @@ export class CustomFieldsComponent implements OnInit {
       type: '',
       entityKey: ''
     };
+    
+    // Focus the name input after the modal is rendered
+    setTimeout(() => {
+      const nameInput = document.querySelector('#name') as HTMLInputElement;
+      if (nameInput) {
+        nameInput.focus();
+      }
+    }, 0);
   }
 
   closeNewCustomFieldModal(): void {

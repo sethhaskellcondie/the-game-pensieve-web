@@ -100,18 +100,15 @@
 
         <div class="form-group">
           <label for="type">Type *</label>
-          <select 
-            id="type" 
-            name="type" 
+          <app-filterable-dropdown
+            id="type"
+            name="type"
             [(ngModel)]="newCustomField.type"
             #typeField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a type</option>
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
-          </select>
+            [options]="typeOptions"
+            placeholder="Select a type"
+            [required]="true">
+          </app-filterable-dropdown>
           <div *ngIf="typeField.invalid && typeField.touched" class="error-text">
             Type is required
           </div>
@@ -119,21 +116,15 @@
 
         <div class="form-group">
           <label for="entityKey">Entity Type *</label>
-          <select 
-            id="entityKey" 
-            name="entityKey" 
+          <app-filterable-dropdown
+            id="entityKey"
+            name="entityKey"
             [(ngModel)]="newCustomField.entityKey"
             #entityKeyField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select an entity type</option>
-            <option value="toy">Toy</option>
-            <option value="system">System</option>
-            <option value="videoGame">Video Game</option>
-            <option value="videoGameBox">Video Game Box</option>
-            <option value="boardGame">Board Game</option>
-            <option value="boardGameBox">Board Game Box</option>
-          </select>
+            [options]="entityOptions"
+            placeholder="Select an entity type"
+            [required]="true">
+          </app-filterable-dropdown>
           <div *ngIf="entityKeyField.invalid && entityKeyField.touched" class="error-text">
             Entity type is required
           </div>
