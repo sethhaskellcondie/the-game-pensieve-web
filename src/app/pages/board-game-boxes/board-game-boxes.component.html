@@ -36,23 +36,33 @@
               <th>Expansion</th>
               <th>Standalone</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of boardGameBoxes" class="table-row" (click)="openDetailBoardGameBoxModal(box)">
-              <td class="game-title">{{box.title}}</td>
-              <td class="game-expansion">
+            <tr *ngFor="let box of boardGameBoxes" class="table-row">
+              <td class="game-title" (click)="openDetailBoardGameBoxModal(box)">{{box.title}}</td>
+              <td class="game-expansion" (click)="openDetailBoardGameBoxModal(box)">
                 <span class="expansion-badge" [class]="box.isExpansion ? 'expansion-yes' : 'expansion-no'">
                   {{box.isExpansion ? 'Yes' : 'No'}}
                 </span>
               </td>
-              <td class="game-standalone">
+              <td class="game-standalone" (click)="openDetailBoardGameBoxModal(box)">
                 <span class="standalone-badge" [class]="box.isStandAlone ? 'standalone-yes' : 'standalone-no'">
                   {{box.isStandAlone ? 'Yes' : 'No'}}
                 </span>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailBoardGameBoxModal(box)">
                 {{getCustomFieldValue(box, fieldName)}}
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteBoardGameBox(box)"
+                  title="Delete board game box">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -380,6 +390,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the board game box <strong>"{{boardGameBoxToDelete?.title}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteBoardGameBox()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

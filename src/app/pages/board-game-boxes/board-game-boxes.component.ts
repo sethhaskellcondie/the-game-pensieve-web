@@ -53,6 +53,10 @@ export class BoardGameBoxesComponent implements OnInit {
     customFieldValues: [] as any[]
   };
 
+  showDeleteConfirmModal = false;
+  boardGameBoxToDelete: BoardGameBox | null = null;
+  isDeleting = false;
+
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
@@ -332,5 +336,35 @@ export class BoardGameBoxesComponent implements OnInit {
         this.newBoardGameBox.baseSetId = null;
       }
     }
+  }
+
+  confirmDeleteBoardGameBox(boardGameBox: BoardGameBox): void {
+    this.boardGameBoxToDelete = boardGameBox;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.boardGameBoxToDelete = null;
+  }
+
+  deleteBoardGameBox(): void {
+    if (!this.boardGameBoxToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteBoardGameBox(this.boardGameBoxToDelete.id).subscribe({
+      next: () => {
+        console.log('Board game box deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadBoardGameBoxes();
+      },
+      error: (error) => {
+        console.error('Error deleting board game box:', error);
+        this.errorMessage = `Failed to delete board game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
   }
 }

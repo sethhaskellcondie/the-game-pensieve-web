@@ -336,6 +336,10 @@ export class ApiService {
       );
   }
 
+  deleteBoardGameBox(boardGameBoxId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/boardGameBoxes/${boardGameBoxId}`);
+  }
+
   createBoardGame(boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {
     return this.http.post<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames`, {
       boardGame: {
