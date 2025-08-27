@@ -31,23 +31,33 @@
               <th>Generation</th>
               <th>Handheld</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let system of systems" class="table-row" (click)="openUpdateSystemModal(system)">
-              <td class="system-name">
+            <tr *ngFor="let system of systems" class="table-row">
+              <td class="system-name" (click)="openUpdateSystemModal(system)">
                 {{system.name}}
               </td>
-              <td class="system-generation">
+              <td class="system-generation" (click)="openUpdateSystemModal(system)">
                 {{system.generation}}
               </td>
-              <td class="system-handheld">
+              <td class="system-handheld" (click)="openUpdateSystemModal(system)">
                 <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
                   {{system.handheld ? 'Yes' : 'No'}}
                 </span>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateSystemModal(system)">
                 {{getCustomFieldValue(system, fieldName)}}
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteSystem(system)"
+                  title="Delete system">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -127,6 +137,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the system <strong>"{{systemToDelete?.name}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteSystem()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

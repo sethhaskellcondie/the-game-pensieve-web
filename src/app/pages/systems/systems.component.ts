@@ -28,6 +28,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
     customFieldValues: [] as any[]
   };
 
+  showDeleteConfirmModal = false;
+  systemToDelete: System | null = null;
+  isDeleting = false;
+
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
@@ -157,6 +161,36 @@ export class SystemsComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  confirmDeleteSystem(system: System): void {
+    this.systemToDelete = system;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.systemToDelete = null;
+  }
+
+  deleteSystem(): void {
+    if (!this.systemToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteSystem(this.systemToDelete.id).subscribe({
+      next: () => {
+        console.log('System deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadSystems();
+      },
+      error: (error) => {
+        console.error('Error deleting system:', error);
+        this.errorMessage = `Failed to delete system: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
   }
 
 }

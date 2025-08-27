@@ -27,6 +27,10 @@ export class ToysComponent implements OnInit, OnDestroy {
     customFieldValues: [] as any[]
   };
 
+  showDeleteConfirmModal = false;
+  toyToDelete: Toy | null = null;
+  isDeleting = false;
+
   constructor(private apiService: ApiService) {
     console.log('ToysComponent constructor called');
   }
@@ -154,6 +158,36 @@ export class ToysComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  confirmDeleteToy(toy: Toy): void {
+    this.toyToDelete = toy;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.toyToDelete = null;
+  }
+
+  deleteToy(): void {
+    if (!this.toyToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteToy(this.toyToDelete.id).subscribe({
+      next: () => {
+        console.log('Toy deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadToys();
+      },
+      error: (error) => {
+        console.error('Error deleting toy:', error);
+        this.errorMessage = `Failed to delete toy: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
   }
 
 }

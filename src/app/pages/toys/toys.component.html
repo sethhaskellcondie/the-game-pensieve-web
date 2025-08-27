@@ -30,18 +30,28 @@
               <th>Name</th>
               <th>Set</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let toy of toys" class="table-row" (click)="openUpdateToyModal(toy)">
-              <td class="toy-name">
+            <tr *ngFor="let toy of toys" class="table-row">
+              <td class="toy-name" (click)="openUpdateToyModal(toy)">
                 {{toy.name}}
               </td>
-              <td class="toy-set">
+              <td class="toy-set" (click)="openUpdateToyModal(toy)">
                 {{toy.set}}
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateToyModal(toy)">
                 {{getCustomFieldValue(toy, fieldName)}}
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteToy(toy)"
+                  title="Delete toy">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -108,6 +118,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the toy <strong>"{{toyToDelete?.name}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteToy()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

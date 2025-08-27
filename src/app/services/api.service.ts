@@ -177,6 +177,10 @@ export class ApiService {
       );
   }
 
+  deleteToy(toyId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/toys/${toyId}`);
+  }
+
   getSystems(): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
       filters: []
@@ -202,6 +206,10 @@ export class ApiService {
       .pipe(
         map(response => response.data)
       );
+  }
+
+  deleteSystem(systemId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/systems/${systemId}`);
   }
 
   getVideoGameBoxes(): Observable<VideoGameBox[]> {
