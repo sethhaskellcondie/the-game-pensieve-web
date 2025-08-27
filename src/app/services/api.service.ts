@@ -18,7 +18,7 @@ export interface CustomField {
 export interface CustomFieldValue {
   customFieldId: number;
   customFieldName: string;
-  customFieldType: 'text' | 'number' | 'boolean' | 'timestamp';
+  customFieldType: 'text' | 'number' | 'boolean';
   value: string;
 }
 
@@ -50,6 +50,7 @@ export interface VideoGameBox {
   id: number;
   title: string;
   system: System;
+  videoGames: VideoGame[];
   isPhysical: boolean;
   isCollection: boolean;
   createdAt: string;
@@ -65,6 +66,7 @@ export interface BoardGameBox {
   isExpansion: boolean;
   isStandAlone: boolean;
   baseSetId?: number | null;
+  boardGame?: BoardGame | null;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
@@ -119,6 +121,31 @@ export class ApiService {
       );
   }
 
+  getCustomFieldsByEntity(entityKey: string): Observable<CustomField[]> {
+    return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields/entity/${entityKey}`)
+      .pipe(
+        map(response => response.data || [])
+      );
+  }
+
+  createCustomField(customField: { name: string; type: string; entityKey: string }): Observable<CustomField> {
+    return this.http.post<{data: CustomField, errors: any}>(`${this.baseUrl}/custom_fields`, {
+      custom_field: customField
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateCustomFieldName(customFieldId: number, name: string): Observable<CustomField> {
+    return this.http.patch<{data: CustomField, errors: any}>(`${this.baseUrl}/custom_fields/${customFieldId}`, {
+      name: name
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
   getToys(): Observable<Toy[]> {
     return this.http.post<{data: Toy[], errors: any}>(`${this.baseUrl}/toys/function/search`, {
       filters: []
@@ -128,12 +155,48 @@ export class ApiService {
       );
   }
 
+  createToy(toy: { name: string; set: string; customFieldValues: any[] }): Observable<Toy> {
+    return this.http.post<{data: Toy, errors: any}>(`${this.baseUrl}/toys`, {
+      toy: toy
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateToy(toyId: number, toy: { name: string; set: string; customFieldValues: any[] }): Observable<Toy> {
+    return this.http.put<{data: Toy, errors: any}>(`${this.baseUrl}/toys/${toyId}`, {
+      toy: toy
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
   getSystems(): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
       filters: []
     })
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  createSystem(system: { name: string; generation: number; handheld: boolean; customFieldValues: any[] }): Observable<System> {
+    return this.http.post<{data: System, errors: any}>(`${this.baseUrl}/systems`, {
+      system: system
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateSystem(systemId: number, system: { name: string; generation: number; handheld: boolean; customFieldValues: any[] }): Observable<System> {
+    return this.http.put<{data: System, errors: any}>(`${this.baseUrl}/systems/${systemId}`, {
+      system: system
+    })
+      .pipe(
+        map(response => response.data)
       );
   }
 
@@ -170,6 +233,115 @@ export class ApiService {
     })
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  createVideoGame(videoGame: { title: string; systemId: number; customFieldValues: any[] }): Observable<VideoGame> {
+    return this.http.post<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames`, {
+      title: videoGame.title,
+      systemId: videoGame.systemId,
+      customFieldValues: videoGame.customFieldValues
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateVideoGame(id: number, videoGame: { title: string; systemId: number; customFieldValues: any[] }): Observable<VideoGame> {
+    return this.http.put<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames/${id}`, {
+      videoGame: videoGame
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createVideoGameBox(videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; existingVideoGameIds?: number[]; newVideoGames?: any[]; customFieldValues: any[] }): Observable<VideoGameBox> {
+    return this.http.post<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes`, {
+      videoGameBox: {
+        title: videoGameBox.title,
+        systemId: videoGameBox.systemId,
+        isPhysical: videoGameBox.isPhysical,
+        isCollection: videoGameBox.isCollection,
+        existingVideoGameIds: videoGameBox.existingVideoGameIds || [],
+        newVideoGames: videoGameBox.newVideoGames || [],
+        customFieldValues: videoGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateVideoGameBox(id: number, videoGameBox: { title: string; systemId: number; isPhysical: boolean; isCollection: boolean; existingVideoGameIds?: number[]; newVideoGames?: any[]; customFieldValues: any[] }): Observable<VideoGameBox> {
+    return this.http.put<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`, {
+      videoGameBox: {
+        title: videoGameBox.title,
+        systemId: videoGameBox.systemId,
+        isPhysical: videoGameBox.isPhysical,
+        isCollection: videoGameBox.isCollection,
+        existingVideoGameIds: videoGameBox.existingVideoGameIds || [],
+        newVideoGames: videoGameBox.newVideoGames || [],
+        customFieldValues: videoGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createBoardGameBox(boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; boardGame?: any; customFieldValues: any[] }): Observable<BoardGameBox> {
+    return this.http.post<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes`, {
+      boardGameBox: {
+        title: boardGameBox.title,
+        isExpansion: boardGameBox.isExpansion,
+        isStandAlone: boardGameBox.isStandAlone,
+        baseSetId: boardGameBox.baseSetId ? parseInt(boardGameBox.baseSetId.toString()) : null,
+        boardGameId: boardGameBox.boardGameId ? parseInt(boardGameBox.boardGameId.toString()) : null,
+        boardGame: boardGameBox.boardGame || null,
+        customFieldValues: boardGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateBoardGameBox(id: number, boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; customFieldValues: any[] }): Observable<BoardGameBox> {
+    return this.http.put<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes/${id}`, {
+      boardGameBox: {
+        title: boardGameBox.title,
+        isExpansion: boardGameBox.isExpansion,
+        isStandAlone: boardGameBox.isStandAlone,
+        baseSetId: boardGameBox.baseSetId ? parseInt(boardGameBox.baseSetId.toString()) : null,
+        boardGameId: boardGameBox.boardGameId ? parseInt(boardGameBox.boardGameId.toString()) : null,
+        boardGame: null,
+        customFieldValues: boardGameBox.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  createBoardGame(boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {
+    return this.http.post<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames`, {
+      boardGame: {
+        title: boardGame.title,
+        customFieldValues: boardGame.customFieldValues
+      }
+    })
+      .pipe(
+        map(response => response.data)
+      );
+  }
+
+  updateBoardGame(id: number, boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {
+    return this.http.put<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames/${id}`, {
+      boardGame: boardGame
+    })
+      .pipe(
+        map(response => response.data)
       );
   }
 }

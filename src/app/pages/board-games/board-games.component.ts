@@ -1,42 +1,54 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService, BoardGameBox } from '../../services/api.service';
+import { ApiService, BoardGame } from '../../services/api.service';
+import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 
 @Component({
   selector: 'app-board-games',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
   templateUrl: './board-games.component.html',
   styleUrl: './board-games.component.scss'
 })
 export class BoardGamesComponent implements OnInit {
-  boardGameBoxes: BoardGameBox[] = [];
+  boardGames: BoardGame[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  
+  showDetailBoardGameModal = false;
+  showEditBoardGameModal = false;
+  selectedBoardGame: BoardGame | null = null;
+  boardGameToUpdate: BoardGame | null = null;
+  isUpdating = false;
+  editBoardGame = {
+    title: '',
+    customFieldValues: [] as any[]
+  };
 
   constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadBoardGameBoxes();
+    this.loadBoardGames();
   }
 
-  loadBoardGameBoxes(): void {
+  loadBoardGames(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getBoardGameBoxes().subscribe({
-      next: (boardGameBoxes) => {
-        console.log('Board game boxes received:', boardGameBoxes);
-        console.log('Number of board game boxes:', boardGameBoxes.length);
-        this.boardGameBoxes = boardGameBoxes;
+    this.apiService.getBoardGames().subscribe({
+      next: (boardGames) => {
+        console.log('Board games received:', boardGames);
+        console.log('Number of board games:', boardGames.length);
+        this.boardGames = boardGames;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading board game boxes:', error);
-        this.errorMessage = `Failed to load board game boxes: ${error.message || 'Unknown error'}`;
+        console.error('Error loading board games:', error);
+        this.errorMessage = `Failed to load board games: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
       }
     });
@@ -45,8 +57,8 @@ export class BoardGamesComponent implements OnInit {
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
-    this.boardGameBoxes.forEach(box => {
-      box.customFieldValues.forEach(cfv => {
+    this.boardGames.forEach(game => {
+      game.customFieldValues.forEach(cfv => {
         fieldNamesSet.add(cfv.customFieldName);
       });
     });
@@ -55,12 +67,83 @@ export class BoardGamesComponent implements OnInit {
     console.log('Custom field names:', this.customFieldNames);
   }
 
-  getCustomFieldValue(box: BoardGameBox, fieldName: string): string {
-    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+  getCustomFieldValue(game: BoardGame, fieldName: string): string {
+    const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
   }
 
+  openDetailBoardGameModal(boardGame: BoardGame): void {
+    this.selectedBoardGame = boardGame;
+    this.showDetailBoardGameModal = true;
+  }
+
+  closeDetailBoardGameModal(): void {
+    this.showDetailBoardGameModal = false;
+    this.selectedBoardGame = null;
+  }
+
+  openEditBoardGameModal(boardGame: BoardGame): void {
+    this.boardGameToUpdate = boardGame;
+    this.showEditBoardGameModal = true;
+    this.editBoardGame = {
+      title: boardGame.title,
+      customFieldValues: [...boardGame.customFieldValues]
+    };
+  }
+
+  closeEditBoardGameModal(): void {
+    this.showEditBoardGameModal = false;
+    this.boardGameToUpdate = null;
+    this.editBoardGame = {
+      title: '',
+      customFieldValues: []
+    };
+  }
+
+  openEditFromDetail(): void {
+    if (this.selectedBoardGame) {
+      const boardGameToEdit = this.selectedBoardGame;
+      this.closeDetailBoardGameModal();
+      this.openEditBoardGameModal(boardGameToEdit);
+    }
+  }
+
+  openDetailFromEdit(): void {
+    if (this.boardGameToUpdate) {
+      const boardGameToDetail = this.boardGameToUpdate;
+      this.closeEditBoardGameModal();
+      this.openDetailBoardGameModal(boardGameToDetail);
+    }
+  }
+
+  onSubmitEditBoardGame(): void {
+    if (this.isUpdating || !this.editBoardGame.title || !this.boardGameToUpdate) {
+      return;
+    }
+    
+    this.isUpdating = true;
+    
+    const boardGameData = {
+      title: this.editBoardGame.title,
+      customFieldValues: this.editBoardGame.customFieldValues
+    };
+    
+    this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
+      next: (response) => {
+        console.log('Board game updated successfully:', response);
+        this.isUpdating = false;
+        this.closeEditBoardGameModal();
+        this.loadBoardGames(); // Refresh the board games list
+      },
+      error: (error) => {
+        console.error('Error updating board game:', error);
+        this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+      }
+    });
+  }
+
   swapView(): void {
-    this.router.navigate(['/board-games-individual']);
+    this.router.navigate(['/board-game-boxes']);
   }
 }

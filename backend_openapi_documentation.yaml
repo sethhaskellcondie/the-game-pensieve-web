@@ -592,7 +592,7 @@ paths:
               type: object
               properties:
                 boardGameBox:
-                  $ref: '#/components/schemas/BoardGameBoxRequest'
+                  $ref: '#/components/schemas/BoardGameBoxUpdateRequest'
               required:
                 - boardGameBox
       responses:
@@ -791,6 +791,41 @@ paths:
                   errors:
                     type: 'null'
 
+  /v1/custom_fields/entity/{key}:
+    get:
+      tags:
+        - Custom Fields
+      summary: Get custom fields by entity key
+      description: Retrieve all custom fields associated with a specific entity type
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [toy, system, videoGame, videoGameBox, boardGame, boardGameBox]
+          description: Entity key to get custom fields for
+      responses:
+        '200':
+          description: List of custom fields for the entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomFieldResponse'
+                  errors:
+                    type: 'null'
+        '404':
+          description: Invalid entity key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /v1/custom_fields/{id}:
     patch:
       tags:
@@ -951,6 +986,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+
+  /v1/metadata:
+    post:
+      tags:
+        - Metadata
+      summary: Create new metadata
+      description: Create a new metadata entry with a unique key and JSON value
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  $ref: '#/components/schemas/MetadataRequest'
+              required:
+                - metadata
+      responses:
+        '201':
+          description: Metadata created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataDataResponse'
+        '400':
+          description: Invalid input data or invalid JSON value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Metadata
+      summary: Get all metadata
+      description: Retrieve all metadata entries
+      responses:
+        '200':
+          description: List of all metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MetadataResponse'
+                  errors:
+                    type: 'null'
+
+  /v1/metadata/{key}:
+    get:
+      tags:
+        - Metadata
+      summary: Get metadata by key
+      description: Retrieve a specific metadata entry by its unique key
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique key for the metadata entry
+      responses:
+        '200':
+          description: Metadata found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataDataResponse'
+        '404':
+          description: Metadata not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - Metadata
+      summary: Update metadata value
+      description: Update the JSON value of an existing metadata entry
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique key for the metadata entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: New JSON value (must be valid JSON)
+              required:
+                - value
+      responses:
+        '200':
+          description: Metadata updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataDataResponse'
+        '400':
+          description: Invalid JSON value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Metadata not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Metadata
+      summary: Delete metadata
+      description: Soft delete a metadata entry by its unique key
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique key for the metadata entry
+      responses:
+        '204':
+          description: Metadata deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Metadata not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -1301,6 +1481,25 @@ components:
           type: string
           description: Title of the board game box
 
+    SlimBoardGame:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              description: Unique identifier of the board game
+            title:
+              type: string
+              description: Title of the board game
+        - $ref: '#/components/schemas/EntityTimestamps'
+        - type: object
+          properties:
+            customFieldValues:
+              type: array
+              items:
+                $ref: '#/components/schemas/CustomFieldValue'
+              description: Custom field values for this board game
+
     BoardGameResponse:
       allOf:
         - type: object
@@ -1373,6 +1572,39 @@ components:
         - isStandAlone
         - customFieldValues
 
+    BoardGameBoxUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the board game box
+          minLength: 1
+        isExpansion:
+          type: boolean
+          description: Whether this is an expansion
+        isStandAlone:
+          type: boolean
+          description: Whether this can be played standalone
+        baseSetId:
+          type: integer
+          nullable: true
+          description: ID of the base set if this is an expansion
+        boardGameId:
+          type: integer
+          description: ID of existing board game (required for updates)
+          minimum: 1
+        customFieldValues:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldValue'
+          description: Custom field values for this board game box
+      required:
+        - title
+        - isExpansion
+        - isStandAlone
+        - boardGameId
+        - customFieldValues
+
     BoardGameBoxResponse:
       allOf:
         - type: object
@@ -1398,7 +1630,7 @@ components:
               nullable: true
               description: ID of the base set if this is an expansion
             boardGame:
-              $ref: '#/components/schemas/BoardGameResponse'
+              $ref: '#/components/schemas/SlimBoardGame'
         - $ref: '#/components/schemas/EntityTimestamps'
         - type: object
           properties:
@@ -1535,6 +1767,80 @@ components:
           type: object
           description: Details of any import errors
 
+    # Metadata Schemas
+    MetadataRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+          nullable: true
+          description: Unique identifier (null for new entries)
+        key:
+          type: string
+          description: Unique key for the metadata entry
+          minLength: 1
+        value:
+          type: string
+          description: JSON value as string (must be valid JSON)
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Creation timestamp (auto-generated)
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Update timestamp (auto-generated)
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Deletion timestamp (null if not deleted)
+      required:
+        - key
+        - value
+
+    MetadataResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier
+        key:
+          type: string
+          description: Unique key for the metadata entry
+        value:
+          type: string
+          description: JSON value as string
+        createdAt:
+          type: string
+          format: date-time
+          description: When the metadata was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the metadata was last updated
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the metadata was soft-deleted (null if not deleted)
+      required:
+        - id
+        - key
+        - value
+        - createdAt
+        - updatedAt
+
+    MetadataDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MetadataResponse'
+        errors:
+          type: 'null'
+
     # Response Schemas
     SuccessResponse:
       type: object
@@ -1570,6 +1876,8 @@ tags:
     description: Manage board game box collections
   - name: Custom Fields
     description: Manage custom metadata fields
+  - name: Metadata
+    description: Manage arbitrary JSON metadata by key
   - name: Filters
     description: Get filtering capabilities for entities
   - name: Data Management

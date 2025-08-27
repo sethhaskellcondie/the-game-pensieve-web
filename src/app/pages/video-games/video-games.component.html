@@ -1,9 +1,11 @@
 <div class="video-games-container">
   <div class="header-section">
     <h1>Video Games (Game View)</h1>
-    <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-      {{isLoading ? 'Loading...' : 'Swap View'}}
-    </button>
+    <div class="header-buttons">
+  <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+        {{isLoading ? 'Loading...' : 'Swap View'}}
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -33,7 +35,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of videoGames" class="table-row">
+            <tr *ngFor="let game of videoGames" class="table-row" (click)="openDetailVideoGameModal(game)">
               <td class="game-title">{{game.title}}</td>
               <td class="game-system">{{game.system.name}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
@@ -43,6 +45,154 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- Detail Video Game Modal -->
+  <div *ngIf="showDetailVideoGameModal" class="modal-overlay" (click)="closeDetailVideoGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{selectedVideoGame?.title}} Details</h2>
+        <div class="modal-header-actions">
+          <button type="button" class="edit-button" (click)="openEditFromDetail()">
+            Edit
+          </button>
+          <button type="button" class="close-button" (click)="closeDetailVideoGameModal()">×</button>
+        </div>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedVideoGame">
+        <!-- System Information -->
+        <div class="system-inline">
+          <span class="system-label">System:</span>
+          <span class="system-name">{{selectedVideoGame.system.name}}</span>
+        </div>
+
+        <!-- Custom Fields -->
+        <div class="custom-fields-inline" *ngIf="selectedVideoGame.customFieldValues.length > 0">
+          <div class="detail-grid">
+            <div class="detail-item" *ngFor="let field of selectedVideoGame.customFieldValues">
+              <label>{{field.customFieldName}}:</label>
+              <span>{{field.value}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Game Boxes -->
+        <div class="detail-section">
+          <h3>Appears in Video Game Boxes</h3>
+          <div *ngIf="getVideoGameBoxesForGame(selectedVideoGame).length === 0" class="no-data-message">
+            This video game is not included in any video game boxes.
+          </div>
+          <div *ngIf="getVideoGameBoxesForGame(selectedVideoGame).length > 0" class="boxes-list">
+            <div class="box-item" *ngFor="let box of getVideoGameBoxesForGame(selectedVideoGame)">
+              <div class="box-header">
+                <h4>{{box.title}}</h4>
+                <div class="box-badges">
+                  <span class="badge" [class]="box.isPhysical ? 'badge-physical' : 'badge-digital'">
+                    {{box.isPhysical ? 'Physical' : 'Digital'}}
+                  </span>
+                  <span class="badge" [class]="box.isCollection ? 'badge-collection' : 'badge-single'">
+                    {{box.isCollection ? 'Collection' : 'Single Game'}}
+                  </span>
+                </div>
+              </div>
+              <div class="box-details">
+                <p><strong>System:</strong> {{box.system.name}}</p>
+                <p><strong>{{box.isCollection ? 'Games in collection:' : 'Games in box:'}}</strong> {{box.videoGames.length}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Video Game Modal -->
+  <div *ngIf="showEditVideoGameModal" class="modal-overlay" (click)="closeEditVideoGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Update Video Game</h2>
+        <div class="modal-header-actions">
+          <button type="button" class="details-button" (click)="openDetailFromEdit()">
+            Details
+          </button>
+          <button type="button" class="close-button" (click)="closeEditVideoGameModal()">×</button>
+        </div>
+      </div>
+      
+      <form (ngSubmit)="onSubmitEditVideoGame()" #videoGameForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            [(ngModel)]="editVideoGame.title"
+            #titleField="ngModel"
+            required
+            minlength="1"
+            class="form-input"
+            placeholder="Enter game title">
+          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="systemId">System *</label>
+          <select 
+            id="systemId" 
+            name="systemId" 
+            [(ngModel)]="editVideoGame.systemId"
+            #systemField="ngModel"
+            required
+            class="form-select">
+            <option value="">Select a system</option>
+            <option *ngFor="let system of systems" [value]="system.id">
+              {{system.name}} (Gen {{system.generation}})
+            </option>
+          </select>
+          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
+            System selection is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="videoGame" 
+          sectionTitle="Video Game Custom Fields"
+          [(customFieldValues)]="editVideoGame.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <!-- Video Game Boxes (Read-only) -->
+        <div class="form-group" *ngIf="videoGameToUpdate">
+          <label>Appears in Video Game Boxes</label>
+          <div *ngIf="getVideoGameBoxesForGame(videoGameToUpdate).length === 0" class="info-text">
+            This video game is not included in any video game boxes.
+          </div>
+          <div *ngIf="getVideoGameBoxesForGame(videoGameToUpdate).length > 0" class="readonly-boxes-list">
+            <div class="readonly-box-item" *ngFor="let box of getVideoGameBoxesForGame(videoGameToUpdate)">
+              <div class="readonly-box-content">
+                <span class="box-title">{{box.title}}</span>
+                <div class="box-info">
+                  <span class="box-system">{{box.system.name}}</span>
+                  <span class="box-type">{{box.isPhysical ? 'Physical' : 'Digital'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditVideoGameModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!videoGameForm.form.valid || isUpdating">
+            {{isUpdating ? 'Updating...' : 'Update'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
