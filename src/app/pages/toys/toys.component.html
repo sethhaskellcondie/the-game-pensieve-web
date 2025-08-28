@@ -78,16 +78,15 @@
       <form (ngSubmit)="onSubmitNewToy()" #toyForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="name">Name *</label>
-          <input 
-            type="text" 
+          <app-selectable-text-input
             id="name" 
             name="name" 
             [(ngModel)]="newToy.name"
             #nameField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
+          </app-selectable-text-input>
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>
@@ -95,15 +94,14 @@
 
         <div class="form-group">
           <label for="set">Set *</label>
-          <input 
-            type="text" 
+          <app-selectable-text-input
             id="set" 
             name="set" 
             [(ngModel)]="newToy.set"
             #setField="ngModel"
-            required
-            class="form-input"
+            [required]="true"
             placeholder="">
+          </app-selectable-text-input>
           <div *ngIf="setField.invalid && setField.touched" class="error-text">
             Set is required
           </div>

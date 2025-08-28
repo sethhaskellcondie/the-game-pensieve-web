@@ -63,6 +63,7 @@ export class CustomFieldsComponent implements OnInit {
   constructor(private apiService: ApiService, public iconService: IconService) {}
 
   ngOnInit(): void {
+    this.loadSavedFilter();
     this.loadCustomFields();
   }
 
@@ -76,21 +77,42 @@ export class CustomFieldsComponent implements OnInit {
     
     console.log('Loading custom fields...');
     
-    this.apiService.getCustomFields().subscribe({
-      next: (fields) => {
-        console.log('Custom fields received:', fields);
-        console.log('Number of fields:', fields.length);
-        this.customFields = fields;
-        this.sortedCustomFields = [...fields];
-        this.applySorting();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading custom fields:', error);
-        this.errorMessage = `Failed to load custom fields: ${error.message || 'Unknown error'}`;
-        this.isLoading = false;
-      }
-    });
+    // Check if there's a saved filter to apply
+    if (this.currentFilter) {
+      console.log('Applying saved filter:', this.currentFilter);
+      this.apiService.getCustomFieldsByEntity(this.currentFilter).subscribe({
+        next: (fields) => {
+          console.log('Filtered custom fields received:', fields);
+          console.log('Number of filtered fields:', fields.length);
+          this.customFields = fields;
+          this.sortedCustomFields = [...fields];
+          this.applySorting();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading filtered custom fields:', error);
+          this.errorMessage = `Failed to load custom fields: ${error.message || 'Unknown error'}`;
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Load all custom fields if no filter is applied
+      this.apiService.getCustomFields().subscribe({
+        next: (fields) => {
+          console.log('Custom fields received:', fields);
+          console.log('Number of fields:', fields.length);
+          this.customFields = fields;
+          this.sortedCustomFields = [...fields];
+          this.applySorting();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading custom fields:', error);
+          this.errorMessage = `Failed to load custom fields: ${error.message || 'Unknown error'}`;
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   openNewCustomFieldModal(): void {
@@ -319,6 +341,7 @@ export class CustomFieldsComponent implements OnInit {
 
     this.isFiltering = true;
     this.currentFilter = this.filterEntityKey;
+    this.saveFilterToLocalStorage();
 
     this.apiService.getCustomFieldsByEntity(this.filterEntityKey).subscribe({
       next: (fields) => {
@@ -339,11 +362,32 @@ export class CustomFieldsComponent implements OnInit {
 
   clearFilter(): void {
     this.currentFilter = null;
+    this.clearFilterFromLocalStorage();
     this.loadCustomFields();
   }
 
   getFilterDisplayText(): string {
     if (!this.currentFilter) return '';
     return this.getEntityDisplayName(this.currentFilter);
+  }
+
+  private saveFilterToLocalStorage(): void {
+    if (this.currentFilter) {
+      localStorage.setItem('customFields.filter', this.currentFilter);
+      console.log('Filter saved to localStorage:', this.currentFilter);
+    }
+  }
+
+  private clearFilterFromLocalStorage(): void {
+    localStorage.removeItem('customFields.filter');
+    console.log('Filter cleared from localStorage');
+  }
+
+  private loadSavedFilter(): void {
+    const savedFilter = localStorage.getItem('customFields.filter');
+    if (savedFilter) {
+      this.currentFilter = savedFilter;
+      console.log('Loaded saved filter from localStorage:', savedFilter);
+    }
   }
 }
