@@ -176,7 +176,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter board game box title">
+            placeholder="">
           <div *ngIf="editTitleField.invalid && editTitleField.touched" class="error-text">
             Title is required
           </div>
@@ -274,7 +274,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter board game box title">
+            placeholder="">
           <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
             Title is required
           </div>
@@ -377,7 +377,7 @@
             name="newBoardGameTitle" 
             [(ngModel)]="newBoardGameBox.newBoardGame.title"
             class="form-input"
-            placeholder="Enter board game title">
+            placeholder="">
         </div>
 
         <!-- New Board Game Custom Fields -->

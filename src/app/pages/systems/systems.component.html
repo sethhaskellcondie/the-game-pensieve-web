@@ -91,7 +91,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter system name (e.g. Nintendo Switch)">
+            placeholder="">
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>
@@ -108,7 +108,7 @@
             required
             min="1"
             class="form-input"
-            placeholder="Enter generation number (e.g. 9)">
+            placeholder="">
           <div *ngIf="generationField.invalid && generationField.touched" class="error-text">
             Generation is required and must be a positive number
           </div>

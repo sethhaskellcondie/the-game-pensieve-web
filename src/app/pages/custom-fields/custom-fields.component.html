@@ -114,7 +114,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter custom field name">
+            placeholder="">
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>
@@ -128,7 +128,7 @@
             [(ngModel)]="newCustomField.type"
             #typeField="ngModel"
             [options]="typeOptions"
-            placeholder="Select a type"
+            placeholder=""
             [required]="true">
           </app-filterable-dropdown>
           <div *ngIf="typeField.invalid && typeField.touched" class="error-text">
@@ -144,7 +144,7 @@
             [(ngModel)]="newCustomField.entityKey"
             #entityKeyField="ngModel"
             [options]="entityOptions"
-            placeholder="Select an entity type"
+            placeholder=""
             [required]="true">
           </app-filterable-dropdown>
           <div *ngIf="entityKeyField.invalid && entityKeyField.touched" class="error-text">

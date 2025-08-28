@@ -87,7 +87,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter toy name">
+            placeholder="">
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>
@@ -103,7 +103,7 @@
             #setField="ngModel"
             required
             class="form-input"
-            placeholder="Enter toy set or series">
+            placeholder="">
           <div *ngIf="setField.invalid && setField.touched" class="error-text">
             Set is required
           </div>
