@@ -87,7 +87,7 @@
   <div *ngIf="showNewToyModal" class="modal-overlay" (click)="closeNewToyModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? 'Edit Toy' : 'Create Toy'}}</h2>
+        <h2>{{isUpdateMode ? 'Edit Toy' : 'New Toy'}}</h2>
         <button type="button" class="close-button" (click)="closeNewToyModal()">×</button>
       </div>
       

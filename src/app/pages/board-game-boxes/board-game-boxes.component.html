@@ -167,17 +167,17 @@
       <form (ngSubmit)="onSubmitEditBoardGameBox()" #editBoardGameBoxForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="editTitle">Title *</label>
-          <input 
-            type="text" 
-            id="editTitle" 
-            name="editTitle" 
+          <app-selectable-text-input
+            #titleField
+            id="editTitle"
+            name="editTitle"
             [(ngModel)]="editBoardGameBox.title"
-            #editTitleField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            #editTitleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
-          <div *ngIf="editTitleField.invalid && editTitleField.touched" class="error-text">
+          </app-selectable-text-input>
+          <div *ngIf="editTitleNgModel.invalid && editTitleNgModel.touched" class="error-text">
             Title is required
           </div>
         </div>
@@ -217,16 +217,13 @@
 
         <div class="form-group">
           <label for="editBoardGameId">Related Board Game</label>
-          <select 
-            id="editBoardGameId" 
-            name="editBoardGameId" 
+          <app-filterable-dropdown
+            id="editBoardGameId"
+            name="editBoardGameId"
             [(ngModel)]="editBoardGameBox.boardGameId"
-            class="form-select">
-            <option value="">Select a board game (optional)</option>
-            <option *ngFor="let game of boardGamesForDropdown" [value]="game.id">
-              {{game.title}}
-            </option>
-          </select>
+            [options]="boardGameOptions"
+            placeholder="">
+          </app-filterable-dropdown>
         </div>
 
         <!-- Dynamic Custom Fields -->
@@ -252,24 +249,24 @@
   <div *ngIf="showNewBoardGameBoxModal" class="modal-overlay" (click)="closeNewBoardGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Create New Board Game Box</h2>
+        <h2>New Board Game Box</h2>
         <button type="button" class="close-button" (click)="closeNewBoardGameBoxModal()">×</button>
       </div>
       
       <form (ngSubmit)="onSubmitNewBoardGameBox()" #boardGameBoxForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="title">Title *</label>
-          <input 
-            type="text" 
-            id="title" 
-            name="title" 
+          <app-selectable-text-input
+            #titleField
+            id="title"
+            name="title"
             [(ngModel)]="newBoardGameBox.title"
-            #titleField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            #titleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
-          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
+          </app-selectable-text-input>
+          <div *ngIf="titleNgModel.invalid && titleNgModel.touched" class="error-text">
             Title is required
           </div>
         </div>
@@ -359,13 +356,13 @@
         <!-- New Board Game Creation -->
         <div class="form-group" *ngIf="boardGameSelectionMode === 'new'">
           <label for="newBoardGameTitle">New Board Game Title *</label>
-          <input 
-            type="text" 
-            id="newBoardGameTitle" 
-            name="newBoardGameTitle" 
+          <app-selectable-text-input
+            id="newBoardGameTitle"
+            name="newBoardGameTitle"
             [(ngModel)]="newBoardGameBox.newBoardGame.title"
-            class="form-input"
+            [required]="true"
             placeholder="">
+          </app-selectable-text-input>
         </div>
 
         <!-- New Board Game Custom Fields -->
