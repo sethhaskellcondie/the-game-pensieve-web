@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -23,6 +23,7 @@ export class SelectableTextInputComponent implements ControlValueAccessor {
   @Input() id: string = '';
   @Input() name: string = '';
   @Input() type: string = 'text';
+  @ViewChild('inputElement', { static: false }) inputElement!: ElementRef<HTMLInputElement>;
 
   value: string = '';
   disabled: boolean = false;
@@ -64,5 +65,11 @@ export class SelectableTextInputComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  focus(): void {
+    if (this.inputElement) {
+      this.inputElement.nativeElement.focus();
+    }
   }
 }

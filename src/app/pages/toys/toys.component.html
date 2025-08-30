@@ -79,15 +79,16 @@
         <div class="form-group">
           <label for="name">Name *</label>
           <app-selectable-text-input
+            #nameField
             id="name" 
             name="name" 
             [(ngModel)]="newToy.name"
-            #nameField="ngModel"
+            #nameNgModel="ngModel"
             [required]="true"
             [minlength]="1"
             placeholder="">
           </app-selectable-text-input>
-          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+          <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
             Name is required
           </div>
         </div>

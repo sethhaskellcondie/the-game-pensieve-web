@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Toy } from '../../services/api.service';
@@ -14,6 +14,7 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
   styleUrl: './toys.component.scss'
 })
 export class ToysComponent implements OnInit, OnDestroy {
+  @ViewChild('nameField', { static: false }) nameField: any;
   toys: Toy[] = [];
   isLoading = false;
   errorMessage = '';
@@ -121,6 +122,13 @@ export class ToysComponent implements OnInit, OnDestroy {
       set: toy.set,
       customFieldValues: [...toy.customFieldValues]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   closeNewToyModal(): void {
