@@ -41,14 +41,14 @@
           </thead>
           <tbody>
             <tr *ngFor="let box of boardGameBoxes" class="table-row">
-              <td class="game-title" (click)="openDetailBoardGameBoxModal(box)">{{box.title}}</td>
-              <td class="game-expansion" (click)="openDetailBoardGameBoxModal(box)">
+              <td class="game-title" (click)="navigateToDetail(box.id)">{{box.title}}</td>
+              <td class="game-expansion" (click)="navigateToDetail(box.id)">
                 <app-boolean-display [value]="box.isExpansion" size="small"></app-boolean-display>
               </td>
-              <td class="game-standalone" (click)="openDetailBoardGameBoxModal(box)">
+              <td class="game-standalone" (click)="navigateToDetail(box.id)">
                 <app-boolean-display [value]="box.isStandAlone" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailBoardGameBoxModal(box)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToDetail(box.id)">
                 <app-boolean-display 
                   *ngIf="isCustomFieldBoolean(fieldName); else textValue"
                   [value]="getCustomFieldValue(box, fieldName)"
@@ -74,94 +74,13 @@
     </div>
   </div>
 
-  <!-- Detail Board Game Box Modal -->
-  <div *ngIf="showDetailBoardGameBoxModal" class="modal-overlay" (click)="closeDetailBoardGameBoxModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>{{selectedBoardGameBox?.title}} Details</h2>
-        <div class="modal-header-actions">
-          <button type="button" class="edit-button" (click)="openEditFromDetail()">
-            Edit
-          </button>
-          <button type="button" class="close-button" (click)="closeDetailBoardGameBoxModal()">×</button>
-        </div>
-      </div>
-      
-      <div class="modal-body" *ngIf="selectedBoardGameBox">
-        <!-- Related Board Game Information -->
-        <div class="detail-section" *ngIf="selectedBoardGameBox.boardGame">
-          <h3>Related Board Game</h3>
-          <div class="game-item">
-            <div class="game-header">
-              <h4>{{selectedBoardGameBox.boardGame.title}}</h4>
-            </div>
-            <div class="game-details" *ngIf="selectedBoardGameBox.boardGame.customFieldValues && selectedBoardGameBox.boardGame.customFieldValues.length > 0">
-              <div class="custom-fields-grid">
-                <div class="field-item" *ngFor="let field of selectedBoardGameBox.boardGame.customFieldValues">
-                  <span class="field-label">{{field.customFieldName}}:</span>
-                  <app-boolean-display 
-                    *ngIf="field.customFieldType === 'boolean'; else textValue"
-                    [value]="field.value"
-                    size="small">
-                  </app-boolean-display>
-                  <ng-template #textValue>
-                    <span class="field-value">{{field.value}}</span>
-                  </ng-template>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Box Properties -->
-        <div class="box-properties-inline">
-          <div class="property-badges">
-            <span class="badge" [class]="selectedBoardGameBox.isExpansion ? 'badge-expansion' : 'badge-base'">
-              {{selectedBoardGameBox.isExpansion ? 'Expansion' : 'Base Game'}}
-            </span>
-            <span class="badge" [class]="selectedBoardGameBox.isStandAlone ? 'badge-standalone' : 'badge-not-standalone'">
-              {{selectedBoardGameBox.isStandAlone ? 'Stand Alone' : 'Not Stand Alone'}}
-            </span>
-          </div>
-        </div>
-
-        <!-- Base Set Information -->
-        <div class="base-set-inline" *ngIf="selectedBoardGameBox.baseSetId">
-          <span class="base-set-label">Base Set:</span>
-          <span class="base-set-name">{{getBoardGameBoxTitle(selectedBoardGameBox.baseSetId)}}</span>
-        </div>
-
-        <!-- Custom Fields -->
-        <div class="custom-fields-inline" *ngIf="selectedBoardGameBox.customFieldValues.length > 0">
-          <div class="detail-grid">
-            <div class="detail-item" *ngFor="let field of selectedBoardGameBox.customFieldValues">
-              <label>{{field.customFieldName}}:</label>
-              <app-boolean-display 
-                *ngIf="field.customFieldType === 'boolean'; else textValue"
-                [value]="field.value"
-                size="small">
-              </app-boolean-display>
-              <ng-template #textValue>
-                <span>{{field.value}}</span>
-              </ng-template>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- Edit Board Game Box Modal -->
   <div *ngIf="showEditBoardGameBoxModal" class="modal-overlay" (click)="closeEditBoardGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Update Board Game Box</h2>
-        <div class="modal-header-actions">
-          <button type="button" class="details-button" (click)="openDetailFromEdit()">
-            Details
-          </button>
-          <button type="button" class="close-button" (click)="closeEditBoardGameBoxModal()">×</button>
-        </div>
+        <button type="button" class="close-button" (click)="closeEditBoardGameBoxModal()">×</button>
       </div>
       
       <form (ngSubmit)="onSubmitEditBoardGameBox()" #editBoardGameBoxForm="ngForm" class="modal-form">

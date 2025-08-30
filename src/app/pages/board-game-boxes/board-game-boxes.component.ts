@@ -24,10 +24,8 @@ export class BoardGameBoxesComponent implements OnInit {
   errorMessage = '';
   customFieldNames: string[] = [];
   
-  showDetailBoardGameBoxModal = false;
   showEditBoardGameBoxModal = false;
   showNewBoardGameBoxModal = false;
-  selectedBoardGameBox: BoardGameBox | null = null;
   boardGameBoxToUpdate: BoardGameBox | null = null;
   isCreating = false;
   isUpdating = false;
@@ -246,15 +244,10 @@ export class BoardGameBoxesComponent implements OnInit {
     });
   }
 
-  openDetailBoardGameBoxModal(boardGameBox: BoardGameBox): void {
-    this.selectedBoardGameBox = boardGameBox;
-    this.showDetailBoardGameBoxModal = true;
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/board-game-box', id]);
   }
 
-  closeDetailBoardGameBoxModal(): void {
-    this.showDetailBoardGameBoxModal = false;
-    this.selectedBoardGameBox = null;
-  }
 
   openEditBoardGameBoxModal(boardGameBox: BoardGameBox): void {
     this.boardGameBoxToUpdate = boardGameBox;
@@ -309,21 +302,6 @@ export class BoardGameBoxesComponent implements OnInit {
     };
   }
 
-  openEditFromDetail(): void {
-    if (this.selectedBoardGameBox) {
-      const boardGameBoxToEdit = this.selectedBoardGameBox;
-      this.closeDetailBoardGameBoxModal();
-      this.openEditBoardGameBoxModal(boardGameBoxToEdit);
-    }
-  }
-
-  openDetailFromEdit(): void {
-    if (this.boardGameBoxToUpdate) {
-      const boardGameBoxToDetail = this.boardGameBoxToUpdate;
-      this.closeEditBoardGameBoxModal();
-      this.openDetailBoardGameBoxModal(boardGameBoxToDetail);
-    }
-  }
 
   onSubmitEditBoardGameBox(): void {
     if (this.isUpdating || !this.editBoardGameBox.title || !this.boardGameBoxToUpdate) {

@@ -1,0 +1,379 @@
+.board-game-box-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  padding: 0;
+}
+
+.header-section {
+  background: linear-gradient(135deg, #0370ec 0%, #0256c7 100%);
+  color: white;
+  padding: 40px 0;
+  margin-bottom: 0;
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(3, 112, 236, 0.15);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h1 {
+    color: white;
+    font-size: 3rem;
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.header-right {
+  .edit-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  padding: 60px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  p {
+    font-size: 1.3rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.error-message p {
+  color: #dc3545;
+}
+
+.detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// Hero Section with Stock Properties
+.hero-section {
+  margin-bottom: 20px;
+}
+
+.stock-properties {
+  .property-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+}
+
+.property-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0370ec, #0256c7);
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+  }
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 64px rgba(3, 112, 236, 0.15);
+      
+      .property-value.text-base-set {
+        color: #0256c7;
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.property-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #0370ec, #0256c7);
+  border-radius: 12px;
+  filter: drop-shadow(0 4px 8px rgba(3, 112, 236, 0.2));
+}
+
+.property-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .property-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #9e9e9e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .property-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+    
+    &.text-expansion {
+      color: #f57c00;
+    }
+    
+    &.text-base {
+      color: #388e3c;
+    }
+    
+    &.text-standalone {
+      color: #0c5460;
+    }
+    
+    &.text-requires-base {
+      color: #d32f2f;
+    }
+    
+    &.text-base-set {
+      color: #0370ec;
+    }
+  }
+}
+
+// Content Sections
+.content-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(3, 112, 236, 0.08);
+  
+  h2 {
+    color: #0370ec;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+    position: relative;
+    padding-bottom: 12px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #0370ec, #0256c7);
+      border-radius: 2px;
+    }
+  }
+}
+
+// Custom Fields Modern Design
+.custom-fields-modern {
+  .fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+}
+
+.field-card {
+  background: #f8f9ff;
+  border: 1px solid rgba(3, 112, 236, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(3, 112, 236, 0.1);
+  }
+}
+
+.field-header {
+  margin-bottom: 12px;
+  
+  .field-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0370ec;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.field-content {
+  .field-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+  }
+}
+
+// Related Board Game Section
+.related-game-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  border: 2px solid rgba(3, 112, 236, 0.1);
+}
+
+.related-game-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.related-game-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  h3 {
+    color: #0370ec;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.related-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.related-field-item {
+  background: #f8f9ff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  
+  .related-field-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #9e9e9e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  
+  .related-field-value {
+    .related-field-text {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    
+    h1 {
+      font-size: 2.2rem;
+    }
+  }
+  
+  .detail-content {
+    padding: 20px;
+    gap: 24px;
+  }
+  
+  .property-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .property-card {
+    padding: 20px;
+  }
+  
+  .property-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+  }
+  
+  .fields-grid, .related-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .content-section {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 24px 0;
+  }
+  
+  .header-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .property-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .property-info {
+    align-items: center;
+  }
+}

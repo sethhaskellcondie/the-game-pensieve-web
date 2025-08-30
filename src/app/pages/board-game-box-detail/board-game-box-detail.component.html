@@ -1,0 +1,112 @@
+<div class="board-game-box-detail-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 *ngIf="boardGameBox">{{boardGameBox.title}}</h1>
+      <div class="header-right" *ngIf="boardGameBox">
+        <button type="button" class="edit-button" (click)="editBoardGameBox()">
+          Edit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-message">
+    <p>Loading board game box details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-message">
+    <p>{{errorMessage}}</p>
+  </div>
+
+  <!-- Board Game Box Details -->
+  <div *ngIf="!isLoading && !errorMessage && boardGameBox" class="detail-content">
+    <!-- Stock Properties Hero Section -->
+    <div class="hero-section">
+      <div class="stock-properties">
+        <div class="property-row">
+          <div class="property-card expansion-card">
+            <div class="property-icon">📦</div>
+            <div class="property-info">
+              <span class="property-label">Type</span>
+              <span class="property-value" [class]="boardGameBox.isExpansion ? 'text-expansion' : 'text-base'">
+                {{boardGameBox.isExpansion ? 'Expansion' : 'Base Game'}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="property-card standalone-card">
+            <div class="property-icon">🎯</div>
+            <div class="property-info">
+              <span class="property-label">Playable</span>
+              <span class="property-value" [class]="boardGameBox.isStandAlone ? 'text-standalone' : 'text-requires-base'">
+                {{boardGameBox.isStandAlone ? 'Stand Alone' : 'Requires Base Game'}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="property-card base-set-card clickable" *ngIf="boardGameBox.baseSetId" (click)="navigateToBaseSet(boardGameBox.baseSetId)">
+            <div class="property-icon">🔗</div>
+            <div class="property-info">
+              <span class="property-label">Base Set</span>
+              <span class="property-value text-base-set">{{getBoardGameBoxTitle(boardGameBox.baseSetId)}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board Game Box Custom Fields -->
+    <div class="content-section" *ngIf="boardGameBox.customFieldValues.length > 0">
+      <h2>Additional Details</h2>
+      <div class="custom-fields-modern">
+        <div class="fields-grid">
+          <div class="field-card" *ngFor="let field of boardGameBox.customFieldValues">
+            <div class="field-header">
+              <span class="field-name">{{field.customFieldName}}</span>
+            </div>
+            <div class="field-content">
+              <app-boolean-display 
+                *ngIf="field.customFieldType === 'boolean'; else textValue"
+                [value]="field.value"
+                size="large">
+              </app-boolean-display>
+              <ng-template #textValue>
+                <span class="field-text">{{field.value}}</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Board Game Information -->
+    <div class="content-section related-game-section" *ngIf="boardGameBox.boardGame">
+      <h2>Board Game</h2>
+      <div class="related-game-card">
+        <div class="related-game-header">
+          <h3>{{boardGameBox.boardGame.title}}</h3>
+        </div>
+        <div class="related-game-content" *ngIf="boardGameBox.boardGame.customFieldValues && boardGameBox.boardGame.customFieldValues.length > 0">
+          <div class="related-fields-grid">
+            <div class="related-field-item" *ngFor="let field of boardGameBox.boardGame.customFieldValues">
+              <span class="related-field-label">{{field.customFieldName}}</span>
+              <div class="related-field-value">
+                <app-boolean-display 
+                  *ngIf="field.customFieldType === 'boolean'; else textValue"
+                  [value]="field.value"
+                  size="medium">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  <span class="related-field-text">{{field.value}}</span>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
