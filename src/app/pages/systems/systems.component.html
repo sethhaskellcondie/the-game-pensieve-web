@@ -114,16 +114,13 @@
           </div>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="handheld" 
-              name="handheld" 
-              [(ngModel)]="newSystem.handheld"
-              class="checkbox-input">
-            <span class="checkbox-text">Handheld</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="handheld"
+            name="handheld"
+            label="Handheld"
+            [(ngModel)]="newSystem.handheld">
+          </app-custom-checkbox>
         </div>
 
         <!-- Dynamic Custom Fields -->

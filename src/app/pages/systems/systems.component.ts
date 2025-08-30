@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })

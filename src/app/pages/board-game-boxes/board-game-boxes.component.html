@@ -182,29 +182,23 @@
           </div>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="editIsExpansion" 
-              name="editIsExpansion" 
-              [(ngModel)]="editBoardGameBox.isExpansion"
-              (ngModelChange)="onExpansionChange($event, true)"
-              class="checkbox-input">
-            <span class="checkbox-text">Expansion</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="editIsExpansion"
+            name="editIsExpansion"
+            label="Expansion"
+            [(ngModel)]="editBoardGameBox.isExpansion"
+            (ngModelChange)="onExpansionChange($event, true)">
+          </app-custom-checkbox>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="editIsStandAlone" 
-              name="editIsStandAlone" 
-              [(ngModel)]="editBoardGameBox.isStandAlone"
-              class="checkbox-input">
-            <span class="checkbox-text">Stand Alone</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="editIsStandAlone"
+            name="editIsStandAlone"
+            label="Stand Alone"
+            [(ngModel)]="editBoardGameBox.isStandAlone">
+          </app-custom-checkbox>
         </div>
 
         <div class="form-group" *ngIf="editBoardGameBox.isExpansion">
@@ -280,29 +274,23 @@
           </div>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="isExpansion" 
-              name="isExpansion" 
-              [(ngModel)]="newBoardGameBox.isExpansion"
-              (ngModelChange)="onExpansionChange($event, false)"
-              class="checkbox-input">
-            <span class="checkbox-text">Expansion</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="isExpansion"
+            name="isExpansion"
+            label="Expansion"
+            [(ngModel)]="newBoardGameBox.isExpansion"
+            (ngModelChange)="onExpansionChange($event, false)">
+          </app-custom-checkbox>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="isStandAlone" 
-              name="isStandAlone" 
-              [(ngModel)]="newBoardGameBox.isStandAlone"
-              class="checkbox-input">
-            <span class="checkbox-text">Stand Alone</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="isStandAlone"
+            name="isStandAlone"
+            label="Stand Alone"
+            [(ngModel)]="newBoardGameBox.isStandAlone">
+          </app-custom-checkbox>
         </div>
 
         <div class="form-group" *ngIf="newBoardGameBox.isExpansion">

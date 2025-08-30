@@ -1,0 +1,14 @@
+<div class="checkbox-wrapper" (keydown)="onKeyDown($event)" tabindex="0">
+  <input
+    type="checkbox"
+    [id]="id"
+    [name]="name"
+    [checked]="value"
+    [disabled]="disabled"
+    (change)="onCheckboxChange($event)"
+    class="checkbox-input">
+  <label [for]="id" class="checkbox-label">
+    <span class="checkbox-custom"></span>
+    <span class="checkbox-text" *ngIf="label">{{label}}</span>
+  </label>
+</div>

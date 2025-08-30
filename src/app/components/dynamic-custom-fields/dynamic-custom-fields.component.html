@@ -46,18 +46,15 @@
         [placeholder]="">
     </div>
     
-    <!-- Boolean Field - No separate label -->
+    <!-- Boolean Field -->
     <div *ngIf="field.type === 'boolean'" class="custom-field-checkbox-group">
-      <label class="custom-field-checkbox-label">
-        <input 
-          type="checkbox"
-          [id]="'field-' + field.id"
-          [name]="'field-' + field.id"
-          [(ngModel)]="fieldValues[field.id]"
-          (ngModelChange)="onFieldValueChange()"
-          class="custom-field-checkbox">
-        <span class="custom-field-checkbox-text">{{field.name}}</span>
-      </label>
+      <app-custom-checkbox
+        [id]="'field-' + field.id"
+        [name]="'field-' + field.id"
+        [label]="field.name"
+        [(ngModel)]="fieldValues[field.id]"
+        (ngModelChange)="onFieldValueChange()">
+      </app-custom-checkbox>
     </div>
   </div>
 </div>

@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { ApiService, BoardGameBox, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 
 @Component({
   selector: 'app-board-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent],
   templateUrl: './board-game-boxes.component.html',
   styleUrl: './board-game-boxes.component.scss'
 })
