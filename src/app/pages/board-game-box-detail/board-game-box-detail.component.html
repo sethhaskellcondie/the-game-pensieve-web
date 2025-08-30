@@ -125,7 +125,7 @@
             #titleField
             id="editTitle"
             name="editTitle"
-            [(ngModel)]="editBoardGameBox.title"
+            [(ngModel)]="editBoardGameBoxData.title"
             #editTitleNgModel="ngModel"
             [required]="true"
             [minlength]="1"
@@ -141,7 +141,7 @@
             id="editIsExpansion"
             name="editIsExpansion"
             label="Expansion"
-            [(ngModel)]="editBoardGameBox.isExpansion"
+            [(ngModel)]="editBoardGameBoxData.isExpansion"
             (ngModelChange)="onExpansionChange($event)">
           </app-custom-checkbox>
         </div>
@@ -151,16 +151,16 @@
             id="editIsStandAlone"
             name="editIsStandAlone"
             label="Stand Alone"
-            [(ngModel)]="editBoardGameBox.isStandAlone">
+            [(ngModel)]="editBoardGameBoxData.isStandAlone">
           </app-custom-checkbox>
         </div>
 
-        <div class="form-group" *ngIf="editBoardGameBox.isExpansion">
+        <div class="form-group" *ngIf="editBoardGameBoxData.isExpansion">
           <label for="editBaseSetId">Base Set</label>
           <app-filterable-dropdown
             id="editBaseSetId"
             name="editBaseSetId"
-            [(ngModel)]="editBoardGameBox.baseSetId"
+            [(ngModel)]="editBoardGameBoxData.baseSetId"
             [options]="baseSetOptions"
             placeholder="Select a base set (optional)">
           </app-filterable-dropdown>
@@ -171,7 +171,7 @@
           <app-filterable-dropdown
             id="editBoardGameId"
             name="editBoardGameId"
-            [(ngModel)]="editBoardGameBox.boardGameId"
+            [(ngModel)]="editBoardGameBoxData.boardGameId"
             [options]="boardGameOptions"
             placeholder="">
           </app-filterable-dropdown>
@@ -181,7 +181,7 @@
         <app-dynamic-custom-fields 
           entityKey="boardGameBox" 
           sectionTitle=""
-          [(customFieldValues)]="editBoardGameBox.customFieldValues">
+          [(customFieldValues)]="editBoardGameBoxData.customFieldValues">
         </app-dynamic-custom-fields>
 
         <div class="modal-actions">

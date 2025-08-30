@@ -20,14 +20,7 @@ export class BoardGamesComponent implements OnInit {
   customFieldNames: string[] = [];
   
   showDetailBoardGameModal = false;
-  showEditBoardGameModal = false;
   selectedBoardGame: BoardGame | null = null;
-  boardGameToUpdate: BoardGame | null = null;
-  isUpdating = false;
-  editBoardGame = {
-    title: '',
-    customFieldValues: [] as any[]
-  };
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -87,66 +80,6 @@ export class BoardGamesComponent implements OnInit {
     this.selectedBoardGame = null;
   }
 
-  openEditBoardGameModal(boardGame: BoardGame): void {
-    this.boardGameToUpdate = boardGame;
-    this.showEditBoardGameModal = true;
-    this.editBoardGame = {
-      title: boardGame.title,
-      customFieldValues: [...boardGame.customFieldValues]
-    };
-  }
-
-  closeEditBoardGameModal(): void {
-    this.showEditBoardGameModal = false;
-    this.boardGameToUpdate = null;
-    this.editBoardGame = {
-      title: '',
-      customFieldValues: []
-    };
-  }
-
-  openEditFromDetail(): void {
-    if (this.selectedBoardGame) {
-      const boardGameToEdit = this.selectedBoardGame;
-      this.closeDetailBoardGameModal();
-      this.openEditBoardGameModal(boardGameToEdit);
-    }
-  }
-
-  openDetailFromEdit(): void {
-    if (this.boardGameToUpdate) {
-      const boardGameToDetail = this.boardGameToUpdate;
-      this.closeEditBoardGameModal();
-      this.openDetailBoardGameModal(boardGameToDetail);
-    }
-  }
-
-  onSubmitEditBoardGame(): void {
-    if (this.isUpdating || !this.editBoardGame.title || !this.boardGameToUpdate) {
-      return;
-    }
-    
-    this.isUpdating = true;
-    
-    const boardGameData = {
-      title: this.editBoardGame.title,
-      customFieldValues: this.editBoardGame.customFieldValues
-    };
-    
-    this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
-      next: (response) => {
-        console.log('Board game updated successfully:', response);
-        this.isUpdating = false;
-        this.closeEditBoardGameModal();
-        this.loadBoardGames(); // Refresh the board games list
-      },
-      error: (error) => {
-        console.error('Error updating board game:', error);
-        this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-      }
-    });
-  }
 
   swapView(): void {
     this.router.navigate(['/board-game-boxes']);

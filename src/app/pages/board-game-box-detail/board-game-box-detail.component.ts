@@ -43,7 +43,7 @@ export class BoardGameBoxDetailComponent implements OnInit {
     }));
   }
   
-  editBoardGameBox = {
+  editBoardGameBoxData = {
     title: '',
     isExpansion: false,
     isStandAlone: false,
@@ -128,7 +128,7 @@ export class BoardGameBoxDetailComponent implements OnInit {
       }
     });
     
-    this.editBoardGameBox = {
+    this.editBoardGameBoxData = {
       title: this.boardGameBox.title,
       isExpansion: this.boardGameBox.isExpansion,
       isStandAlone: this.boardGameBox.isStandAlone,
@@ -147,7 +147,7 @@ export class BoardGameBoxDetailComponent implements OnInit {
 
   closeEditBoardGameBoxModal(): void {
     this.showEditBoardGameBoxModal = false;
-    this.editBoardGameBox = {
+    this.editBoardGameBoxData = {
       title: '',
       isExpansion: false,
       isStandAlone: false,
@@ -158,7 +158,7 @@ export class BoardGameBoxDetailComponent implements OnInit {
   }
 
   onSubmitEditBoardGameBox(): void {
-    if (this.isUpdating || !this.editBoardGameBox.title || !this.boardGameBox) {
+    if (this.isUpdating || !this.editBoardGameBoxData.title || !this.boardGameBox) {
       return;
     }
     
@@ -166,12 +166,12 @@ export class BoardGameBoxDetailComponent implements OnInit {
     this.errorMessage = '';
     
     const boardGameBoxData = {
-      title: this.editBoardGameBox.title,
-      isExpansion: this.editBoardGameBox.isExpansion,
-      isStandAlone: this.editBoardGameBox.isStandAlone,
-      baseSetId: this.editBoardGameBox.baseSetId ? parseInt(this.editBoardGameBox.baseSetId.toString()) : null,
-      boardGameId: this.editBoardGameBox.boardGameId ? parseInt(this.editBoardGameBox.boardGameId.toString()) : null,
-      customFieldValues: this.editBoardGameBox.customFieldValues
+      title: this.editBoardGameBoxData.title,
+      isExpansion: this.editBoardGameBoxData.isExpansion,
+      isStandAlone: this.editBoardGameBoxData.isStandAlone,
+      baseSetId: this.editBoardGameBoxData.baseSetId ? parseInt(this.editBoardGameBoxData.baseSetId.toString()) : null,
+      boardGameId: this.editBoardGameBoxData.boardGameId ? parseInt(this.editBoardGameBoxData.boardGameId.toString()) : null,
+      customFieldValues: this.editBoardGameBoxData.customFieldValues
     };
     
     this.apiService.updateBoardGameBox(this.boardGameBox.id, boardGameBoxData).subscribe({
@@ -191,7 +191,7 @@ export class BoardGameBoxDetailComponent implements OnInit {
 
   onExpansionChange(isExpansion: boolean): void {
     if (!isExpansion) {
-      this.editBoardGameBox.baseSetId = null;
+      this.editBoardGameBoxData.baseSetId = null;
     }
   }
 

@@ -242,11 +242,7 @@ export class BoardGameBoxesComponent implements OnInit {
   onExpansionChange(isExpansion: boolean, isEdit: boolean = false): void {
     if (!isExpansion) {
       // Clear base set selection when expansion is unchecked
-      if (isEdit) {
-        this.editBoardGameBox.baseSetId = null;
-      } else {
-        this.newBoardGameBox.baseSetId = null;
-      }
+      this.newBoardGameBox.baseSetId = null;
     }
   }
 

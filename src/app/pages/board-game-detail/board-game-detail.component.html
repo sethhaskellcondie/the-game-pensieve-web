@@ -4,7 +4,7 @@
     <div class="header-content">
       <h1 *ngIf="boardGame">{{boardGame.title}}</h1>
       <div class="header-right" *ngIf="boardGame">
-        <button type="button" class="edit-button" (click)="editBoardGame()">
+        <button type="button" class="edit-button" (click)="editBoardGameMethod()">
           Edit
         </button>
       </div>
@@ -82,6 +82,51 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Edit Board Game Modal -->
+  <div *ngIf="showEditBoardGameModal" class="modal-overlay" (click)="closeEditBoardGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Update Board Game</h2>
+        <button type="button" class="close-button" (click)="closeEditBoardGameModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitEditBoardGame()" #boardGameForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <app-selectable-text-input
+            #titleField
+            id="title"
+            name="title"
+            [(ngModel)]="editBoardGameData.title"
+            #titleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
+            placeholder="">
+          </app-selectable-text-input>
+          <div *ngIf="titleNgModel.invalid && titleNgModel.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="boardGame" 
+          sectionTitle=""
+          [(customFieldValues)]="editBoardGameData.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditBoardGameModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!boardGameForm.form.valid || isUpdating">
+            {{isUpdating ? 'Updating...' : 'Update'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
