@@ -102,6 +102,9 @@ export class FilterableDropdownComponent implements ControlValueAccessor, OnInit
   }
 
   onInputFocus(): void {
+    // Clear the field and show all options when focused
+    this.searchText = '';
+    this.filteredOptions = [...this.options];
     this.openDropdown();
     this.onTouched();
   }
