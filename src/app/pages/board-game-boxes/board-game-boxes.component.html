@@ -226,7 +226,7 @@
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="boardGameBox" 
-          sectionTitle="Board Game Box Custom Fields"
+          sectionTitle=""
           [(customFieldValues)]="editBoardGameBox.customFieldValues">
         </app-dynamic-custom-fields>
 
@@ -363,7 +363,7 @@
         <div *ngIf="boardGameSelectionMode === 'new'" class="custom-fields-wrapper">
           <app-dynamic-custom-fields 
             entityKey="boardGame" 
-            sectionTitle="Board Game Custom Fields"
+            sectionTitle=""
             [(customFieldValues)]="newBoardGameBox.newBoardGame.customFieldValues">
           </app-dynamic-custom-fields>
         </div>
