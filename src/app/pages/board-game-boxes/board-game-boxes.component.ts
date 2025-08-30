@@ -41,12 +41,19 @@ export class BoardGameBoxesComponent implements OnInit {
       label: game.title
     }));
   }
+  
+  get baseSetOptions(): DropdownOption[] {
+    return this.boardGameBoxesForDropdown.map(box => ({
+      value: box.id.toString(),
+      label: box.title
+    }));
+  }
   newBoardGameBox = {
     title: '',
     isExpansion: false,
     isStandAlone: false,
-    baseSetId: null as number | null,
-    boardGameId: null as number | null,
+    baseSetId: null as string | null,
+    boardGameId: null as string | null,
     newBoardGame: {
       title: '',
       customFieldValues: [] as any[]
@@ -57,8 +64,8 @@ export class BoardGameBoxesComponent implements OnInit {
     title: '',
     isExpansion: false,
     isStandAlone: false,
-    baseSetId: null as number | null,
-    boardGameId: null as number | null,
+    baseSetId: null as string | null,
+    boardGameId: null as string | null,
     newBoardGame: {
       title: '',
       customFieldValues: [] as any[]
@@ -218,8 +225,8 @@ export class BoardGameBoxesComponent implements OnInit {
       title: this.newBoardGameBox.title,
       isExpansion: this.newBoardGameBox.isExpansion,
       isStandAlone: this.newBoardGameBox.isStandAlone,
-      baseSetId: this.newBoardGameBox.baseSetId,
-      boardGameId: this.boardGameSelectionMode === 'existing' ? this.newBoardGameBox.boardGameId : null,
+      baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
+      boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
       boardGame: this.boardGameSelectionMode === 'new' ? this.newBoardGameBox.newBoardGame : null,
       customFieldValues: this.newBoardGameBox.customFieldValues
     };
@@ -268,7 +275,7 @@ export class BoardGameBoxesComponent implements OnInit {
       title: boardGameBox.title,
       isExpansion: boardGameBox.isExpansion,
       isStandAlone: boardGameBox.isStandAlone,
-      baseSetId: boardGameBox.baseSetId ?? null,
+      baseSetId: boardGameBox.baseSetId ? boardGameBox.baseSetId.toString() : null,
       boardGameId: boardGameBox.boardGame?.id ? boardGameBox.boardGame.id.toString() : null,
       newBoardGame: {
         title: '',

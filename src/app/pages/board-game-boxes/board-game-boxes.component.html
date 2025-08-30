@@ -203,16 +203,13 @@
 
         <div class="form-group" *ngIf="editBoardGameBox.isExpansion">
           <label for="editBaseSetId">Base Set</label>
-          <select 
-            id="editBaseSetId" 
-            name="editBaseSetId" 
+          <app-filterable-dropdown
+            id="editBaseSetId"
+            name="editBaseSetId"
             [(ngModel)]="editBoardGameBox.baseSetId"
-            class="form-select">
-            <option value="">Select a base set (optional)</option>
-            <option *ngFor="let box of boardGameBoxesForDropdown" [value]="box.id">
-              {{box.title}}
-            </option>
-          </select>
+            [options]="baseSetOptions"
+            placeholder="Select a base set (optional)">
+          </app-filterable-dropdown>
         </div>
 
         <div class="form-group">
@@ -292,16 +289,13 @@
 
         <div class="form-group" *ngIf="newBoardGameBox.isExpansion">
           <label for="baseSetId">Base Set</label>
-          <select 
-            id="baseSetId" 
-            name="baseSetId" 
+          <app-filterable-dropdown
+            id="baseSetId"
+            name="baseSetId"
             [(ngModel)]="newBoardGameBox.baseSetId"
-            class="form-select">
-            <option value="">Select a base set (optional)</option>
-            <option *ngFor="let box of boardGameBoxesForDropdown" [value]="box.id">
-              {{box.title}}
-            </option>
-          </select>
+            [options]="baseSetOptions"
+            placeholder="Select a base set (optional)">
+          </app-filterable-dropdown>
         </div>
 
         <!-- Board Game Selection Mode -->
