@@ -5,11 +5,13 @@ import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, EntityFilterModalComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
@@ -34,7 +36,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
   systemToDelete: System | null = null;
   isDeleting = false;
 
-  constructor(private apiService: ApiService) {}
+  showFilterModal = false;
+
+  constructor(private apiService: ApiService, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadSystems();
@@ -48,7 +52,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getSystems().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('system');
+    
+    this.apiService.getSystems(activeFilters).subscribe({
       next: (systems) => {
         console.log('Systems received:', systems);
         console.log('Number of systems:', systems.length);
@@ -208,6 +214,37 @@ export class SystemsComponent implements OnInit, OnDestroy {
         this.isDeleting = false;
       }
     });
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('system', filters);
+    this.loadSystems();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('system');
+    this.loadSystems();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('system');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 
 }

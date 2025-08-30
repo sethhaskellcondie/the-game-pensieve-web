@@ -1,9 +1,14 @@
 <div class="systems-container">
   <div class="header-section">
     <h1>Systems</h1>
-    <button type="button" class="new-button" (click)="openNewSystemModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewSystemModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Systems List -->
     <div *ngIf="!isLoading && !errorMessage" class="systems-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('system')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="systems.length === 0" class="no-systems-message">
         <p>No systems found.</p>
       </div>
@@ -165,4 +181,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="system"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

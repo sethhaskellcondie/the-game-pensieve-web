@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { FilterRequestDto } from './filter.service';
 
 interface ApiResponse {
   data: any;
@@ -150,9 +151,9 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/custom_fields/${customFieldId}`);
   }
 
-  getToys(): Observable<Toy[]> {
+  getToys(filters: FilterRequestDto[] = []): Observable<Toy[]> {
     return this.http.post<{data: Toy[], errors: any}>(`${this.baseUrl}/toys/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
@@ -181,9 +182,9 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/toys/${toyId}`);
   }
 
-  getSystems(): Observable<System[]> {
+  getSystems(filters: FilterRequestDto[] = []): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
@@ -212,36 +213,36 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/systems/${systemId}`);
   }
 
-  getVideoGameBoxes(): Observable<VideoGameBox[]> {
+  getVideoGameBoxes(filters: FilterRequestDto[] = []): Observable<VideoGameBox[]> {
     return this.http.post<{data: VideoGameBox[], errors: any}>(`${this.baseUrl}/videoGameBoxes/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getBoardGameBoxes(): Observable<BoardGameBox[]> {
+  getBoardGameBoxes(filters: FilterRequestDto[] = []): Observable<BoardGameBox[]> {
     return this.http.post<{data: BoardGameBox[], errors: any}>(`${this.baseUrl}/boardGameBoxes/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getVideoGames(): Observable<VideoGame[]> {
+  getVideoGames(filters: FilterRequestDto[] = []): Observable<VideoGame[]> {
     return this.http.post<{data: VideoGame[], errors: any}>(`${this.baseUrl}/videoGames/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getBoardGames(): Observable<BoardGame[]> {
+  getBoardGames(filters: FilterRequestDto[] = []): Observable<BoardGame[]> {
     return this.http.post<{data: BoardGame[], errors: any}>(`${this.baseUrl}/boardGames/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])

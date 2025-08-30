@@ -1,9 +1,14 @@
 <div class="toys-container">
   <div class="header-section">
     <h1>Toys</h1>
-    <button type="button" class="new-button" (click)="openNewToyModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewToyModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Toys List -->
     <div *ngIf="!isLoading && !errorMessage" class="toys-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('toy')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="toys.length === 0" class="no-toys-message">
         <p>No toys found.</p>
       </div>
@@ -150,4 +166,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="toy"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>
