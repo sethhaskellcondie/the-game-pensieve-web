@@ -91,24 +91,24 @@
   <div *ngIf="showNewSystemModal" class="modal-overlay" (click)="closeNewSystemModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? 'Update Existing System' : 'Create New System'}}</h2>
+        <h2>{{isUpdateMode ? 'Update System' : 'Create System'}}</h2>
         <button type="button" class="close-button" (click)="closeNewSystemModal()">×</button>
       </div>
       
       <form (ngSubmit)="onSubmitNewSystem()" #systemForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="name">Name *</label>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
+          <app-selectable-text-input
+            #nameField
+            id="name"
+            name="name"
             [(ngModel)]="newSystem.name"
-            #nameField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            #nameNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
-          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+          </app-selectable-text-input>
+          <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
             Name is required
           </div>
         </div>
@@ -123,6 +123,7 @@
             required
             [min]="1"
             [step]="1"
+            class="form-input"
             placeholder="">
           </app-selectable-number-input>
           <div *ngIf="generationField.invalid && generationField.touched" class="error-text">
@@ -142,7 +143,6 @@
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="system" 
-          sectionTitle="System Custom Fields"
           [(customFieldValues)]="newSystem.customFieldValues">
         </app-dynamic-custom-fields>
 

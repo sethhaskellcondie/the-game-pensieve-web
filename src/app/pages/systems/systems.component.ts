@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
@@ -6,17 +6,20 @@ import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fi
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableNumberInputComponent } from '../../components/selectable-number-input/selectable-number-input.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableNumberInputComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableNumberInputComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
 export class SystemsComponent implements OnInit, OnDestroy {
+  @ViewChild('nameField', { static: false }) nameField: any;
+  
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
@@ -114,6 +117,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
       handheld: false,
       customFieldValues: [] as any[]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   openUpdateSystemModal(system: System): void {
@@ -126,6 +136,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
       handheld: system.handheld,
       customFieldValues: [...system.customFieldValues]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   closeNewSystemModal(): void {
