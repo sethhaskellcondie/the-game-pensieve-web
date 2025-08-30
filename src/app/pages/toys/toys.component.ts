@@ -69,8 +69,8 @@ export class ToysComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading toys:', error);
-        this.errorMessage = `Failed to load toys: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -176,8 +176,9 @@ export class ToysComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating toy:', error);
-          this.errorMessage = `Failed to update toy: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewToyModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     } else {
@@ -191,8 +192,9 @@ export class ToysComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error creating toy:', error);
-          this.errorMessage = `Failed to create toy: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewToyModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     }
@@ -222,8 +224,10 @@ export class ToysComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error deleting toy:', error);
-        this.errorMessage = `Failed to delete toy: ${error.message || 'Unknown error'}`;
         this.isDeleting = false;
+        this.closeDeleteConfirmModal(); // Close the modal on error
+        // Don't reload toys - keep existing display
+        // Error snackbar will be shown automatically by API service
       }
     });
   }

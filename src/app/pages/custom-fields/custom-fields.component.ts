@@ -91,8 +91,8 @@ export class CustomFieldsComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading filtered custom fields:', error);
-          this.errorMessage = `Failed to load custom fields: ${error.message || 'Unknown error'}`;
           this.isLoading = false;
+          // Error snackbar will be shown automatically by API service
         }
       });
     } else {
@@ -108,8 +108,8 @@ export class CustomFieldsComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading custom fields:', error);
-          this.errorMessage = `Failed to load custom fields: ${error.message || 'Unknown error'}`;
           this.isLoading = false;
+          // Error snackbar will be shown automatically by API service
         }
       });
     }
@@ -155,8 +155,9 @@ export class CustomFieldsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating custom field:', error);
-        this.errorMessage = `Failed to create custom field: ${error.message || 'Unknown error'}`;
         this.isCreating = false;
+        this.closeNewCustomFieldModal(); // Close the modal on error
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -240,8 +241,10 @@ export class CustomFieldsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error deleting custom field:', error);
-        this.errorMessage = `Failed to delete custom field: ${error.message || 'Unknown error'}`;
         this.isDeleting = false;
+        this.closeDeleteConfirmModal(); // Close the modal on error
+        // Don't reload custom fields - keep existing display
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -354,8 +357,9 @@ export class CustomFieldsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error filtering custom fields:', error);
-        this.errorMessage = `Failed to filter custom fields: ${error.message || 'Unknown error'}`;
         this.isFiltering = false;
+        this.closeFilterModal(); // Close the modal on error
+        // Error snackbar will be shown automatically by API service
       }
     });
   }

@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { FilterRequestDto } from './filter.service';
+import { ErrorSnackbarService } from './error-snackbar.service';
 
 interface ApiResponse {
   data: any;
@@ -101,7 +102,21 @@ export interface BoardGame {
 export class ApiService {
   private readonly baseUrl = 'http://localhost:8080/v1';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private errorSnackbarService: ErrorSnackbarService) { }
+
+  private handleApiResponse<T>(response: {data: T, errors: any}): T {
+    if (response.errors && Array.isArray(response.errors) && response.errors.length > 0) {
+      this.errorSnackbarService.processApiErrors({errors: response.errors});
+    }
+    return response.data;
+  }
+
+  private handleHttpError = (error: any): Observable<never> => {
+    // Extract errors from the HTTP error response
+    console.log('HTTP Error:', error);
+    this.errorSnackbarService.processApiErrors(error);
+    throw error;
+  }
 
   heartbeat(): Observable<string> {
     return this.http.get(`${this.baseUrl}/heartbeat`, { 
@@ -118,14 +133,16 @@ export class ApiService {
   getCustomFields(): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields`)
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
   getCustomFieldsByEntity(entityKey: string): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields/entity/${entityKey}`)
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -134,7 +151,8 @@ export class ApiService {
       custom_field: customField
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -148,7 +166,10 @@ export class ApiService {
   }
 
   deleteCustomField(customFieldId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/custom_fields/${customFieldId}`);
+    return this.http.delete(`${this.baseUrl}/custom_fields/${customFieldId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
   }
 
   getToys(filters: FilterRequestDto[] = []): Observable<Toy[]> {
@@ -156,7 +177,8 @@ export class ApiService {
       filters: filters
     })
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -165,7 +187,8 @@ export class ApiService {
       toy: toy
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -174,12 +197,16 @@ export class ApiService {
       toy: toy
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
   deleteToy(toyId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/toys/${toyId}`);
+    return this.http.delete(`${this.baseUrl}/toys/${toyId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
   }
 
   getSystems(filters: FilterRequestDto[] = []): Observable<System[]> {
@@ -187,7 +214,8 @@ export class ApiService {
       filters: filters
     })
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -196,7 +224,8 @@ export class ApiService {
       system: system
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -205,12 +234,16 @@ export class ApiService {
       system: system
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
   deleteSystem(systemId: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/systems/${systemId}`);
+    return this.http.delete(`${this.baseUrl}/systems/${systemId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
   }
 
   getVideoGameBoxes(filters: FilterRequestDto[] = []): Observable<VideoGameBox[]> {

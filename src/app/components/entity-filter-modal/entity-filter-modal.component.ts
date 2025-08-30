@@ -225,8 +225,8 @@ export class EntityFilterModalComponent implements OnInit {
 
   getBooleanOptions(): DropdownOption[] {
     return [
-      { value: 'true', label: 'True' },
-      { value: 'false', label: 'False' }
+      { value: 'true', label: 'Yes' },
+      { value: 'false', label: 'No' }
     ];
   }
 

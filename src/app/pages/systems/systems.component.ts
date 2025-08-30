@@ -64,8 +64,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading systems:', error);
-        this.errorMessage = `Failed to load systems: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -164,8 +164,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating system:', error);
-          this.errorMessage = `Failed to update system: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewSystemModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     } else {
@@ -179,8 +180,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error creating system:', error);
-          this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewSystemModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     }
@@ -210,8 +212,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error deleting system:', error);
-        this.errorMessage = `Failed to delete system: ${error.message || 'Unknown error'}`;
         this.isDeleting = false;
+        this.closeDeleteConfirmModal(); // Close the modal on error
+        // Don't reload systems - keep existing display
+        // Error snackbar will be shown automatically by API service
       }
     });
   }

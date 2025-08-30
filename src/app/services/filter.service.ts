@@ -130,7 +130,10 @@ export class FilterService {
         ];
       
       case 'boolean':
-        return [...baseOperators, sortOperator];
+        return [
+          { value: 'equals', label: 'Equals' },
+          sortOperator
+        ];
       
       case 'timestamp':
         return [
