@@ -115,16 +115,16 @@
 
         <div class="form-group">
           <label for="generation">Generation *</label>
-          <input 
-            type="number" 
-            id="generation" 
-            name="generation" 
+          <app-selectable-number-input
+            id="generation"
+            name="generation"
             [(ngModel)]="newSystem.generation"
             #generationField="ngModel"
             required
-            min="1"
-            class="form-input"
+            [min]="1"
+            [step]="1"
             placeholder="">
+          </app-selectable-number-input>
           <div *ngIf="generationField.invalid && generationField.touched" class="error-text">
             Generation is required and must be a positive number
           </div>

@@ -5,13 +5,14 @@ import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { SelectableNumberInputComponent } from '../../components/selectable-number-input/selectable-number-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableNumberInputComponent, EntityFilterModalComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })

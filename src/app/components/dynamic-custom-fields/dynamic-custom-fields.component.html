@@ -35,8 +35,7 @@
       <label [for]="'field-' + field.id" class="custom-field-label">
         {{field.name}}
       </label>
-      <input 
-        type="number"
+      <app-selectable-number-input
         [id]="'field-' + field.id"
         [name]="'field-' + field.id"
         [(ngModel)]="fieldValues[field.id]"
@@ -44,6 +43,7 @@
         (keyup.enter)="onEnterPressed()"
         class="custom-field-input"
         [placeholder]="">
+      </app-selectable-number-input>
     </div>
     
     <!-- Boolean Field -->

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, CustomField, CustomFieldValue } from '../../services/api.service';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
+import { SelectableNumberInputComponent } from '../selectable-number-input/selectable-number-input.component';
 
 export interface DynamicFieldValue {
   [key: string]: any;
@@ -11,7 +12,7 @@ export interface DynamicFieldValue {
 @Component({
   selector: 'app-dynamic-custom-fields',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomCheckboxComponent],
+  imports: [CommonModule, FormsModule, CustomCheckboxComponent, SelectableNumberInputComponent],
   templateUrl: './dynamic-custom-fields.component.html',
   styleUrl: './dynamic-custom-fields.component.scss'
 })
