@@ -290,6 +290,14 @@ export class ApiService {
       );
   }
 
+  getBoardGame(id: number): Observable<BoardGame> {
+    return this.http.get<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
   createVideoGame(videoGame: { title: string; systemId: number; customFieldValues: any[] }): Observable<VideoGame> {
     return this.http.post<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames`, {
       title: videoGame.title,

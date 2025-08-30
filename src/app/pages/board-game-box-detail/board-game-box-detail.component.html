@@ -85,7 +85,7 @@
     <!-- Related Board Game Information -->
     <div class="content-section related-game-section" *ngIf="boardGameBox.boardGame">
       <h2>Board Game</h2>
-      <div class="related-game-card">
+      <div class="related-game-card clickable-card" (click)="navigateToBoardGame(boardGameBox.boardGame!.id)">
         <div class="related-game-header">
           <h3>{{boardGameBox.boardGame.title}}</h3>
         </div>

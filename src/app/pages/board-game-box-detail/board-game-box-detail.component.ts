@@ -73,6 +73,10 @@ export class BoardGameBoxDetailComponent implements OnInit {
     this.router.navigate(['/board-game-box', baseSetId]);
   }
 
+  navigateToBoardGame(boardGameId: number): void {
+    this.router.navigate(['/board-game', boardGameId]);
+  }
+
   editBoardGameBox(): void {
     // Navigate back to the board game boxes page and somehow trigger edit modal
     // For now, just navigate back - this could be enhanced later

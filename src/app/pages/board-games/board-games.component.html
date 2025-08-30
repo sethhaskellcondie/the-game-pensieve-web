@@ -34,7 +34,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of boardGames" class="table-row" (click)="openDetailBoardGameModal(game)">
+            <tr *ngFor="let game of boardGames" class="table-row" (click)="navigateToDetail(game.id)">
               <td class="game-title">{{game.title}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 

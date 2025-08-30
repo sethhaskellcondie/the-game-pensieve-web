@@ -73,6 +73,10 @@ export class BoardGamesComponent implements OnInit {
     return customField ? customField.value : '';
   }
 
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/board-game', id]);
+  }
+
   openDetailBoardGameModal(boardGame: BoardGame): void {
     this.selectedBoardGame = boardGame;
     this.showDetailBoardGameModal = true;
