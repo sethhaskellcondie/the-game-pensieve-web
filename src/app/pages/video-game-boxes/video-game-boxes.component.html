@@ -37,24 +37,37 @@
               <th>Physical</th>
               <th>Collection</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of videoGameBoxes" class="table-row" (click)="openDetailVideoGameBoxModal(box)">
-              <td class="game-title">{{box.title}}</td>
-              <td class="game-system">{{box.system.name}}</td>
-              <td class="game-physical">
-                <span class="physical-badge" [class]="box.isPhysical ? 'physical-yes' : 'physical-no'">
-                  {{box.isPhysical ? 'Yes' : 'No'}}
-                </span>
+            <tr *ngFor="let box of videoGameBoxes" class="table-row">
+              <td class="game-title" (click)="openDetailVideoGameBoxModal(box)">{{box.title}}</td>
+              <td class="game-system" (click)="openDetailVideoGameBoxModal(box)">{{box.system.name}}</td>
+              <td class="game-physical" (click)="openDetailVideoGameBoxModal(box)">
+                <app-boolean-display [value]="box.isPhysical" size="small"></app-boolean-display>
               </td>
-              <td class="game-collection">
-                <span class="collection-badge" [class]="box.isCollection ? 'collection-yes' : 'collection-no'">
-                  {{box.isCollection ? 'Yes' : 'No'}}
-                </span>
+              <td class="game-collection" (click)="openDetailVideoGameBoxModal(box)">
+                <app-boolean-display [value]="box.isCollection" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(box, fieldName)}}
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailVideoGameBoxModal(box)">
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(box, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(box, fieldName)}}
+                </ng-template>
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteVideoGameBox(box)"
+                  title="Delete video game box">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -100,7 +113,14 @@
           <div class="detail-grid">
             <div class="detail-item" *ngFor="let field of selectedVideoGameBox.customFieldValues">
               <label>{{field.customFieldName}}:</label>
-              <span>{{field.value}}</span>
+              <app-boolean-display 
+                *ngIf="field.customFieldType === 'boolean'; else textValue"
+                [value]="field.value"
+                size="small">
+              </app-boolean-display>
+              <ng-template #textValue>
+                <span>{{field.value}}</span>
+              </ng-template>
             </div>
           </div>
         </div>
@@ -120,7 +140,15 @@
                 <p><strong>System:</strong> {{game.system.name}}</p>
                 <div *ngIf="game.customFieldValues.length > 0" class="game-custom-fields">
                   <div class="custom-field" *ngFor="let field of game.customFieldValues">
-                    <strong>{{field.customFieldName}}:</strong> {{field.value}}
+                    <strong>{{field.customFieldName}}:</strong> 
+                    <app-boolean-display 
+                      *ngIf="field.customFieldType === 'boolean'; else textValue"
+                      [value]="field.value"
+                      size="small">
+                    </app-boolean-display>
+                    <ng-template #textValue>
+                      {{field.value}}
+                    </ng-template>
                   </div>
                 </div>
               </div>
@@ -156,7 +184,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter game title">
+            placeholder="">
           <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
             Title is required
           </div>
@@ -181,28 +209,22 @@
           </div>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="isPhysical" 
-              name="isPhysical" 
-              [(ngModel)]="newVideoGameBox.isPhysical"
-              class="checkbox-input">
-            <span class="checkbox-text">Physical</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="isPhysical"
+            name="isPhysical"
+            label="Physical"
+            [(ngModel)]="newVideoGameBox.isPhysical">
+          </app-custom-checkbox>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="isCollection" 
-              name="isCollection" 
-              [(ngModel)]="newVideoGameBox.isCollection"
-              class="checkbox-input">
-            <span class="checkbox-text">Collection</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="isCollection"
+            name="isCollection"
+            label="Collection"
+            [(ngModel)]="newVideoGameBox.isCollection">
+          </app-custom-checkbox>
         </div>
 
         <!-- Dynamic Custom Fields -->
@@ -286,7 +308,7 @@
                       [(ngModel)]="videoGame.title"
                       [name]="'newGameTitle' + i"
                       class="form-input"
-                      placeholder="Enter video game title">
+                      placeholder="">
                   </div>
                   <div class="form-group">
                     <label for="newGameSystem{{i}}">System *</label>
@@ -324,6 +346,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the video game box <strong>"{{videoGameBoxToDelete?.title}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteVideoGameBox()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

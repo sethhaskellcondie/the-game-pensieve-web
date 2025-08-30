@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, VideoGame, System, VideoGameBox } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 
 @Component({
   selector: 'app-video-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
   templateUrl: './video-games.component.html',
   styleUrl: './video-games.component.scss'
 })
@@ -184,5 +185,20 @@ export class VideoGamesComponent implements OnInit {
 
   swapView(): void {
     this.router.navigate(['/video-game-boxes']);
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any video game that has this field to determine its type
+    for (const game of this.videoGames) {
+      const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 }

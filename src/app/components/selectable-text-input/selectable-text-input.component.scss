@@ -1,0 +1,27 @@
+// Selectable Text Input Component Styles
+// Matches the form-input styles used throughout the application
+
+input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  
+  &:focus {
+    outline: none;
+    border-color: #0370ec;
+  }
+  
+  &.ng-invalid.ng-touched {
+    border-color: #dc3545;
+  }
+  
+  &:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}

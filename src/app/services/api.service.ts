@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { FilterRequestDto } from './filter.service';
+import { ErrorSnackbarService } from './error-snackbar.service';
 
 interface ApiResponse {
   data: any;
@@ -100,7 +102,21 @@ export interface BoardGame {
 export class ApiService {
   private readonly baseUrl = 'http://localhost:8080/v1';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private errorSnackbarService: ErrorSnackbarService) { }
+
+  private handleApiResponse<T>(response: {data: T, errors: any}): T {
+    if (response.errors && Array.isArray(response.errors) && response.errors.length > 0) {
+      this.errorSnackbarService.processApiErrors({errors: response.errors});
+    }
+    return response.data;
+  }
+
+  private handleHttpError = (error: any): Observable<never> => {
+    // Extract errors from the HTTP error response
+    console.log('HTTP Error:', error);
+    this.errorSnackbarService.processApiErrors(error);
+    throw error;
+  }
 
   heartbeat(): Observable<string> {
     return this.http.get(`${this.baseUrl}/heartbeat`, { 
@@ -117,14 +133,16 @@ export class ApiService {
   getCustomFields(): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields`)
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
   getCustomFieldsByEntity(entityKey: string): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields/entity/${entityKey}`)
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -133,7 +151,8 @@ export class ApiService {
       custom_field: customField
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -146,12 +165,20 @@ export class ApiService {
       );
   }
 
-  getToys(): Observable<Toy[]> {
+  deleteCustomField(customFieldId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/custom_fields/${customFieldId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
+  getToys(filters: FilterRequestDto[] = []): Observable<Toy[]> {
     return this.http.post<{data: Toy[], errors: any}>(`${this.baseUrl}/toys/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -160,7 +187,8 @@ export class ApiService {
       toy: toy
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -169,16 +197,25 @@ export class ApiService {
       toy: toy
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
-  getSystems(): Observable<System[]> {
+  deleteToy(toyId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/toys/${toyId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
+  getSystems(filters: FilterRequestDto[] = []): Observable<System[]> {
     return this.http.post<{data: System[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
-        map(response => response.data || [])
+        map(response => this.handleApiResponse(response) || []),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -187,7 +224,8 @@ export class ApiService {
       system: system
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -196,40 +234,48 @@ export class ApiService {
       system: system
     })
       .pipe(
-        map(response => response.data)
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
-  getVideoGameBoxes(): Observable<VideoGameBox[]> {
+  deleteSystem(systemId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/systems/${systemId}`)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
+  getVideoGameBoxes(filters: FilterRequestDto[] = []): Observable<VideoGameBox[]> {
     return this.http.post<{data: VideoGameBox[], errors: any}>(`${this.baseUrl}/videoGameBoxes/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getBoardGameBoxes(): Observable<BoardGameBox[]> {
+  getBoardGameBoxes(filters: FilterRequestDto[] = []): Observable<BoardGameBox[]> {
     return this.http.post<{data: BoardGameBox[], errors: any}>(`${this.baseUrl}/boardGameBoxes/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getVideoGames(): Observable<VideoGame[]> {
+  getVideoGames(filters: FilterRequestDto[] = []): Observable<VideoGame[]> {
     return this.http.post<{data: VideoGame[], errors: any}>(`${this.baseUrl}/videoGames/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
       );
   }
 
-  getBoardGames(): Observable<BoardGame[]> {
+  getBoardGames(filters: FilterRequestDto[] = []): Observable<BoardGame[]> {
     return this.http.post<{data: BoardGame[], errors: any}>(`${this.baseUrl}/boardGames/function/search`, {
-      filters: []
+      filters: filters
     })
       .pipe(
         map(response => response.data || [])
@@ -290,6 +336,10 @@ export class ApiService {
       );
   }
 
+  deleteVideoGameBox(videoGameBoxId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/videoGameBoxes/${videoGameBoxId}`);
+  }
+
   createBoardGameBox(boardGameBox: { title: string; isExpansion: boolean; isStandAlone: boolean; baseSetId?: number | null; boardGameId?: number | null; boardGame?: any; customFieldValues: any[] }): Observable<BoardGameBox> {
     return this.http.post<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes`, {
       boardGameBox: {
@@ -322,6 +372,10 @@ export class ApiService {
       .pipe(
         map(response => response.data)
       );
+  }
+
+  deleteBoardGameBox(boardGameBoxId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/boardGameBoxes/${boardGameBoxId}`);
   }
 
   createBoardGame(boardGame: { title: string; customFieldValues: any[] }): Observable<BoardGame> {

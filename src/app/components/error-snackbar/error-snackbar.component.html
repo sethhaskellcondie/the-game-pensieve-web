@@ -1,0 +1,15 @@
+<div *ngIf="errorState.show" class="error-snackbar">
+  <div class="error-content">
+    <div class="error-icon">
+      ⚠️
+    </div>
+    <div class="error-messages">
+      <div *ngFor="let error of errorState.errors" class="error-message">
+        {{ error }}
+      </div>
+    </div>
+    <button type="button" class="dismiss-button" (click)="dismiss()" title="Dismiss errors">
+      ×
+    </button>
+  </div>
+</div>

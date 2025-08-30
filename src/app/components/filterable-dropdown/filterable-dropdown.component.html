@@ -1,0 +1,36 @@
+<div class="filterable-dropdown" (click)="onDropdownClick($event)">
+  <div class="dropdown-input-container">
+    <input
+      type="text"
+      [id]="id"
+      [name]="name"
+      [(ngModel)]="searchText"
+      (input)="onInputChange()"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      (keydown)="onKeyDown($event)"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [required]="required"
+      class="dropdown-input"
+      autocomplete="off" />
+    
+    <div class="dropdown-arrow" [class.open]="isOpen">
+      <span>▼</span>
+    </div>
+  </div>
+  
+  <div class="dropdown-options" *ngIf="isOpen" [class.visible]="isOpen">
+    <div 
+      *ngFor="let option of filteredOptions"
+      class="dropdown-option"
+      [class.selected]="option.value === selectedValue"
+      (click)="onOptionClick(option, $event)">
+      {{ option.label }}
+    </div>
+    
+    <div *ngIf="filteredOptions.length === 0" class="dropdown-no-options">
+      No options match your search
+    </div>
+  </div>
+</div>

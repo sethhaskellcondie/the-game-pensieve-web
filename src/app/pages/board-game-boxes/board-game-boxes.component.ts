@@ -1,18 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, BoardGameBox, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 
 @Component({
   selector: 'app-board-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent],
   templateUrl: './board-game-boxes.component.html',
   styleUrl: './board-game-boxes.component.scss'
 })
 export class BoardGameBoxesComponent implements OnInit {
+  @ViewChild('titleField', { static: false }) titleField: any;
+  
   boardGameBoxes: BoardGameBox[] = [];
   isLoading = false;
   errorMessage = '';
@@ -28,12 +34,26 @@ export class BoardGameBoxesComponent implements OnInit {
   boardGameBoxesForDropdown: BoardGameBox[] = [];
   boardGamesForDropdown: BoardGame[] = [];
   boardGameSelectionMode: 'existing' | 'new' | 'self-contained' = 'self-contained';
+  
+  get boardGameOptions(): DropdownOption[] {
+    return this.boardGamesForDropdown.map(game => ({
+      value: game.id.toString(),
+      label: game.title
+    }));
+  }
+  
+  get baseSetOptions(): DropdownOption[] {
+    return this.boardGameBoxesForDropdown.map(box => ({
+      value: box.id.toString(),
+      label: box.title
+    }));
+  }
   newBoardGameBox = {
     title: '',
     isExpansion: false,
     isStandAlone: false,
-    baseSetId: null as number | null,
-    boardGameId: null as number | null,
+    baseSetId: null as string | null,
+    boardGameId: null as string | null,
     newBoardGame: {
       title: '',
       customFieldValues: [] as any[]
@@ -44,14 +64,18 @@ export class BoardGameBoxesComponent implements OnInit {
     title: '',
     isExpansion: false,
     isStandAlone: false,
-    baseSetId: null as number | null,
-    boardGameId: null as number | null,
+    baseSetId: null as string | null,
+    boardGameId: null as string | null,
     newBoardGame: {
       title: '',
       customFieldValues: [] as any[]
     },
     customFieldValues: [] as any[]
   };
+
+  showDeleteConfirmModal = false;
+  boardGameBoxToDelete: BoardGameBox | null = null;
+  isDeleting = false;
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -152,6 +176,13 @@ export class BoardGameBoxesComponent implements OnInit {
         this.newBoardGameBox.newBoardGame.customFieldValues = [];
       }
     });
+    
+    // Focus the title field after the view updates
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      }
+    }, 0);
   }
 
   closeNewBoardGameBoxModal(): void {
@@ -194,8 +225,8 @@ export class BoardGameBoxesComponent implements OnInit {
       title: this.newBoardGameBox.title,
       isExpansion: this.newBoardGameBox.isExpansion,
       isStandAlone: this.newBoardGameBox.isStandAlone,
-      baseSetId: this.newBoardGameBox.baseSetId,
-      boardGameId: this.boardGameSelectionMode === 'existing' ? this.newBoardGameBox.boardGameId : null,
+      baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
+      boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
       boardGame: this.boardGameSelectionMode === 'new' ? this.newBoardGameBox.newBoardGame : null,
       customFieldValues: this.newBoardGameBox.customFieldValues
     };
@@ -244,14 +275,21 @@ export class BoardGameBoxesComponent implements OnInit {
       title: boardGameBox.title,
       isExpansion: boardGameBox.isExpansion,
       isStandAlone: boardGameBox.isStandAlone,
-      baseSetId: boardGameBox.baseSetId ?? null,
-      boardGameId: boardGameBox.boardGame?.id ?? null,
+      baseSetId: boardGameBox.baseSetId ? boardGameBox.baseSetId.toString() : null,
+      boardGameId: boardGameBox.boardGame?.id ? boardGameBox.boardGame.id.toString() : null,
       newBoardGame: {
         title: '',
         customFieldValues: []
       },
       customFieldValues: [...boardGameBox.customFieldValues]
     };
+    
+    // Focus the title field after the view updates
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      }
+    }, 0);
   }
 
   closeEditBoardGameBoxModal(): void {
@@ -332,5 +370,50 @@ export class BoardGameBoxesComponent implements OnInit {
         this.newBoardGameBox.baseSetId = null;
       }
     }
+  }
+
+  confirmDeleteBoardGameBox(boardGameBox: BoardGameBox): void {
+    this.boardGameBoxToDelete = boardGameBox;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.boardGameBoxToDelete = null;
+  }
+
+  deleteBoardGameBox(): void {
+    if (!this.boardGameBoxToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteBoardGameBox(this.boardGameBoxToDelete.id).subscribe({
+      next: () => {
+        console.log('Board game box deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadBoardGameBoxes();
+      },
+      error: (error) => {
+        console.error('Error deleting board game box:', error);
+        this.errorMessage = `Failed to delete board game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any board game box that has this field to determine its type
+    for (const box of this.boardGameBoxes) {
+      const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 }

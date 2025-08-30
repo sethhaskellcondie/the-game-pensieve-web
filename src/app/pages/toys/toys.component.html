@@ -1,9 +1,14 @@
 <div class="toys-container">
   <div class="header-section">
     <h1>Toys</h1>
-    <button type="button" class="new-button" (click)="openNewToyModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewToyModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Toys List -->
     <div *ngIf="!isLoading && !errorMessage" class="toys-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('toy')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="toys.length === 0" class="no-toys-message">
         <p>No toys found.</p>
       </div>
@@ -30,18 +46,35 @@
               <th>Name</th>
               <th>Set</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let toy of toys" class="table-row" (click)="openUpdateToyModal(toy)">
-              <td class="toy-name">
+            <tr *ngFor="let toy of toys" class="table-row">
+              <td class="toy-name" (click)="openUpdateToyModal(toy)">
                 {{toy.name}}
               </td>
-              <td class="toy-set">
+              <td class="toy-set" (click)="openUpdateToyModal(toy)">
                 {{toy.set}}
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(toy, fieldName)}}
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateToyModal(toy)">
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(toy, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(toy, fieldName)}}
+                </ng-template>
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteToy(toy)"
+                  title="Delete toy">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -54,39 +87,38 @@
   <div *ngIf="showNewToyModal" class="modal-overlay" (click)="closeNewToyModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? 'Update Existing Toy' : 'Create New Toy'}}</h2>
+        <h2>{{isUpdateMode ? 'Edit Toy' : 'New Toy'}}</h2>
         <button type="button" class="close-button" (click)="closeNewToyModal()">×</button>
       </div>
       
       <form (ngSubmit)="onSubmitNewToy()" #toyForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="name">Name *</label>
-          <input 
-            type="text" 
+          <app-selectable-text-input
+            #nameField
             id="name" 
             name="name" 
             [(ngModel)]="newToy.name"
-            #nameField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
-            placeholder="Enter toy name">
-          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+            #nameNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
+            placeholder="">
+          </app-selectable-text-input>
+          <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
             Name is required
           </div>
         </div>
 
         <div class="form-group">
           <label for="set">Set *</label>
-          <input 
-            type="text" 
+          <app-selectable-text-input
             id="set" 
             name="set" 
             [(ngModel)]="newToy.set"
             #setField="ngModel"
-            required
-            class="form-input"
-            placeholder="Enter toy set or series">
+            [required]="true"
+            placeholder="">
+          </app-selectable-text-input>
           <div *ngIf="setField.invalid && setField.touched" class="error-text">
             Set is required
           </div>
@@ -95,7 +127,7 @@
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="toy" 
-          sectionTitle="Toy Custom Fields"
+          sectionTitle=""
           [(customFieldValues)]="newToy.customFieldValues">
         </app-dynamic-custom-fields>
 
@@ -110,4 +142,35 @@
       </form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the toy <strong>"{{toyToDelete?.name}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteToy()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="toy"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

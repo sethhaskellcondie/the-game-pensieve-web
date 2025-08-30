@@ -39,7 +39,14 @@
               <td class="game-title">{{game.title}}</td>
               <td class="game-system">{{game.system.name}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(game, fieldName)}}
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(game, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(game, fieldName)}}
+                </ng-template>
               </td>
             </tr>
           </tbody>
@@ -73,7 +80,14 @@
           <div class="detail-grid">
             <div class="detail-item" *ngFor="let field of selectedVideoGame.customFieldValues">
               <label>{{field.customFieldName}}:</label>
-              <span>{{field.value}}</span>
+              <app-boolean-display 
+                *ngIf="field.customFieldType === 'boolean'; else textValue"
+                [value]="field.value"
+                size="small">
+              </app-boolean-display>
+              <ng-template #textValue>
+                <span>{{field.value}}</span>
+              </ng-template>
             </div>
           </div>
         </div>
@@ -133,7 +147,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter game title">
+            placeholder="">
           <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
             Title is required
           </div>

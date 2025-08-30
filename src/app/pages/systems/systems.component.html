@@ -1,9 +1,14 @@
 <div class="systems-container">
   <div class="header-section">
     <h1>Systems</h1>
-    <button type="button" class="new-button" (click)="openNewSystemModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewSystemModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Systems List -->
     <div *ngIf="!isLoading && !errorMessage" class="systems-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('system')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="systems.length === 0" class="no-systems-message">
         <p>No systems found.</p>
       </div>
@@ -31,23 +47,38 @@
               <th>Generation</th>
               <th>Handheld</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let system of systems" class="table-row" (click)="openUpdateSystemModal(system)">
-              <td class="system-name">
+            <tr *ngFor="let system of systems" class="table-row">
+              <td class="system-name" (click)="openUpdateSystemModal(system)">
                 {{system.name}}
               </td>
-              <td class="system-generation">
+              <td class="system-generation" (click)="openUpdateSystemModal(system)">
                 {{system.generation}}
               </td>
-              <td class="system-handheld">
-                <span class="handheld-badge" [class]="system.handheld ? 'handheld-yes' : 'handheld-no'">
-                  {{system.handheld ? 'Yes' : 'No'}}
-                </span>
+              <td class="system-handheld" (click)="openUpdateSystemModal(system)">
+                <app-boolean-display [value]="system.handheld" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
-                {{getCustomFieldValue(system, fieldName)}}
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateSystemModal(system)">
+                <app-boolean-display 
+                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  [value]="getCustomFieldValue(system, fieldName)"
+                  size="small">
+                </app-boolean-display>
+                <ng-template #textValue>
+                  {{getCustomFieldValue(system, fieldName)}}
+                </ng-template>
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteSystem(system)"
+                  title="Delete system">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -60,61 +91,58 @@
   <div *ngIf="showNewSystemModal" class="modal-overlay" (click)="closeNewSystemModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? 'Update Existing System' : 'Create New System'}}</h2>
+        <h2>{{isUpdateMode ? 'Update System' : 'New System'}}</h2>
         <button type="button" class="close-button" (click)="closeNewSystemModal()">×</button>
       </div>
       
       <form (ngSubmit)="onSubmitNewSystem()" #systemForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="name">Name *</label>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
+          <app-selectable-text-input
+            #nameField
+            id="name"
+            name="name"
             [(ngModel)]="newSystem.name"
-            #nameField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
-            placeholder="Enter system name (e.g. Nintendo Switch)">
-          <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
+            #nameNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
+            placeholder="">
+          </app-selectable-text-input>
+          <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
             Name is required
           </div>
         </div>
 
         <div class="form-group">
           <label for="generation">Generation *</label>
-          <input 
-            type="number" 
-            id="generation" 
-            name="generation" 
+          <app-selectable-number-input
+            id="generation"
+            name="generation"
             [(ngModel)]="newSystem.generation"
             #generationField="ngModel"
             required
-            min="1"
+            [min]="1"
+            [step]="1"
             class="form-input"
-            placeholder="Enter generation number (e.g. 9)">
+            placeholder="">
+          </app-selectable-number-input>
           <div *ngIf="generationField.invalid && generationField.touched" class="error-text">
             Generation is required and must be a positive number
           </div>
         </div>
 
-        <div class="form-group checkbox-group">
-          <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              id="handheld" 
-              name="handheld" 
-              [(ngModel)]="newSystem.handheld"
-              class="checkbox-input">
-            <span class="checkbox-text">Handheld</span>
-          </label>
+        <div class="form-group">
+          <app-custom-checkbox
+            id="handheld"
+            name="handheld"
+            label="Handheld"
+            [(ngModel)]="newSystem.handheld">
+          </app-custom-checkbox>
         </div>
 
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="system" 
-          sectionTitle="System Custom Fields"
           [(customFieldValues)]="newSystem.customFieldValues">
         </app-dynamic-custom-fields>
 
@@ -129,4 +157,35 @@
       </form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the system <strong>"{{systemToDelete?.name}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteSystem()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="system"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

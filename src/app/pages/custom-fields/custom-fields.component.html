@@ -1,9 +1,14 @@
 <div class="custom-fields-container">
   <div class="header-section">
     <h1>Custom Fields</h1>
-    <button type="button" class="new-button" (click)="openNewCustomFieldModal()">
-      New
-    </button>
+    <div class="header-buttons">
+      <button type="button" class="new-button" (click)="openNewCustomFieldModal()">
+        New
+      </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+    </div>
   </div>
 
   <div class="content-section">
@@ -19,6 +24,17 @@
 
     <!-- Custom Fields List -->
     <div *ngIf="!isLoading && !errorMessage" class="custom-fields-list">
+      <!-- Filter Status -->
+      <div *ngIf="currentFilter" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilter()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+
       <div *ngIf="customFields.length === 0" class="no-fields-message">
         <p>No custom fields found.</p>
       </div>
@@ -27,14 +43,21 @@
         <table class="custom-fields-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Entity</th>
+              <th class="sortable-header" (click)="sortTable('name')">
+                Name <span class="sort-icon">{{getSortIcon('name')}}</span>
+              </th>
+              <th class="sortable-header" (click)="sortTable('type')">
+                Type <span class="sort-icon">{{getSortIcon('type')}}</span>
+              </th>
+              <th class="sortable-header" (click)="sortTable('entity')">
+                Entity <span class="sort-icon">{{getSortIcon('entity')}}</span>
+              </th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let field of customFields" class="table-row" (click)="startEditingField(field)">
-              <td class="field-name">
+            <tr *ngFor="let field of sortedCustomFields" class="table-row">
+              <td class="field-name" (click)="startEditingField(field)">
                 <div *ngIf="editingFieldId !== field.id" class="field-name-display">
                   {{field.name}}
                 </div>
@@ -49,11 +72,20 @@
                     #nameInput>
                 </div>
               </td>
-              <td class="field-type">
+              <td class="field-type" (click)="startEditingField(field)">
                 <span class="type-badge" [class]="'type-' + field.type">{{field.type}}</span>
               </td>
-              <td class="field-entity">
-                <span class="entity-badge">{{field.entityKey}}</span>
+              <td class="field-entity" (click)="startEditingField(field)">
+                <span class="entity-badge" [style.background-color]="getEntityColor(field.entityKey) + '20'" [style.color]="getEntityColor(field.entityKey)">{{getEntityDisplayName(field.entityKey)}}</span>
+              </td>
+              <td class="field-actions">
+                <button 
+                  type="button" 
+                  class="delete-button" 
+                  (click)="confirmDeleteCustomField(field)"
+                  title="Delete custom field">
+                  <span class="delete-text-icon">×</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -66,7 +98,7 @@
   <div *ngIf="showNewCustomFieldModal" class="modal-overlay" (click)="closeNewCustomFieldModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Create New Custom Field</h2>
+        <h2>New Custom Field</h2>
         <button type="button" class="close-button" (click)="closeNewCustomFieldModal()">×</button>
       </div>
       
@@ -82,7 +114,7 @@
             required
             minlength="1"
             class="form-input"
-            placeholder="Enter custom field name">
+            placeholder="">
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>
@@ -90,18 +122,15 @@
 
         <div class="form-group">
           <label for="type">Type *</label>
-          <select 
-            id="type" 
-            name="type" 
+          <app-filterable-dropdown
+            id="type"
+            name="type"
             [(ngModel)]="newCustomField.type"
             #typeField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a type</option>
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
-          </select>
+            [options]="typeOptions"
+            placeholder=""
+            [required]="true">
+          </app-filterable-dropdown>
           <div *ngIf="typeField.invalid && typeField.touched" class="error-text">
             Type is required
           </div>
@@ -109,21 +138,15 @@
 
         <div class="form-group">
           <label for="entityKey">Entity Type *</label>
-          <select 
-            id="entityKey" 
-            name="entityKey" 
+          <app-filterable-dropdown
+            id="entityKey"
+            name="entityKey"
             [(ngModel)]="newCustomField.entityKey"
             #entityKeyField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select an entity type</option>
-            <option value="toy">Toy</option>
-            <option value="system">System</option>
-            <option value="videoGame">Video Game</option>
-            <option value="videoGameBox">Video Game Box</option>
-            <option value="boardGame">Board Game</option>
-            <option value="boardGameBox">Board Game Box</option>
-          </select>
+            [options]="entityOptions"
+            placeholder=""
+            [required]="true">
+          </app-filterable-dropdown>
           <div *ngIf="entityKeyField.invalid && entityKeyField.touched" class="error-text">
             Entity type is required
           </div>
@@ -138,6 +161,63 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <p>Are you sure you want to delete the custom field <strong>"{{fieldToDelete?.name}}"</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-button" (click)="deleteCustomField()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Modal -->
+  <div *ngIf="showFilterModal" class="modal-overlay" (click)="closeFilterModal()">
+    <div class="modal-content filter-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Filter Custom Fields</h2>
+        <button type="button" class="close-button" (click)="closeFilterModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="filterEntity">Entity *</label>
+          <app-filterable-dropdown
+            id="filterEntity"
+            name="filterEntity"
+            [(ngModel)]="filterEntityKey"
+            [options]="entityOptions"
+            placeholder=""
+            [required]="true">
+          </app-filterable-dropdown>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeFilterModal()">
+          Cancel
+        </button>
+        <button type="button" class="filter-apply-button" (click)="applyFilter()" [disabled]="!filterEntityKey || isFiltering">
+          {{isFiltering ? 'Filtering...' : 'Apply Filter'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

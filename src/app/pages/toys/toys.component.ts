@@ -1,17 +1,22 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, Toy } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-toys',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './toys.component.html',
   styleUrl: './toys.component.scss'
 })
 export class ToysComponent implements OnInit, OnDestroy {
+  @ViewChild('nameField', { static: false }) nameField: any;
   toys: Toy[] = [];
   isLoading = false;
   errorMessage = '';
@@ -27,7 +32,13 @@ export class ToysComponent implements OnInit, OnDestroy {
     customFieldValues: [] as any[]
   };
 
-  constructor(private apiService: ApiService) {
+  showDeleteConfirmModal = false;
+  toyToDelete: Toy | null = null;
+  isDeleting = false;
+
+  showFilterModal = false;
+
+  constructor(private apiService: ApiService, public filterService: FilterService) {
     console.log('ToysComponent constructor called');
   }
 
@@ -46,7 +57,9 @@ export class ToysComponent implements OnInit, OnDestroy {
     
     console.log('Loading toys...');
     
-    this.apiService.getToys().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('toy');
+    
+    this.apiService.getToys(activeFilters).subscribe({
       next: (toys) => {
         console.log('Toys received:', toys);
         console.log('Number of toys:', toys.length);
@@ -56,8 +69,8 @@ export class ToysComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading toys:', error);
-        this.errorMessage = `Failed to load toys: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -80,6 +93,21 @@ export class ToysComponent implements OnInit, OnDestroy {
     return customField ? customField.value : '';
   }
 
+  getCustomFieldType(fieldName: string): string {
+    // Check any toy that has this field to determine its type
+    for (const toy of this.toys) {
+      const customField = toy.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
   openNewToyModal(): void {
     this.isUpdateMode = false;
     this.toyToUpdate = null;
@@ -89,6 +117,13 @@ export class ToysComponent implements OnInit, OnDestroy {
       set: '',
       customFieldValues: [] as any[]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   openUpdateToyModal(toy: Toy): void {
@@ -100,6 +135,13 @@ export class ToysComponent implements OnInit, OnDestroy {
       set: toy.set,
       customFieldValues: [...toy.customFieldValues]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   closeNewToyModal(): void {
@@ -134,8 +176,9 @@ export class ToysComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating toy:', error);
-          this.errorMessage = `Failed to update toy: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewToyModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     } else {
@@ -149,11 +192,75 @@ export class ToysComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error creating toy:', error);
-          this.errorMessage = `Failed to create toy: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewToyModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     }
+  }
+
+  confirmDeleteToy(toy: Toy): void {
+    this.toyToDelete = toy;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.toyToDelete = null;
+  }
+
+  deleteToy(): void {
+    if (!this.toyToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteToy(this.toyToDelete.id).subscribe({
+      next: () => {
+        console.log('Toy deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadToys();
+      },
+      error: (error) => {
+        console.error('Error deleting toy:', error);
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal(); // Close the modal on error
+        // Don't reload toys - keep existing display
+        // Error snackbar will be shown automatically by API service
+      }
+    });
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('toy', filters);
+    this.loadToys();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('toy');
+    this.loadToys();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('toy');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 
 }

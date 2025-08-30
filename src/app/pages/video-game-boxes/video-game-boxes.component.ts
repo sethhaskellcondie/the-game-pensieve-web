@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, VideoGameBox, System, VideoGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 
 @Component({
   selector: 'app-video-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent],
   templateUrl: './video-game-boxes.component.html',
   styleUrl: './video-game-boxes.component.scss'
 })
@@ -41,6 +43,10 @@ export class VideoGameBoxesComponent implements OnInit {
     }[],
     customFieldValues: [] as any[]
   };
+
+  showDeleteConfirmModal = false;
+  videoGameBoxToDelete: VideoGameBox | null = null;
+  isDeleting = false;
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -382,5 +388,50 @@ export class VideoGameBoxesComponent implements OnInit {
 
   cancelVideoGameEdit(index: number): void {
     this.editingVideoGameIndex = null;
+  }
+
+  confirmDeleteVideoGameBox(videoGameBox: VideoGameBox): void {
+    this.videoGameBoxToDelete = videoGameBox;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.videoGameBoxToDelete = null;
+  }
+
+  deleteVideoGameBox(): void {
+    if (!this.videoGameBoxToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteVideoGameBox(this.videoGameBoxToDelete.id).subscribe({
+      next: () => {
+        console.log('Video game box deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadVideoGameBoxes();
+      },
+      error: (error) => {
+        console.error('Error deleting video game box:', error);
+        this.errorMessage = `Failed to delete video game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+      }
+    });
+  }
+
+  getCustomFieldType(fieldName: string): string {
+    // Check any video game box that has this field to determine its type
+    for (const box of this.videoGameBoxes) {
+      const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
   }
 }

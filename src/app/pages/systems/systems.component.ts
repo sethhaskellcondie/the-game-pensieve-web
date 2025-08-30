@@ -1,17 +1,25 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { SelectableNumberInputComponent } from '../../components/selectable-number-input/selectable-number-input.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-systems',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableNumberInputComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './systems.component.html',
   styleUrl: './systems.component.scss'
 })
 export class SystemsComponent implements OnInit, OnDestroy {
+  @ViewChild('nameField', { static: false }) nameField: any;
+  
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
@@ -28,7 +36,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
     customFieldValues: [] as any[]
   };
 
-  constructor(private apiService: ApiService) {}
+  showDeleteConfirmModal = false;
+  systemToDelete: System | null = null;
+  isDeleting = false;
+
+  showFilterModal = false;
+
+  constructor(private apiService: ApiService, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadSystems();
@@ -42,7 +56,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getSystems().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('system');
+    
+    this.apiService.getSystems(activeFilters).subscribe({
       next: (systems) => {
         console.log('Systems received:', systems);
         console.log('Number of systems:', systems.length);
@@ -52,8 +68,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading systems:', error);
-        this.errorMessage = `Failed to load systems: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
+        // Error snackbar will be shown automatically by API service
       }
     });
   }
@@ -76,6 +92,21 @@ export class SystemsComponent implements OnInit, OnDestroy {
     return customField ? customField.value : '';
   }
 
+  getCustomFieldType(fieldName: string): string {
+    // Check any system that has this field to determine its type
+    for (const system of this.systems) {
+      const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+      if (customField && customField.customFieldType) {
+        return customField.customFieldType;
+      }
+    }
+    return 'text'; // default to text if type is unknown
+  }
+
+  isCustomFieldBoolean(fieldName: string): boolean {
+    return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
   openNewSystemModal(): void {
     this.isUpdateMode = false;
     this.systemToUpdate = null;
@@ -86,6 +117,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
       handheld: false,
       customFieldValues: [] as any[]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   openUpdateSystemModal(system: System): void {
@@ -98,6 +136,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
       handheld: system.handheld,
       customFieldValues: [...system.customFieldValues]
     };
+    
+    // Focus the name field after the view updates
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 0);
   }
 
   closeNewSystemModal(): void {
@@ -137,8 +182,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating system:', error);
-          this.errorMessage = `Failed to update system: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewSystemModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     } else {
@@ -152,11 +198,75 @@ export class SystemsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error creating system:', error);
-          this.errorMessage = `Failed to create system: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewSystemModal(); // Close the modal on error
+          // Error snackbar will be shown automatically by API service
         }
       });
     }
+  }
+
+  confirmDeleteSystem(system: System): void {
+    this.systemToDelete = system;
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.systemToDelete = null;
+  }
+
+  deleteSystem(): void {
+    if (!this.systemToDelete || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteSystem(this.systemToDelete.id).subscribe({
+      next: () => {
+        console.log('System deleted successfully');
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        this.loadSystems();
+      },
+      error: (error) => {
+        console.error('Error deleting system:', error);
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal(); // Close the modal on error
+        // Don't reload systems - keep existing display
+        // Error snackbar will be shown automatically by API service
+      }
+    });
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('system', filters);
+    this.loadSystems();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('system');
+    this.loadSystems();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('system');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 
 }

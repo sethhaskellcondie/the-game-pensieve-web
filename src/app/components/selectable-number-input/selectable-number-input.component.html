@@ -1,0 +1,15 @@
+<input 
+  #numberInput
+  type="number" 
+  [id]="id"
+  [placeholder]="placeholder"
+  [min]="min"
+  [max]="max"
+  [step]="step"
+  [disabled]="disabled"
+  (focus)="onInputFocus()"
+  (input)="onInputChange($event)"
+  (blur)="onInputBlur()"
+  (keyup)="onKeyup($event)"
+  class="selectable-number-input"
+>

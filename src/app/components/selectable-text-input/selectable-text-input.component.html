@@ -1,0 +1,13 @@
+<input
+  #inputElement
+  [type]="type"
+  [id]="id"
+  [name]="name"
+  [value]="value"
+  [placeholder]="placeholder"
+  [required]="required"
+  [attr.minlength]="minlength"
+  [disabled]="disabled"
+  (input)="onInput($event)"
+  (focus)="onFocus($event)"
+  (blur)="onBlur()">

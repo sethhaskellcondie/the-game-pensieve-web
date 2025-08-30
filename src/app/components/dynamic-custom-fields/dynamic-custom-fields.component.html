@@ -27,7 +27,7 @@
         (ngModelChange)="onFieldValueChange()"
         (keyup.enter)="onEnterPressed()"
         class="custom-field-input"
-        [placeholder]="'Enter ' + field.name.toLowerCase()">
+        [placeholder]="">
     </div>
     
     <!-- Number Field -->
@@ -35,29 +35,26 @@
       <label [for]="'field-' + field.id" class="custom-field-label">
         {{field.name}}
       </label>
-      <input 
-        type="number"
+      <app-selectable-number-input
         [id]="'field-' + field.id"
         [name]="'field-' + field.id"
         [(ngModel)]="fieldValues[field.id]"
         (ngModelChange)="onFieldValueChange()"
         (keyup.enter)="onEnterPressed()"
         class="custom-field-input"
-        [placeholder]="'Enter ' + field.name.toLowerCase()">
+        [placeholder]="">
+      </app-selectable-number-input>
     </div>
     
-    <!-- Boolean Field - No separate label -->
+    <!-- Boolean Field -->
     <div *ngIf="field.type === 'boolean'" class="custom-field-checkbox-group">
-      <label class="custom-field-checkbox-label">
-        <input 
-          type="checkbox"
-          [id]="'field-' + field.id"
-          [name]="'field-' + field.id"
-          [(ngModel)]="fieldValues[field.id]"
-          (ngModelChange)="onFieldValueChange()"
-          class="custom-field-checkbox">
-        <span class="custom-field-checkbox-text">{{field.name}}</span>
-      </label>
+      <app-custom-checkbox
+        [id]="'field-' + field.id"
+        [name]="'field-' + field.id"
+        [label]="field.name"
+        [(ngModel)]="fieldValues[field.id]"
+        (ngModelChange)="onFieldValueChange()">
+      </app-custom-checkbox>
     </div>
   </div>
 </div>
