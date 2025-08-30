@@ -24,11 +24,8 @@ export class BoardGameBoxesComponent implements OnInit {
   errorMessage = '';
   customFieldNames: string[] = [];
   
-  showEditBoardGameBoxModal = false;
   showNewBoardGameBoxModal = false;
-  boardGameBoxToUpdate: BoardGameBox | null = null;
   isCreating = false;
-  isUpdating = false;
   boardGameBoxesForDropdown: BoardGameBox[] = [];
   boardGamesForDropdown: BoardGame[] = [];
   boardGameSelectionMode: 'existing' | 'new' | 'self-contained' = 'self-contained';
@@ -47,18 +44,6 @@ export class BoardGameBoxesComponent implements OnInit {
     }));
   }
   newBoardGameBox = {
-    title: '',
-    isExpansion: false,
-    isStandAlone: false,
-    baseSetId: null as string | null,
-    boardGameId: null as string | null,
-    newBoardGame: {
-      title: '',
-      customFieldValues: [] as any[]
-    },
-    customFieldValues: [] as any[]
-  };
-  editBoardGameBox = {
     title: '',
     isExpansion: false,
     isStandAlone: false,
@@ -249,91 +234,6 @@ export class BoardGameBoxesComponent implements OnInit {
   }
 
 
-  openEditBoardGameBoxModal(boardGameBox: BoardGameBox): void {
-    this.boardGameBoxToUpdate = boardGameBox;
-    this.showEditBoardGameBoxModal = true;
-    this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
-    
-    // Load existing board games for the dropdown
-    this.apiService.getBoardGames().subscribe({
-      next: (boardGames) => {
-        this.boardGamesForDropdown = boardGames;
-      },
-      error: (error) => {
-        console.error('Error loading board games:', error);
-      }
-    });
-    
-    this.editBoardGameBox = {
-      title: boardGameBox.title,
-      isExpansion: boardGameBox.isExpansion,
-      isStandAlone: boardGameBox.isStandAlone,
-      baseSetId: boardGameBox.baseSetId ? boardGameBox.baseSetId.toString() : null,
-      boardGameId: boardGameBox.boardGame?.id ? boardGameBox.boardGame.id.toString() : null,
-      newBoardGame: {
-        title: '',
-        customFieldValues: []
-      },
-      customFieldValues: [...boardGameBox.customFieldValues]
-    };
-    
-    // Focus the title field after the view updates
-    setTimeout(() => {
-      if (this.titleField && this.titleField.focus) {
-        this.titleField.focus();
-      }
-    }, 0);
-  }
-
-  closeEditBoardGameBoxModal(): void {
-    this.showEditBoardGameBoxModal = false;
-    this.boardGameBoxToUpdate = null;
-    this.editBoardGameBox = {
-      title: '',
-      isExpansion: false,
-      isStandAlone: false,
-      baseSetId: null,
-      boardGameId: null,
-      newBoardGame: {
-        title: '',
-        customFieldValues: []
-      },
-      customFieldValues: []
-    };
-  }
-
-
-  onSubmitEditBoardGameBox(): void {
-    if (this.isUpdating || !this.editBoardGameBox.title || !this.boardGameBoxToUpdate) {
-      return;
-    }
-    
-    this.isUpdating = true;
-    this.errorMessage = '';
-    
-    const boardGameBoxData = {
-      title: this.editBoardGameBox.title,
-      isExpansion: this.editBoardGameBox.isExpansion,
-      isStandAlone: this.editBoardGameBox.isStandAlone,
-      baseSetId: this.editBoardGameBox.baseSetId ? parseInt(this.editBoardGameBox.baseSetId.toString()) : null,
-      boardGameId: this.editBoardGameBox.boardGameId ? parseInt(this.editBoardGameBox.boardGameId.toString()) : null,
-      customFieldValues: this.editBoardGameBox.customFieldValues
-    };
-    
-    this.apiService.updateBoardGameBox(this.boardGameBoxToUpdate.id, boardGameBoxData).subscribe({
-      next: (response) => {
-        console.log('Board game box updated successfully:', response);
-        this.isUpdating = false;
-        this.closeEditBoardGameBoxModal();
-        this.loadBoardGameBoxes(); // Refresh the board game boxes list
-      },
-      error: (error) => {
-        console.error('Error updating board game box:', error);
-        this.errorMessage = `Failed to update board game box: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-      }
-    });
-  }
 
   swapView(): void {
     this.router.navigate(['/board-games']);

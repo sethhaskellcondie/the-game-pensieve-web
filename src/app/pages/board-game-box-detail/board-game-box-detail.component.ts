@@ -1,21 +1,56 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService, BoardGameBox } from '../../services/api.service';
+import { ApiService, BoardGame, BoardGameBox } from '../../services/api.service';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
+import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 
 @Component({
   selector: 'app-board-game-box-detail',
   standalone: true,
-  imports: [CommonModule, BooleanDisplayComponent],
+  imports: [CommonModule, FormsModule, BooleanDisplayComponent, DynamicCustomFieldsComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent],
   templateUrl: './board-game-box-detail.component.html',
   styleUrl: './board-game-box-detail.component.scss'
 })
 export class BoardGameBoxDetailComponent implements OnInit {
+  @ViewChild('titleField', { static: false }) titleField: any;
+  
   boardGameBox: BoardGameBox | null = null;
   isLoading = false;
   errorMessage = '';
   boardGameBoxes: BoardGameBox[] = [];
+  
+  showEditBoardGameBoxModal = false;
+  isUpdating = false;
+  boardGameBoxesForDropdown: BoardGameBox[] = [];
+  boardGamesForDropdown: BoardGame[] = [];
+  
+  get boardGameOptions(): DropdownOption[] {
+    return this.boardGamesForDropdown.map(game => ({
+      value: game.id.toString(),
+      label: game.title
+    }));
+  }
+  
+  get baseSetOptions(): DropdownOption[] {
+    return this.boardGameBoxesForDropdown.map(box => ({
+      value: box.id.toString(),
+      label: box.title
+    }));
+  }
+  
+  editBoardGameBox = {
+    title: '',
+    isExpansion: false,
+    isStandAlone: false,
+    baseSetId: null as string | null,
+    boardGameId: null as string | null,
+    customFieldValues: [] as any[]
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -77,9 +112,90 @@ export class BoardGameBoxDetailComponent implements OnInit {
     this.router.navigate(['/board-game', boardGameId]);
   }
 
+  openEditBoardGameBoxModal(): void {
+    if (!this.boardGameBox) return;
+    
+    this.showEditBoardGameBoxModal = true;
+    this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
+    
+    // Load existing board games for the dropdown
+    this.apiService.getBoardGames().subscribe({
+      next: (boardGames) => {
+        this.boardGamesForDropdown = boardGames;
+      },
+      error: (error) => {
+        console.error('Error loading board games:', error);
+      }
+    });
+    
+    this.editBoardGameBox = {
+      title: this.boardGameBox.title,
+      isExpansion: this.boardGameBox.isExpansion,
+      isStandAlone: this.boardGameBox.isStandAlone,
+      baseSetId: this.boardGameBox.baseSetId ? this.boardGameBox.baseSetId.toString() : null,
+      boardGameId: this.boardGameBox.boardGame?.id ? this.boardGameBox.boardGame.id.toString() : null,
+      customFieldValues: [...this.boardGameBox.customFieldValues]
+    };
+    
+    // Focus the title field after the view updates
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      }
+    }, 0);
+  }
+
+  closeEditBoardGameBoxModal(): void {
+    this.showEditBoardGameBoxModal = false;
+    this.editBoardGameBox = {
+      title: '',
+      isExpansion: false,
+      isStandAlone: false,
+      baseSetId: null,
+      boardGameId: null,
+      customFieldValues: []
+    };
+  }
+
+  onSubmitEditBoardGameBox(): void {
+    if (this.isUpdating || !this.editBoardGameBox.title || !this.boardGameBox) {
+      return;
+    }
+    
+    this.isUpdating = true;
+    this.errorMessage = '';
+    
+    const boardGameBoxData = {
+      title: this.editBoardGameBox.title,
+      isExpansion: this.editBoardGameBox.isExpansion,
+      isStandAlone: this.editBoardGameBox.isStandAlone,
+      baseSetId: this.editBoardGameBox.baseSetId ? parseInt(this.editBoardGameBox.baseSetId.toString()) : null,
+      boardGameId: this.editBoardGameBox.boardGameId ? parseInt(this.editBoardGameBox.boardGameId.toString()) : null,
+      customFieldValues: this.editBoardGameBox.customFieldValues
+    };
+    
+    this.apiService.updateBoardGameBox(this.boardGameBox.id, boardGameBoxData).subscribe({
+      next: (response) => {
+        console.log('Board game box updated successfully:', response);
+        this.isUpdating = false;
+        this.closeEditBoardGameBoxModal();
+        this.loadBoardGameBox(this.boardGameBox!.id); // Refresh the current board game box
+      },
+      error: (error) => {
+        console.error('Error updating board game box:', error);
+        this.errorMessage = `Failed to update board game box: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+      }
+    });
+  }
+
+  onExpansionChange(isExpansion: boolean): void {
+    if (!isExpansion) {
+      this.editBoardGameBox.baseSetId = null;
+    }
+  }
+
   editBoardGameBox(): void {
-    // Navigate back to the board game boxes page and somehow trigger edit modal
-    // For now, just navigate back - this could be enhanced later
-    this.router.navigate(['/board-game-boxes']);
+    this.openEditBoardGameBoxModal();
   }
 }
