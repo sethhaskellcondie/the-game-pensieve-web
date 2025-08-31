@@ -137,13 +137,28 @@
     color: #64b5f6;
   }
 
-  .ui-settings-section h2 {
+  .ui-settings-section h2,
+  .api-section h2 {
     color: #64b5f6;
     border-bottom-color: #64b5f6;
   }
 
   .toggle-label {
     color: #64b5f6;
+  }
+
+  .api-button {
+    background-color: #64b5f6;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
   }
 
   .loading-message, .error-message {

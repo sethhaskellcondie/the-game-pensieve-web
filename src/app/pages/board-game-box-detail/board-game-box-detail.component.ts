@@ -139,27 +139,28 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
     this.apiService.getBoardGames().subscribe({
       next: (boardGames) => {
         this.boardGamesForDropdown = boardGames;
+        
+        // Set form data after board games are loaded
+        this.editBoardGameBoxData = {
+          title: this.boardGameBox!.title,
+          isExpansion: this.boardGameBox!.isExpansion,
+          isStandAlone: this.boardGameBox!.isStandAlone,
+          baseSetId: this.boardGameBox!.baseSetId ? this.boardGameBox!.baseSetId.toString() : null,
+          boardGameId: this.boardGameBox!.boardGame?.id ? this.boardGameBox!.boardGame.id.toString() : null,
+          customFieldValues: [...this.boardGameBox!.customFieldValues]
+        };
+        
+        // Focus the title field after the view updates
+        setTimeout(() => {
+          if (this.titleField && this.titleField.focus) {
+            this.titleField.focus();
+          }
+        }, 0);
       },
       error: (error) => {
         console.error('Error loading board games:', error);
       }
     });
-    
-    this.editBoardGameBoxData = {
-      title: this.boardGameBox.title,
-      isExpansion: this.boardGameBox.isExpansion,
-      isStandAlone: this.boardGameBox.isStandAlone,
-      baseSetId: this.boardGameBox.baseSetId ? this.boardGameBox.baseSetId.toString() : null,
-      boardGameId: this.boardGameBox.boardGame?.id ? this.boardGameBox.boardGame.id.toString() : null,
-      customFieldValues: [...this.boardGameBox.customFieldValues]
-    };
-    
-    // Focus the title field after the view updates
-    setTimeout(() => {
-      if (this.titleField && this.titleField.focus) {
-        this.titleField.focus();
-      }
-    }, 0);
   }
 
   closeEditBoardGameBoxModal(): void {
