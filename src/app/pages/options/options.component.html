@@ -1,4 +1,19 @@
 <div class="options-container">
+  <div class="ui-settings-section">
+    <h2>UI Settings</h2>
+    <div class="settings-group">
+      <div class="toggle-container">
+        <label for="darkModeToggle" class="toggle-label">Dark Mode</label>
+        <input 
+          type="checkbox" 
+          id="darkModeToggle"
+          [checked]="isDarkMode"
+          (change)="onDarkModeToggle($any($event.target).checked)"
+          class="toggle-input">
+      </div>
+    </div>
+  </div>
+
   <div class="api-section">
     <h2>API Tools</h2>
     <div class="button-group">
