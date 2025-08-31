@@ -77,3 +77,63 @@
     -moz-appearance: textfield;
   }
 }
+
+// Dark Mode Styles
+:host .selectable-number-input.dark-mode {
+  background-color: #1a1a1a;
+  border-color: #555;
+  color: #e0e0e0;
+
+  &:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+  }
+
+  &:disabled {
+    background-color: #2d2d2d;
+    color: #888;
+  }
+
+  &::placeholder {
+    color: #888;
+  }
+}
+
+:host.form-input .selectable-number-input.dark-mode {
+  background-color: #1a1a1a;
+  border-color: #555;
+  color: #e0e0e0;
+
+  &:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: #666;
+  }
+
+  &:disabled {
+    background-color: #2d2d2d;
+    color: #888;
+  }
+
+  &::placeholder {
+    color: #888;
+  }
+}
+
+:host.custom-field-input .selectable-number-input.dark-mode {
+  background-color: #1a1a1a;
+  border-color: #555;
+  color: #e0e0e0;
+
+  &:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+  }
+
+  &::placeholder {
+    color: #888;
+  }
+}

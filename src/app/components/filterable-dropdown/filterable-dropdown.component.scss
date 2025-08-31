@@ -128,3 +128,62 @@
     padding: 10px;
   }
 }
+
+// Dark Mode Styles
+.filterable-dropdown.dark-mode {
+  .dropdown-input {
+    background-color: #1a1a1a;
+    border-color: #555;
+    color: #e0e0e0;
+
+    &:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    }
+
+    &:disabled {
+      background-color: #2d2d2d;
+      color: #888;
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: #ff6b6b;
+    }
+
+    &::placeholder {
+      color: #888;
+    }
+  }
+
+  .dropdown-arrow {
+    color: #b0b0b0;
+  }
+
+  .dropdown-input:focus + .dropdown-arrow {
+    color: #64b5f6;
+  }
+
+  .dropdown-options {
+    background: #2d2d2d;
+    border-color: #555;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .dropdown-option {
+    border-bottom-color: #404040;
+    color: #e0e0e0;
+
+    &:hover {
+      background-color: #3d3d3d;
+    }
+
+    &.selected {
+      background-color: #1e3a8a;
+      color: #64b5f6;
+    }
+  }
+
+  .dropdown-no-options {
+    color: #b0b0b0;
+  }
+}

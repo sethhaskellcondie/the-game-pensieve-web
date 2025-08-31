@@ -436,3 +436,181 @@
     opacity: 0.7;
   }
 }
+
+// Dark Mode Styles
+.board-game-detail-container.dark-mode {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #e0e0e0;
+
+  .header-section {
+    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+    box-shadow: 0 4px 20px rgba(100, 181, 246, 0.15);
+  }
+
+  .loading-message, .error-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+
+  .error-message p {
+    color: #ff6b6b;
+  }
+
+  .detail-content {
+    .content-section {
+      background: #2d2d2d;
+      border-color: rgba(100, 181, 246, 0.15);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+      h2 {
+        color: #64b5f6;
+
+        &::after {
+          background: linear-gradient(90deg, #64b5f6, #42a5f5);
+        }
+      }
+    }
+
+    .field-card {
+      background: #1a1a1a;
+      border-color: rgba(100, 181, 246, 0.2);
+    }
+
+    .field-header .field-name {
+      color: #64b5f6;
+    }
+
+    .field-content .field-text {
+      color: #e0e0e0;
+    }
+  }
+
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-content {
+    background: #2d2d2d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-header {
+    border-bottom-color: #404040;
+
+    h2 {
+      color: #64b5f6;
+    }
+  }
+
+  .close-button {
+    color: #b0b0b0;
+
+    &:hover {
+      color: #e0e0e0;
+    }
+  }
+
+  .form-group label {
+    color: #e0e0e0;
+  }
+
+  .error-text {
+    color: #ff6b6b;
+  }
+
+  .modal-actions {
+    border-top-color: #404040;
+  }
+
+  .cancel-button {
+    background-color: #404040;
+    color: #b0b0b0;
+    border-color: #555;
+
+    &:hover {
+      background-color: #555;
+      color: #e0e0e0;
+    }
+  }
+
+  .create-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  .boxes-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(100, 181, 246, 0.2);
+  }
+
+  .box-card {
+    background: #2d2d2d;
+    border-color: rgba(100, 181, 246, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    &::before {
+      background: linear-gradient(90deg, #64b5f6, #42a5f5);
+    }
+
+    &:hover {
+      box-shadow: 0 8px 32px rgba(100, 181, 246, 0.25);
+
+      .box-header h3 {
+        color: #93c5fd;
+      }
+    }
+  }
+
+  .box-header h3 {
+    color: #64b5f6;
+  }
+
+  .badge {
+    &.badge-expansion {
+      background-color: #4a2c00;
+      color: #ffb74d;
+      border-color: #6d4c00;
+    }
+
+    &.badge-base {
+      background-color: #1b4d1b;
+      color: #81c784;
+      border-color: #2e7d2e;
+    }
+
+    &.badge-standalone {
+      background-color: #0d3a47;
+      color: #4dd0e1;
+      border-color: #1a5a6b;
+    }
+
+    &.badge-not-standalone {
+      background-color: #4a1a1a;
+      color: #f48fb1;
+      border-color: #6d2d2d;
+    }
+  }
+
+  .box-field-item {
+    background: #1a1a1a;
+    border-color: rgba(100, 181, 246, 0.2);
+
+    .box-field-label {
+      color: #b0b0b0;
+    }
+
+    .box-field-value .box-field-text {
+      color: #e0e0e0;
+    }
+  }
+}

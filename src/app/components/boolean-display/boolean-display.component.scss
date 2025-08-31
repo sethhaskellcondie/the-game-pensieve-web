@@ -39,3 +39,22 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 }
+
+// Dark Mode Styles
+.boolean-badge.dark-mode {
+  &.true-value {
+    background-color: #1b4d1b;
+    color: #81c784;
+    border-color: #2e6b2e;
+  }
+  
+  &.false-value {
+    background-color: #4a2c00;
+    color: #ffb74d;
+    border-color: #6d3f00;
+  }
+  
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}

@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, CustomField, CustomFieldValue } from '../../services/api.service';
+import { SettingsService } from '../../services/settings.service';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
 import { SelectableNumberInputComponent } from '../selectable-number-input/selectable-number-input.component';
 
@@ -16,12 +19,14 @@ export interface DynamicFieldValue {
   templateUrl: './dynamic-custom-fields.component.html',
   styleUrl: './dynamic-custom-fields.component.scss'
 })
-export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
+export class DynamicCustomFieldsComponent implements OnInit, OnChanges, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() entityKey!: string;
   @Input() customFieldValues: CustomFieldValue[] = [];
   @Input() sectionTitle?: string;
   @Output() customFieldValuesChange = new EventEmitter<CustomFieldValue[]>();
   @Output() enterPressed = new EventEmitter<void>();
+  isDarkMode = false;
 
   customFields: CustomField[] = [];
   fieldValues: DynamicFieldValue = {};
@@ -32,12 +37,23 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges {
     return this.customFields.length > 0;
   }
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private settingsService: SettingsService) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+
     if (this.entityKey) {
       this.loadCustomFields();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

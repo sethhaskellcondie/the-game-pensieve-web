@@ -9,7 +9,7 @@
 </div>
 
 <!-- Custom Fields -->
-<div *ngIf="!isLoading && !errorMessage && customFields.length > 0" class="custom-fields-container">
+<div *ngIf="!isLoading && !errorMessage && customFields.length > 0" class="custom-fields-container" [class.dark-mode]="isDarkMode">
   <div *ngIf="sectionTitle" class="form-section">
     <h3 class="section-title">{{sectionTitle}}</h3>
   </div>

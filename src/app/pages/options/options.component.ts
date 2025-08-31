@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-options',
@@ -10,7 +13,8 @@ import { ApiService } from '../../services/api.service';
   templateUrl: './options.component.html',
   styleUrl: './options.component.scss'
 })
-export class OptionsComponent {
+export class OptionsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   isChecking = false;
   heartbeatResult = '';
   heartbeatStatus: 'success' | 'error' = 'success';
@@ -19,7 +23,29 @@ export class OptionsComponent {
   seedResult = '';
   seedStatus: 'success' | 'error' = 'success';
 
-  constructor(private apiService: ApiService) {}
+  isDarkMode = false;
+
+  constructor(
+    private apiService: ApiService,
+    private settingsService: SettingsService
+  ) {}
+
+  ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onDarkModeToggle(enabled: boolean): void {
+    this.settingsService.updateDarkMode(enabled);
+  }
 
   checkHeartbeat(): void {
     this.isChecking = true;

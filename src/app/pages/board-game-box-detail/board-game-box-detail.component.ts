@@ -1,13 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, BoardGame, BoardGameBox } from '../../services/api.service';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-board-game-box-detail',
@@ -16,13 +19,15 @@ import { FilterableDropdownComponent, DropdownOption } from '../../components/fi
   templateUrl: './board-game-box-detail.component.html',
   styleUrl: './board-game-box-detail.component.scss'
 })
-export class BoardGameBoxDetailComponent implements OnInit {
+export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('titleField', { static: false }) titleField: any;
   
   boardGameBox: BoardGameBox | null = null;
   isLoading = false;
   errorMessage = '';
   boardGameBoxes: BoardGameBox[] = [];
+  isDarkMode = false;
   
   showEditBoardGameBoxModal = false;
   isUpdating = false;
@@ -55,10 +60,17 @@ export class BoardGameBoxDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -68,6 +80,11 @@ export class BoardGameBoxDetailComponent implements OnInit {
         this.router.navigate(['/board-game-boxes']);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadBoardGameBox(id: number): void {

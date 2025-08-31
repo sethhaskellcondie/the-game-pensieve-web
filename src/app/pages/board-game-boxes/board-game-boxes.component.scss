@@ -754,3 +754,340 @@
     opacity: 0.7;
   }
 }
+
+// Dark Mode Styles
+.board-games-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+
+  .header-section h1 {
+    color: #64b5f6;
+  }
+
+  .new-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+  }
+
+  .filter-button, .refresh-button {
+    background-color: #64b5f6;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  .filter-status {
+    background-color: #1e3a8a;
+    border-left-color: #64b5f6;
+
+    .filter-label {
+      color: #93c5fd;
+    }
+
+    .filter-value {
+      background-color: #2d2d2d;
+      color: #64b5f6;
+    }
+
+    .clear-filter-button {
+      color: #93c5fd;
+      border-color: #64b5f6;
+
+      &:hover {
+        background-color: #64b5f6;
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .loading-message, .error-message, .no-games-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+
+  .error-message p {
+    color: #ff6b6b;
+  }
+
+  .table-container {
+    background: #2d2d2d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .board-games-table {
+    thead {
+      background-color: #1976d2;
+      
+      th.sortable-header:hover {
+        background-color: #1565c0;
+      }
+    }
+
+    tbody {
+      .table-row {
+        border-bottom-color: #404040;
+
+        &:hover {
+          background-color: #3d3d3d;
+        }
+      }
+
+      td {
+        &.game-title {
+          color: #64b5f6;
+        }
+
+        &.custom-field-value {
+          color: #b0b0b0;
+        }
+      }
+    }
+  }
+
+  .expansion-badge {
+    &.expansion-yes {
+      background-color: #4a2c00;
+      color: #ffb74d;
+    }
+
+    &.expansion-no {
+      background-color: #0d2940;
+      color: #64b5f6;
+    }
+  }
+
+  .standalone-badge {
+    &.standalone-yes {
+      background-color: #1b4d1b;
+      color: #81c784;
+    }
+
+    &.standalone-no {
+      background-color: #4d1b1b;
+      color: #f48fb1;
+    }
+  }
+
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-content {
+    background: #2d2d2d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-header {
+    border-bottom-color: #404040;
+
+    h2 {
+      color: #64b5f6;
+    }
+  }
+
+  .close-button {
+    color: #b0b0b0;
+
+    &:hover {
+      color: #e0e0e0;
+    }
+  }
+
+  .form-group label {
+    color: #e0e0e0;
+  }
+
+  .form-input, .form-select {
+    background-color: #1a1a1a;
+    border-color: #555;
+    color: #e0e0e0;
+
+    &:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: #ff6b6b;
+    }
+  }
+
+  .form-select option {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+
+    &[value=""] {
+      color: #888;
+    }
+  }
+
+  .error-text {
+    color: #ff6b6b;
+  }
+
+  .modal-actions {
+    border-top-color: #404040;
+  }
+
+  .cancel-button {
+    background-color: #404040;
+    color: #b0b0b0;
+    border-color: #555;
+
+    &:hover {
+      background-color: #555;
+      color: #e0e0e0;
+    }
+  }
+
+  .create-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  .checkbox-text, .radio-text {
+    color: #e0e0e0;
+  }
+
+  .section-title {
+    color: #64b5f6;
+  }
+
+  .edit-button, .details-button {
+    background-color: #64b5f6;
+    color: #1a1a1a;
+
+    &:hover {
+      background-color: #42a5f5;
+    }
+  }
+
+  .badge {
+    &.badge-expansion {
+      background-color: #4a2c00;
+      color: #ffb74d;
+      border-color: #6d3f00;
+    }
+
+    &.badge-base {
+      background-color: #1b4d1b;
+      color: #81c784;
+      border-color: #2e6b2e;
+    }
+
+    &.badge-standalone {
+      background-color: #0d2940;
+      color: #64b5f6;
+      border-color: #1e3a55;
+    }
+
+    &.badge-not-standalone {
+      background-color: #4d1b1b;
+      color: #f48fb1;
+      border-color: #662828;
+    }
+  }
+
+  .base-set-inline, .related-game-inline {
+    .base-set-label, .related-game-label {
+      color: #64b5f6;
+    }
+
+    .base-set-name, .related-game-name {
+      color: #e0e0e0;
+    }
+  }
+
+  .detail-section h3 {
+    color: #64b5f6;
+    border-bottom-color: #404040;
+  }
+
+  .game-item {
+    background-color: #1a1a1a;
+    border-color: #404040;
+  }
+
+  .game-header h4 {
+    color: #64b5f6;
+  }
+
+  .field-item {
+    .field-label {
+      color: #b0b0b0;
+    }
+
+    .field-value {
+      color: #e0e0e0;
+    }
+  }
+
+  .detail-item {
+    label {
+      color: #b0b0b0;
+    }
+
+    span {
+      color: #e0e0e0;
+    }
+  }
+
+  .delete-button {
+    color: #b0b0b0;
+
+    &:hover {
+      background-color: #4a1a1a;
+      color: #ff6b6b;
+    }
+  }
+
+  .delete-modal {
+    .modal-body {
+      p {
+        color: #e0e0e0;
+
+        &.warning-text {
+          color: #ff6b6b;
+        }
+      }
+
+      strong {
+        color: #64b5f6;
+      }
+    }
+  }
+
+  .delete-confirm-button {
+    background-color: #ff6b6b;
+
+    &:hover:not(:disabled) {
+      background-color: #ff5252;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+}

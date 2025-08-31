@@ -96,6 +96,15 @@ export interface BoardGame {
   customFieldValues: CustomFieldValue[];
 }
 
+export interface Metadata {
+  id: number;
+  key: string;
+  value: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -428,6 +437,41 @@ export class ApiService {
     })
       .pipe(
         map(response => response.data)
+      );
+  }
+
+  getMetadata(key: string): Observable<Metadata> {
+    return this.http.get<{data: Metadata, errors: any}>(`${this.baseUrl}/metadata/${key}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
+  createMetadata(metadata: { key: string; value: string }): Observable<Metadata> {
+    return this.http.post<{data: Metadata, errors: any}>(`${this.baseUrl}/metadata`, {
+      metadata: metadata
+    })
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
+  updateMetadata(key: string, value: string): Observable<Metadata> {
+    return this.http.patch<{data: Metadata, errors: any}>(`${this.baseUrl}/metadata/${key}`, {
+      value: value
+    })
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
+  deleteMetadata(key: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/metadata/${key}`)
+      .pipe(
+        catchError(this.handleHttpError)
       );
   }
 }

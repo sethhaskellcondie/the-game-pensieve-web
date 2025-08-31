@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, System } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
@@ -9,6 +11,7 @@ import { SelectableNumberInputComponent } from '../../components/selectable-numb
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-systems',
@@ -18,12 +21,14 @@ import { EntityFilterModalComponent } from '../../components/entity-filter-modal
   styleUrl: './systems.component.scss'
 })
 export class SystemsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('nameField', { static: false }) nameField: any;
   
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  isDarkMode = false;
   
   showNewSystemModal = false;
   isCreating = false;
@@ -42,14 +47,25 @@ export class SystemsComponent implements OnInit, OnDestroy {
 
   showFilterModal = false;
 
-  constructor(private apiService: ApiService, public filterService: FilterService) {}
+  constructor(
+    private apiService: ApiService, 
+    public filterService: FilterService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+    
     this.loadSystems();
   }
 
   ngOnDestroy(): void {
-    // Component cleanup
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadSystems(): void {

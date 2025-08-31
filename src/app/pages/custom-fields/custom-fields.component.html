@@ -1,4 +1,4 @@
-<div class="custom-fields-container">
+<div class="custom-fields-container" [class.dark-mode]="isDarkMode">
   <div class="header-section">
     <h1>Custom Fields</h1>
     <div class="header-buttons">
@@ -105,16 +105,15 @@
       <form (ngSubmit)="onSubmitNewCustomField()" #customFieldForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="name">Name *</label>
-          <input 
-            type="text" 
+          <app-selectable-text-input
             id="name" 
             name="name" 
             [(ngModel)]="newCustomField.name"
             #nameField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
+          </app-selectable-text-input>
           <div *ngIf="nameField.invalid && nameField.touched" class="error-text">
             Name is required
           </div>

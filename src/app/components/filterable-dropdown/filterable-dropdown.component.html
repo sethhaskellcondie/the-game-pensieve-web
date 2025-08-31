@@ -1,4 +1,4 @@
-<div class="filterable-dropdown" (click)="onDropdownClick($event)">
+<div class="filterable-dropdown" [class.dark-mode]="isDarkMode" (click)="onDropdownClick($event)">
   <div class="dropdown-input-container">
     <input
       type="text"

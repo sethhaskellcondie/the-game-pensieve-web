@@ -617,3 +617,136 @@
   }
 }
 
+// Dark Mode Styles
+.video-games-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+
+  .header-section h1 {
+    color: #64b5f6;
+  }
+
+  .filter-button, .refresh-button {
+    background-color: #64b5f6;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  .filter-status {
+    background-color: #1e3a8a;
+    border-left-color: #64b5f6;
+
+    .filter-label {
+      color: #93c5fd;
+    }
+
+    .filter-value {
+      background-color: #2d2d2d;
+      color: #64b5f6;
+    }
+
+    .clear-filter-button {
+      color: #93c5fd;
+      border-color: #64b5f6;
+
+      &:hover {
+        background-color: #64b5f6;
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .loading-message, .error-message, .no-games-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+
+  .error-message p {
+    color: #ff6b6b;
+  }
+
+  .table-container {
+    background: #2d2d2d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .video-games-table {
+    thead {
+      background-color: #1976d2;
+      
+      th.sortable-header:hover {
+        background-color: #1565c0;
+      }
+    }
+
+    tbody {
+      .table-row {
+        border-bottom-color: #404040;
+
+        &:hover {
+          background-color: #3d3d3d;
+        }
+      }
+
+      td {
+        &.game-title {
+          color: #64b5f6;
+        }
+
+        &.game-system {
+          color: #b0b0b0;
+        }
+
+        &.custom-field-value {
+          color: #b0b0b0;
+        }
+      }
+    }
+  }
+
+  .related-boxes-section {
+    .box-item {
+      background-color: #2d2d2d;
+      border-color: #404040;
+    }
+
+    .box-header h4 {
+      color: #64b5f6;
+    }
+
+    .box-type {
+      background-color: #404040;
+      color: #b0b0b0;
+    }
+
+    .field-item {
+      .field-label {
+        color: #b0b0b0;
+      }
+
+      .field-value {
+        color: #e0e0e0;
+      }
+    }
+  }
+
+  .detail-item {
+    label {
+      color: #b0b0b0;
+    }
+
+    span {
+      color: #e0e0e0;
+    }
+  }
+}
+

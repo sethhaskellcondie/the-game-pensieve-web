@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, ViewChild, AfterViewInit, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-selectable-number-input',
@@ -16,13 +19,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     }
   ]
 })
-export class SelectableNumberInputComponent implements ControlValueAccessor, AfterViewInit {
+export class SelectableNumberInputComponent implements ControlValueAccessor, AfterViewInit, OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('numberInput', { static: true }) numberInput!: ElementRef<HTMLInputElement>;
   
   @Input() id?: string;
   @Input() placeholder?: string = '';
   @Input() min?: number;
   @Input() max?: number;
+  isDarkMode = false;
+
+  constructor(private settingsService: SettingsService) {}
   @Input() step?: number = 1;
   @Input() disabled = false;
   
@@ -31,6 +38,19 @@ export class SelectableNumberInputComponent implements ControlValueAccessor, Aft
   private _value: number | null = null;
   private onChange = (value: number | null) => {};
   private onTouched = () => {};
+
+  ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngAfterViewInit(): void {
     // Ensure the input element exists

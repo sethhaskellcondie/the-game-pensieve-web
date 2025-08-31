@@ -1,5 +1,5 @@
 <div *ngIf="show" class="modal-overlay" (click)="closeModal()">
-  <div class="modal-content filter-modal" (click)="$event.stopPropagation()">
+  <div class="modal-content filter-modal" [class.dark-mode]="isDarkMode" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>Filter {{formatFieldName(entityType)}}</h2>
       <button type="button" class="close-button" (click)="closeModal()">×</button>

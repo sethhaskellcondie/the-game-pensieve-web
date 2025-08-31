@@ -1,6 +1,9 @@
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, Input, forwardRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-custom-checkbox',
@@ -16,13 +19,30 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     }
   ]
 })
-export class CustomCheckboxComponent implements ControlValueAccessor {
+export class CustomCheckboxComponent implements ControlValueAccessor, OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() label: string = '';
   @Input() id: string = '';
   @Input() name: string = '';
 
   value: boolean = false;
   disabled: boolean = false;
+  isDarkMode = false;
+
+  constructor(private settingsService: SettingsService) {}
+
+  ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   private onChange = (value: boolean) => {};
   private onTouched = () => {};

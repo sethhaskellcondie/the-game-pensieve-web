@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, BoardGameBox, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
@@ -10,6 +12,7 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-board-game-boxes',
@@ -19,12 +22,14 @@ import { EntityFilterModalComponent } from '../../components/entity-filter-modal
   styleUrl: './board-game-boxes.component.scss'
 })
 export class BoardGameBoxesComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('titleField', { static: false }) titleField: any;
   
   boardGameBoxes: BoardGameBox[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  isDarkMode = false;
   
   showNewBoardGameBoxModal = false;
   isCreating = false;
@@ -63,14 +68,26 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   isDeleting = false;
   showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
+  constructor(
+    private apiService: ApiService, 
+    private router: Router, 
+    public filterService: FilterService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+    
     this.loadBoardGameBoxes();
   }
 
   ngOnDestroy(): void {
-    // Component cleanup
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadBoardGameBoxes(): void {

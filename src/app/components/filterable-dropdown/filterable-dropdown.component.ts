@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter, forwardRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsService } from '../../services/settings.service';
 
 export interface DropdownOption {
   value: string;
@@ -32,6 +35,10 @@ export class FilterableDropdownComponent implements ControlValueAccessor, OnInit
   searchText: string = '';
   selectedValue: string = '';
   isOpen: boolean = false;
+  isDarkMode = false;
+  private destroy$ = new Subject<void>();
+
+  constructor(private settingsService: SettingsService) {}
   filteredOptions: DropdownOption[] = [];
   
   private onChange = (value: string) => {};
@@ -41,6 +48,13 @@ export class FilterableDropdownComponent implements ControlValueAccessor, OnInit
   ngOnInit(): void {
     this.filteredOptions = [...this.options];
     this.updateSearchText();
+    
+    // Subscribe to dark mode changes
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
     
     // Add click listener to close dropdown when clicking outside
     this.clickListener = () => {
@@ -52,6 +66,8 @@ export class FilterableDropdownComponent implements ControlValueAccessor, OnInit
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.clickListener) {
       document.removeEventListener('click', this.clickListener);
     }

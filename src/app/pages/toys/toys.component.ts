@@ -1,12 +1,15 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, Toy } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-toys',
@@ -16,11 +19,13 @@ import { EntityFilterModalComponent } from '../../components/entity-filter-modal
   styleUrl: './toys.component.scss'
 })
 export class ToysComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('nameField', { static: false }) nameField: any;
   toys: Toy[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  isDarkMode = false;
   
   showNewToyModal = false;
   isCreating = false;
@@ -38,17 +43,29 @@ export class ToysComponent implements OnInit, OnDestroy {
 
   showFilterModal = false;
 
-  constructor(private apiService: ApiService, public filterService: FilterService) {
+  constructor(
+    private apiService: ApiService, 
+    public filterService: FilterService,
+    private settingsService: SettingsService
+  ) {
     console.log('ToysComponent constructor called');
   }
 
   ngOnInit(): void {
     console.log('ToysComponent ngOnInit called');
+    
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+    
     this.loadToys();
   }
 
   ngOnDestroy(): void {
-    // Component cleanup
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadToys(): void {

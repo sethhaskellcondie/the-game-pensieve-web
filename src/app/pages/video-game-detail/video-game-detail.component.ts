@@ -1,11 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, VideoGame, VideoGameBox } from '../../services/api.service';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-video-game-detail',
@@ -14,13 +17,15 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
   templateUrl: './video-game-detail.component.html',
   styleUrl: './video-game-detail.component.scss'
 })
-export class VideoGameDetailComponent implements OnInit {
+export class VideoGameDetailComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @ViewChild('titleField', { static: false }) titleField: any;
   
   videoGame: VideoGame | null = null;
   videoGameBoxes: VideoGameBox[] = [];
   isLoading = false;
   errorMessage = '';
+  isDarkMode = false;
   
   showEditVideoGameModal = false;
   isUpdating = false;
@@ -32,10 +37,17 @@ export class VideoGameDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -45,6 +57,11 @@ export class VideoGameDetailComponent implements OnInit {
         this.router.navigate(['/video-games']);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadVideoGame(id: number): void {
