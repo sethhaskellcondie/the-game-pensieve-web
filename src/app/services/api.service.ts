@@ -281,6 +281,14 @@ export class ApiService {
       );
   }
 
+  getVideoGame(id: number): Observable<VideoGame> {
+    return this.http.get<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
   getBoardGames(filters: FilterRequestDto[] = []): Observable<BoardGame[]> {
     return this.http.post<{data: BoardGame[], errors: any}>(`${this.baseUrl}/boardGames/function/search`, {
       filters: filters

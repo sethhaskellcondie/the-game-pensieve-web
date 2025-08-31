@@ -79,6 +79,10 @@ export class VideoGamesComponent implements OnInit {
     return customField ? customField.value : '';
   }
 
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/video-game', id]);
+  }
+
 
 
   loadSystems(): void {

@@ -5,6 +5,7 @@ import { BoardGamesComponent } from './pages/board-games/board-games.component';
 import { BoardGameBoxesComponent } from './pages/board-game-boxes/board-game-boxes.component';
 import { BoardGameBoxDetailComponent } from './pages/board-game-box-detail/board-game-box-detail.component';
 import { BoardGameDetailComponent } from './pages/board-game-detail/board-game-detail.component';
+import { VideoGameDetailComponent } from './pages/video-game-detail/video-game-detail.component';
 import { SystemsComponent } from './pages/systems/systems.component';
 import { ToysComponent } from './pages/toys/toys.component';
 import { CustomFieldsComponent } from './pages/custom-fields/custom-fields.component';
@@ -13,6 +14,7 @@ import { OptionsComponent } from './pages/options/options.component';
 export const routes: Routes = [
   { path: '', redirectTo: '/video-game-boxes', pathMatch: 'full' },
   { path: 'video-games', component: VideoGamesComponent },
+  { path: 'video-game/:id', component: VideoGameDetailComponent },
   { path: 'video-game-boxes', component: VideoGameBoxesComponent },
   { path: 'board-games', component: BoardGamesComponent },
   { path: 'board-game/:id', component: BoardGameDetailComponent },
