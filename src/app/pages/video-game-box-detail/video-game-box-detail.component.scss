@@ -1,0 +1,473 @@
+.video-game-box-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+  padding: 0;
+}
+
+.header-section {
+  background: linear-gradient(135deg, #0370ec 0%, #0256c7 100%);
+  color: white;
+  padding: 40px 0;
+  margin-bottom: 0;
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(3, 112, 236, 0.15);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h1 {
+    color: white;
+    font-size: 3rem;
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.header-right {
+  .edit-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  padding: 60px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  p {
+    font-size: 1.3rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.error-message p {
+  color: #dc3545;
+}
+
+.detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// Hero Section with Stock Properties
+.hero-section {
+  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  border-radius: 16px;
+  padding: 40px;
+  border: 2px solid rgba(3, 112, 236, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.stock-properties {
+  .property-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+  }
+}
+
+.property-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.2s ease;
+  
+  .property-icon {
+    font-size: 2rem;
+    opacity: 0.8;
+  }
+  
+  .property-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    
+    .property-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #9e9e9e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .property-value {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #333;
+      
+      &.text-physical {
+        color: #28a745;
+      }
+      
+      &.text-digital {
+        color: #0c5460;
+      }
+      
+      &.text-collection {
+        color: #856404;
+      }
+      
+      &.text-single {
+        color: #721c24;
+      }
+    }
+  }
+}
+
+// Content Sections
+.content-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(3, 112, 236, 0.08);
+  
+  h2 {
+    color: #0370ec;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+    position: relative;
+    padding-bottom: 12px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #0370ec, #0256c7);
+      border-radius: 2px;
+    }
+  }
+}
+
+// Custom Fields Design
+.custom-fields-modern {
+  .fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+}
+
+.field-card {
+  background: #f8f9ff;
+  border: 1px solid rgba(3, 112, 236, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.field-header {
+  margin-bottom: 12px;
+  
+  .field-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0370ec;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.field-content {
+  .field-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+  }
+}
+
+// Games Section
+.games-section {
+  background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%);
+  border: 2px solid rgba(3, 112, 236, 0.1);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.game-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0370ec, #0256c7);
+  }
+  
+  &.clickable-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(3, 112, 236, 0.12);
+    
+    .game-header h3 {
+      color: #0256c7;
+    }
+  }
+  
+  &.clickable-card:active {
+    transform: translateY(-2px);
+  }
+}
+
+.game-header {
+  margin-bottom: 16px;
+  
+  h3 {
+    color: #0370ec;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+    transition: color 0.2s ease;
+  }
+}
+
+.game-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.game-field-item {
+  background: #f8f9ff;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(3, 112, 236, 0.1);
+  
+  .game-field-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #9e9e9e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  
+  .game-field-value {
+    .game-field-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    
+    h1 {
+      font-size: 2.2rem;
+    }
+  }
+  
+  .detail-content {
+    padding: 20px;
+    gap: 24px;
+  }
+  
+  .property-row {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .content-section {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-section {
+    padding: 24px 0;
+  }
+  
+  .header-content h1 {
+    font-size: 1.8rem;
+  }
+  
+  .property-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .game-fields-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Modal Styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  h2 {
+    color: #0370ec;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #9e9e9e;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #666;
+  }
+}
+
+.modal-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancel-button, .create-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e0e0e0;
+  
+  &:hover {
+    background-color: #e2e6ea;
+  }
+}
+
+.create-button {
+  background-color: #28a745;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}

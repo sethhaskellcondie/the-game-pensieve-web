@@ -255,6 +255,14 @@ export class ApiService {
       );
   }
 
+  getVideoGameBox(id: number): Observable<VideoGameBox> {
+    return this.http.get<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
   getBoardGameBoxes(filters: FilterRequestDto[] = []): Observable<BoardGameBox[]> {
     return this.http.post<{data: BoardGameBox[], errors: any}>(`${this.baseUrl}/boardGameBoxes/function/search`, {
       filters: filters

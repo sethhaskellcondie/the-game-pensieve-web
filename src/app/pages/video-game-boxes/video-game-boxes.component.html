@@ -41,16 +41,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of videoGameBoxes" class="table-row">
-              <td class="game-title" (click)="openDetailVideoGameBoxModal(box)">{{box.title}}</td>
-              <td class="game-system" (click)="openDetailVideoGameBoxModal(box)">{{box.system.name}}</td>
-              <td class="game-physical" (click)="openDetailVideoGameBoxModal(box)">
+            <tr *ngFor="let box of videoGameBoxes" class="table-row" (click)="navigateToDetail(box.id)">
+              <td class="game-title">{{box.title}}</td>
+              <td class="game-system">{{box.system.name}}</td>
+              <td class="game-physical">
                 <app-boolean-display [value]="box.isPhysical" size="small"></app-boolean-display>
               </td>
-              <td class="game-collection" (click)="openDetailVideoGameBoxModal(box)">
+              <td class="game-collection">
                 <app-boolean-display [value]="box.isCollection" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailVideoGameBoxModal(box)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 
                   *ngIf="isCustomFieldBoolean(fieldName); else textValue"
                   [value]="getCustomFieldValue(box, fieldName)"

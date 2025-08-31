@@ -1,0 +1,167 @@
+<div class="video-game-box-detail-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 *ngIf="videoGameBox">{{videoGameBox.title}}</h1>
+      <div class="header-right" *ngIf="videoGameBox">
+        <button type="button" class="edit-button" (click)="editVideoGameBoxMethod()">
+          Edit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-message">
+    <p>Loading video game box details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-message">
+    <p>{{errorMessage}}</p>
+  </div>
+
+  <!-- Video Game Box Details -->
+  <div *ngIf="!isLoading && !errorMessage && videoGameBox" class="detail-content">
+    <!-- Stock Properties Hero Section -->
+    <div class="hero-section">
+      <div class="stock-properties">
+        <div class="property-row">
+          <div class="property-card system-card">
+            <div class="property-icon">🎮</div>
+            <div class="property-info">
+              <span class="property-label">System</span>
+              <span class="property-value">{{videoGameBox.system.name}}</span>
+            </div>
+          </div>
+          
+          <div class="property-card type-card">
+            <div class="property-icon">📦</div>
+            <div class="property-info">
+              <span class="property-label">Type</span>
+              <span class="property-value" [class]="videoGameBox.isPhysical ? 'text-physical' : 'text-digital'">
+                {{videoGameBox.isPhysical ? 'Physical' : 'Digital'}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="property-card collection-card">
+            <div class="property-icon">🎯</div>
+            <div class="property-info">
+              <span class="property-label">Content</span>
+              <span class="property-value" [class]="videoGameBox.isCollection ? 'text-collection' : 'text-single'">
+                {{videoGameBox.isCollection ? 'Collection' : 'Single Game'}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="property-card games-card">
+            <div class="property-icon">🕹️</div>
+            <div class="property-info">
+              <span class="property-label">Games</span>
+              <span class="property-value">{{videoGameBox.videoGames.length}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Game Box Custom Fields -->
+    <div class="content-section" *ngIf="videoGameBox.customFieldValues.length > 0">
+      <h2>Additional Details</h2>
+      <div class="custom-fields-modern">
+        <div class="fields-grid">
+          <div class="field-card" *ngFor="let field of videoGameBox.customFieldValues">
+            <div class="field-header">
+              <span class="field-name">{{field.customFieldName}}</span>
+            </div>
+            <div class="field-content">
+              <app-boolean-display 
+                *ngIf="field.customFieldType === 'boolean'; else textValue"
+                [value]="field.value"
+                size="large">
+              </app-boolean-display>
+              <ng-template #textValue>
+                <span class="field-text">{{field.value}}</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video Games in Box -->
+    <div class="content-section games-section" *ngIf="videoGameBox.videoGames.length > 0">
+      <h2>Games in this Box</h2>
+      <div class="games-grid">
+        <div class="game-card clickable-card" *ngFor="let game of videoGameBox.videoGames" (click)="navigateToVideoGame(game.id)">
+          <div class="game-header">
+            <h3>{{game.title}}</h3>
+          </div>
+          <div class="game-content" *ngIf="game.customFieldValues && game.customFieldValues.length > 0">
+            <div class="game-fields-grid">
+              <div class="game-field-item" *ngFor="let field of game.customFieldValues">
+                <span class="game-field-label">{{field.customFieldName}}</span>
+                <div class="game-field-value">
+                  <app-boolean-display 
+                    *ngIf="field.customFieldType === 'boolean'; else textValue"
+                    [value]="field.value"
+                    size="medium">
+                  </app-boolean-display>
+                  <ng-template #textValue>
+                    <span class="game-field-text">{{field.value}}</span>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Video Game Box Modal -->
+  <div *ngIf="showEditVideoGameBoxModal" class="modal-overlay" (click)="closeEditVideoGameBoxModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Update Video Game Box</h2>
+        <button type="button" class="close-button" (click)="closeEditVideoGameBoxModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitEditVideoGameBox()" #videoGameBoxForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <app-selectable-text-input
+            #titleField
+            id="title"
+            name="title"
+            [(ngModel)]="editVideoGameBoxData.title"
+            #titleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
+            placeholder="">
+          </app-selectable-text-input>
+          <div *ngIf="titleNgModel.invalid && titleNgModel.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="videoGameBox" 
+          sectionTitle=""
+          [(customFieldValues)]="editVideoGameBoxData.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditVideoGameBoxModal()">
+            Cancel
+          </button>
+          <button type="submit" class="create-button" [disabled]="!videoGameBoxForm.form.valid || isUpdating">
+            {{isUpdating ? 'Updating...' : 'Update'}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
