@@ -560,3 +560,180 @@
     opacity: 0.7;
   }
 }
+
+// Dark Mode Styles
+.custom-fields-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+  
+  .header-section h1 {
+    color: #64b5f6; // Lighter blue for dark mode
+  }
+  
+  .loading-message, .no-fields-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+  
+  .error-message p {
+    color: #ff6b6b; // Softer red for dark mode
+  }
+  
+  .table-container {
+    background: #2d2d2d;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .custom-fields-table {
+    thead {
+      background-color: #1976d2; // Darker blue for header
+      
+      th.sortable-header:hover {
+        background-color: #1565c0;
+      }
+    }
+    
+    tbody {
+      .table-row {
+        border-bottom: 1px solid #404040;
+        
+        &:hover {
+          background-color: #3d3d3d;
+        }
+      }
+      
+      td.field-name {
+        color: #64b5f6;
+        
+        &:hover .field-name-display {
+          background-color: #263238;
+        }
+      }
+    }
+  }
+  
+  .type-badge {
+    &.type-text {
+      background-color: #1e3a8a;
+      color: #93c5fd;
+    }
+    
+    &.type-number {
+      background-color: #581c87;
+      color: #c4b5fd;
+    }
+    
+    &.type-boolean {
+      background-color: #166534;
+      color: #86efac;
+    }
+    
+    &.type-timestamp {
+      background-color: #ea580c;
+      color: #fed7aa;
+    }
+  }
+  
+  .edit-input {
+    background-color: #2d2d2d !important;
+    color: #64b5f6 !important;
+    border-color: #64b5f6 !important;
+    
+    &:focus {
+      border-color: #42a5f5 !important;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2) !important;
+    }
+  }
+  
+  .delete-button {
+    color: #b0b0b0;
+    
+    &:hover {
+      background-color: #4a1a1a;
+      color: #ff6b6b;
+    }
+  }
+  
+  .filter-status {
+    background-color: #1e3a8a;
+    border-left-color: #64b5f6;
+  }
+  
+  .filter-label {
+    color: #93c5fd;
+  }
+  
+  .filter-value {
+    background-color: #2d2d2d;
+    color: #64b5f6;
+  }
+  
+  .clear-filter-button {
+    color: #93c5fd;
+    border-color: #93c5fd;
+    
+    &:hover {
+      background-color: #64b5f6;
+      color: #1a1a1a;
+    }
+  }
+  
+  // Modal dark mode styles
+  .modal-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+  
+  .modal-header {
+    border-bottom-color: #404040;
+    
+    h2 {
+      color: #64b5f6;
+    }
+  }
+  
+  .close-button {
+    color: #b0b0b0;
+    
+    &:hover {
+      color: #e0e0e0;
+    }
+  }
+  
+  .form-group label {
+    color: #e0e0e0;
+  }
+  
+  .form-input {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-color: #404040;
+    
+    &:focus {
+      border-color: #64b5f6;
+    }
+    
+    &.ng-invalid.ng-touched {
+      border-color: #ff6b6b;
+    }
+  }
+  
+  .modal-actions {
+    border-top-color: #404040;
+  }
+  
+  .cancel-button {
+    background-color: #404040;
+    color: #b0b0b0;
+    border-color: #555;
+    
+    &:hover {
+      background-color: #555;
+    }
+  }
+  
+  .error-text {
+    color: #ff6b6b;
+  }
+}

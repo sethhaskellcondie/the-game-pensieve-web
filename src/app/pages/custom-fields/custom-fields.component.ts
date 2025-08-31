@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, CustomField } from '../../services/api.service';
 import { IconService } from '../../services/icon.service';
+import { SettingsService } from '../../services/settings.service';
 import { SafeHtml } from '@angular/platform-browser';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 
@@ -13,7 +16,8 @@ import { FilterableDropdownComponent, DropdownOption } from '../../components/fi
   templateUrl: './custom-fields.component.html',
   styleUrl: './custom-fields.component.scss'
 })
-export class CustomFieldsComponent implements OnInit {
+export class CustomFieldsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   customFields: CustomField[] = [];
   sortedCustomFields: CustomField[] = [];
   isLoading = false;
@@ -60,11 +64,28 @@ export class CustomFieldsComponent implements OnInit {
   isFiltering = false;
   currentFilter: string | null = null;
 
-  constructor(private apiService: ApiService, public iconService: IconService) {}
+  isDarkMode = false;
+
+  constructor(
+    private apiService: ApiService, 
+    public iconService: IconService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+    
     this.loadSavedFilter();
     this.loadCustomFields();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getIconHtml(iconName: string): SafeHtml {

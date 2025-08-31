@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {ContainerComponent} from "./components/container/container.component";
 import { ErrorSnackbarComponent } from './components/error-snackbar/error-snackbar.component';
 import { SettingsService } from './services/settings.service';
@@ -12,8 +14,9 @@ import { SettingsService } from './services/settings.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   title: string = 'the-game-pensive-web';
+  private destroy$ = new Subject<void>();
 
   constructor(private settingsService: SettingsService) {}
 
@@ -26,5 +29,20 @@ export class AppComponent implements OnInit {
         console.error('Failed to load settings:', error);
       }
     });
+
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        if (darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

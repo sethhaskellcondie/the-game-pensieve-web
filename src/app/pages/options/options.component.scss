@@ -127,3 +127,67 @@
     padding: 8px 12px;
   }
 }
+
+// Dark Mode Styles
+.options-container.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+
+  .header-section h1 {
+    color: #64b5f6;
+  }
+
+  .ui-settings-section h2 {
+    color: #64b5f6;
+    border-bottom-color: #64b5f6;
+  }
+
+  .toggle-label {
+    color: #64b5f6;
+  }
+
+  .loading-message, .error-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+
+  .error-message p {
+    color: #ff6b6b;
+  }
+
+  .options-list {
+    .option-card {
+      background: #2d2d2d;
+      border-color: rgba(100, 181, 246, 0.15);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        border-color: rgba(100, 181, 246, 0.3);
+        box-shadow: 0 8px 32px rgba(100, 181, 246, 0.15);
+      }
+
+      .option-title {
+        color: #64b5f6;
+      }
+
+      .option-description {
+        color: #b0b0b0;
+      }
+    }
+  }
+
+  .status {
+    &.success {
+      color: #81c784;
+      background-color: #1b4d1b;
+      border-color: #2e6b2e;
+    }
+
+    &.error {
+      color: #ff6b6b;
+      background-color: #4d1b1b;
+      border-color: #662828;
+    }
+  }
+}
