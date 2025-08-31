@@ -1,45 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-board-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, EntityFilterModalComponent],
   templateUrl: './board-games.component.html',
   styleUrl: './board-games.component.scss'
 })
-export class BoardGamesComponent implements OnInit {
+export class BoardGamesComponent implements OnInit, OnDestroy {
   boardGames: BoardGame[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
   
   showDetailBoardGameModal = false;
-  showEditBoardGameModal = false;
   selectedBoardGame: BoardGame | null = null;
-  boardGameToUpdate: BoardGame | null = null;
-  isUpdating = false;
-  editBoardGame = {
-    title: '',
-    customFieldValues: [] as any[]
-  };
+  showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadBoardGames();
+  }
+
+  ngOnDestroy(): void {
+    // Component cleanup
   }
 
   loadBoardGames(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getBoardGames().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('boardGame');
+    
+    this.apiService.getBoardGames(activeFilters).subscribe({
       next: (boardGames) => {
         console.log('Board games received:', boardGames);
         console.log('Number of board games:', boardGames.length);
@@ -73,6 +75,10 @@ export class BoardGamesComponent implements OnInit {
     return customField ? customField.value : '';
   }
 
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/board-game', id]);
+  }
+
   openDetailBoardGameModal(boardGame: BoardGame): void {
     this.selectedBoardGame = boardGame;
     this.showDetailBoardGameModal = true;
@@ -83,66 +89,6 @@ export class BoardGamesComponent implements OnInit {
     this.selectedBoardGame = null;
   }
 
-  openEditBoardGameModal(boardGame: BoardGame): void {
-    this.boardGameToUpdate = boardGame;
-    this.showEditBoardGameModal = true;
-    this.editBoardGame = {
-      title: boardGame.title,
-      customFieldValues: [...boardGame.customFieldValues]
-    };
-  }
-
-  closeEditBoardGameModal(): void {
-    this.showEditBoardGameModal = false;
-    this.boardGameToUpdate = null;
-    this.editBoardGame = {
-      title: '',
-      customFieldValues: []
-    };
-  }
-
-  openEditFromDetail(): void {
-    if (this.selectedBoardGame) {
-      const boardGameToEdit = this.selectedBoardGame;
-      this.closeDetailBoardGameModal();
-      this.openEditBoardGameModal(boardGameToEdit);
-    }
-  }
-
-  openDetailFromEdit(): void {
-    if (this.boardGameToUpdate) {
-      const boardGameToDetail = this.boardGameToUpdate;
-      this.closeEditBoardGameModal();
-      this.openDetailBoardGameModal(boardGameToDetail);
-    }
-  }
-
-  onSubmitEditBoardGame(): void {
-    if (this.isUpdating || !this.editBoardGame.title || !this.boardGameToUpdate) {
-      return;
-    }
-    
-    this.isUpdating = true;
-    
-    const boardGameData = {
-      title: this.editBoardGame.title,
-      customFieldValues: this.editBoardGame.customFieldValues
-    };
-    
-    this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
-      next: (response) => {
-        console.log('Board game updated successfully:', response);
-        this.isUpdating = false;
-        this.closeEditBoardGameModal();
-        this.loadBoardGames(); // Refresh the board games list
-      },
-      error: (error) => {
-        console.error('Error updating board game:', error);
-        this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-      }
-    });
-  }
 
   swapView(): void {
     this.router.navigate(['/board-game-boxes']);
@@ -161,5 +107,36 @@ export class BoardGamesComponent implements OnInit {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('boardGame', filters);
+    this.loadBoardGames();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('boardGame');
+    this.loadBoardGames();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('boardGame');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 }

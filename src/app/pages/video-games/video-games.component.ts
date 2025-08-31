@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import { ApiService, VideoGame, System, VideoGameBox } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-video-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, EntityFilterModalComponent],
   templateUrl: './video-games.component.html',
   styleUrl: './video-games.component.scss'
 })
@@ -33,7 +35,9 @@ export class VideoGamesComponent implements OnInit {
   };
   
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  showFilterModal = false;
+
+  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadVideoGames();
@@ -45,7 +49,9 @@ export class VideoGamesComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getVideoGames().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('videoGame');
+    
+    this.apiService.getVideoGames(activeFilters).subscribe({
       next: (videoGames) => {
         console.log('Video games received:', videoGames);
         console.log('Number of video games:', videoGames.length);
@@ -77,6 +83,10 @@ export class VideoGamesComponent implements OnInit {
   getCustomFieldValue(game: VideoGame, fieldName: string): string {
     const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/video-game', id]);
   }
 
 
@@ -200,5 +210,36 @@ export class VideoGamesComponent implements OnInit {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('videoGame', filters);
+    this.loadVideoGames();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('videoGame');
+    this.loadVideoGames();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('videoGame');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 }

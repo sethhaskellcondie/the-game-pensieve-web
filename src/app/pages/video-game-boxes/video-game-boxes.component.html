@@ -5,6 +5,9 @@
       <button type="button" class="new-button" (click)="openNewVideoGameBoxModal()">
         New
       </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
       <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
         {{isLoading ? 'Loading...' : 'Swap View'}}
       </button>
@@ -24,6 +27,17 @@
 
     <!-- Video Game Boxes List -->
     <div *ngIf="!isLoading && !errorMessage" class="video-game-boxes-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('videoGameBox')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+      
       <div *ngIf="videoGameBoxes.length === 0" class="no-games-message">
         <p>No video game boxes found.</p>
       </div>
@@ -41,16 +55,16 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let box of videoGameBoxes" class="table-row">
-              <td class="game-title" (click)="openDetailVideoGameBoxModal(box)">{{box.title}}</td>
-              <td class="game-system" (click)="openDetailVideoGameBoxModal(box)">{{box.system.name}}</td>
-              <td class="game-physical" (click)="openDetailVideoGameBoxModal(box)">
+            <tr *ngFor="let box of videoGameBoxes" class="table-row" (click)="navigateToDetail(box.id)">
+              <td class="game-title">{{box.title}}</td>
+              <td class="game-system">{{box.system.name}}</td>
+              <td class="game-physical">
                 <app-boolean-display [value]="box.isPhysical" size="small"></app-boolean-display>
               </td>
-              <td class="game-collection" (click)="openDetailVideoGameBoxModal(box)">
+              <td class="game-collection">
                 <app-boolean-display [value]="box.isCollection" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openDetailVideoGameBoxModal(box)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 
                   *ngIf="isCustomFieldBoolean(fieldName); else textValue"
                   [value]="getCustomFieldValue(box, fieldName)"
@@ -372,4 +386,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="videoGameBox"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

@@ -2,7 +2,10 @@
   <div class="header-section">
     <h1>Video Games (Game View)</h1>
     <div class="header-buttons">
-  <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
+      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
         {{isLoading ? 'Loading...' : 'Swap View'}}
       </button>
     </div>
@@ -21,6 +24,17 @@
 
     <!-- Video Games List -->
     <div *ngIf="!isLoading && !errorMessage" class="video-games-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('videoGame')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+      
       <div *ngIf="videoGames.length === 0" class="no-games-message">
         <p>No video games found.</p>
       </div>
@@ -35,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of videoGames" class="table-row" (click)="openDetailVideoGameModal(game)">
+            <tr *ngFor="let game of videoGames" class="table-row" (click)="navigateToDetail(game.id)">
               <td class="game-title">{{game.title}}</td>
               <td class="game-system">{{game.system.name}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
@@ -209,4 +223,11 @@
       </form>
     </div>
   </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="videoGame"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

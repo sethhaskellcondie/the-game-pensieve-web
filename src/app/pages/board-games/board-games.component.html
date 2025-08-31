@@ -2,6 +2,9 @@
   <div class="header-section">
     <h1>Board Games (Game View)</h1>
     <div class="header-buttons">
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
       <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
         {{isLoading ? 'Loading...' : 'Swap View'}}
       </button>
@@ -21,6 +24,17 @@
 
     <!-- Board Games List -->
     <div *ngIf="!isLoading && !errorMessage" class="board-games-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('boardGame')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+      
       <div *ngIf="boardGames.length === 0" class="no-games-message">
         <p>No board games found.</p>
       </div>
@@ -34,7 +48,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of boardGames" class="table-row" (click)="openDetailBoardGameModal(game)">
+            <tr *ngFor="let game of boardGames" class="table-row" (click)="navigateToDetail(game.id)">
               <td class="game-title">{{game.title}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 
@@ -59,9 +73,6 @@
       <div class="modal-header">
         <h2>{{selectedBoardGame?.title}} Details</h2>
         <div class="modal-header-actions">
-          <button type="button" class="edit-button" (click)="openEditFromDetail()">
-            Edit
-          </button>
           <button type="button" class="close-button" (click)="closeDetailBoardGameModal()">×</button>
         </div>
       </div>
@@ -87,53 +98,10 @@
     </div>
   </div>
 
-  <!-- Edit Board Game Modal -->
-  <div *ngIf="showEditBoardGameModal" class="modal-overlay" (click)="closeEditBoardGameModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Update Board Game</h2>
-        <div class="modal-header-actions">
-          <button type="button" class="details-button" (click)="openDetailFromEdit()">
-            Details
-          </button>
-          <button type="button" class="close-button" (click)="closeEditBoardGameModal()">×</button>
-        </div>
-      </div>
-      
-      <form (ngSubmit)="onSubmitEditBoardGame()" #boardGameForm="ngForm" class="modal-form">
-        <div class="form-group">
-          <label for="title">Title *</label>
-          <input 
-            type="text" 
-            id="title" 
-            name="title" 
-            [(ngModel)]="editBoardGame.title"
-            #titleField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
-            placeholder="">
-          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
-            Title is required
-          </div>
-        </div>
-
-        <!-- Dynamic Custom Fields -->
-        <app-dynamic-custom-fields 
-          entityKey="boardGame" 
-          sectionTitle=""
-          [(customFieldValues)]="editBoardGame.customFieldValues">
-        </app-dynamic-custom-fields>
-
-        <div class="modal-actions">
-          <button type="button" class="cancel-button" (click)="closeEditBoardGameModal()">
-            Cancel
-          </button>
-          <button type="submit" class="create-button" [disabled]="!boardGameForm.form.valid || isUpdating">
-            {{isUpdating ? 'Updating...' : 'Update'}}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="boardGame"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

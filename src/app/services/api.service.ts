@@ -255,12 +255,28 @@ export class ApiService {
       );
   }
 
+  getVideoGameBox(id: number): Observable<VideoGameBox> {
+    return this.http.get<{data: VideoGameBox, errors: any}>(`${this.baseUrl}/videoGameBoxes/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
   getBoardGameBoxes(filters: FilterRequestDto[] = []): Observable<BoardGameBox[]> {
     return this.http.post<{data: BoardGameBox[], errors: any}>(`${this.baseUrl}/boardGameBoxes/function/search`, {
       filters: filters
     })
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  getBoardGameBox(id: number): Observable<BoardGameBox> {
+    return this.http.get<{data: BoardGameBox, errors: any}>(`${this.baseUrl}/boardGameBoxes/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 
@@ -273,12 +289,28 @@ export class ApiService {
       );
   }
 
+  getVideoGame(id: number): Observable<VideoGame> {
+    return this.http.get<{data: VideoGame, errors: any}>(`${this.baseUrl}/videoGames/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
+      );
+  }
+
   getBoardGames(filters: FilterRequestDto[] = []): Observable<BoardGame[]> {
     return this.http.post<{data: BoardGame[], errors: any}>(`${this.baseUrl}/boardGames/function/search`, {
       filters: filters
     })
       .pipe(
         map(response => response.data || [])
+      );
+  }
+
+  getBoardGame(id: number): Observable<BoardGame> {
+    return this.http.get<{data: BoardGame, errors: any}>(`${this.baseUrl}/boardGames/${id}`)
+      .pipe(
+        map(response => this.handleApiResponse(response)),
+        catchError(this.handleHttpError)
       );
   }
 

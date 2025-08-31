@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,15 +8,17 @@ import { BooleanDisplayComponent } from '../../components/boolean-display/boolea
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-board-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent, EntityFilterModalComponent],
   templateUrl: './board-game-boxes.component.html',
   styleUrl: './board-game-boxes.component.scss'
 })
-export class BoardGameBoxesComponent implements OnInit {
+export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   @ViewChild('titleField', { static: false }) titleField: any;
   
   boardGameBoxes: BoardGameBox[] = [];
@@ -24,13 +26,8 @@ export class BoardGameBoxesComponent implements OnInit {
   errorMessage = '';
   customFieldNames: string[] = [];
   
-  showDetailBoardGameBoxModal = false;
-  showEditBoardGameBoxModal = false;
   showNewBoardGameBoxModal = false;
-  selectedBoardGameBox: BoardGameBox | null = null;
-  boardGameBoxToUpdate: BoardGameBox | null = null;
   isCreating = false;
-  isUpdating = false;
   boardGameBoxesForDropdown: BoardGameBox[] = [];
   boardGamesForDropdown: BoardGame[] = [];
   boardGameSelectionMode: 'existing' | 'new' | 'self-contained' = 'self-contained';
@@ -60,34 +57,29 @@ export class BoardGameBoxesComponent implements OnInit {
     },
     customFieldValues: [] as any[]
   };
-  editBoardGameBox = {
-    title: '',
-    isExpansion: false,
-    isStandAlone: false,
-    baseSetId: null as string | null,
-    boardGameId: null as string | null,
-    newBoardGame: {
-      title: '',
-      customFieldValues: [] as any[]
-    },
-    customFieldValues: [] as any[]
-  };
 
   showDeleteConfirmModal = false;
   boardGameBoxToDelete: BoardGameBox | null = null;
   isDeleting = false;
+  showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadBoardGameBoxes();
+  }
+
+  ngOnDestroy(): void {
+    // Component cleanup
   }
 
   loadBoardGameBoxes(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getBoardGameBoxes().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('boardGameBox');
+    
+    this.apiService.getBoardGameBoxes(activeFilters).subscribe({
       next: (boardGameBoxes) => {
         console.log('Board game boxes received:', boardGameBoxes);
         console.log('Number of board game boxes:', boardGameBoxes.length);
@@ -246,116 +238,11 @@ export class BoardGameBoxesComponent implements OnInit {
     });
   }
 
-  openDetailBoardGameBoxModal(boardGameBox: BoardGameBox): void {
-    this.selectedBoardGameBox = boardGameBox;
-    this.showDetailBoardGameBoxModal = true;
+  navigateToDetail(id: number): void {
+    this.router.navigate(['/board-game-box', id]);
   }
 
-  closeDetailBoardGameBoxModal(): void {
-    this.showDetailBoardGameBoxModal = false;
-    this.selectedBoardGameBox = null;
-  }
 
-  openEditBoardGameBoxModal(boardGameBox: BoardGameBox): void {
-    this.boardGameBoxToUpdate = boardGameBox;
-    this.showEditBoardGameBoxModal = true;
-    this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
-    
-    // Load existing board games for the dropdown
-    this.apiService.getBoardGames().subscribe({
-      next: (boardGames) => {
-        this.boardGamesForDropdown = boardGames;
-      },
-      error: (error) => {
-        console.error('Error loading board games:', error);
-      }
-    });
-    
-    this.editBoardGameBox = {
-      title: boardGameBox.title,
-      isExpansion: boardGameBox.isExpansion,
-      isStandAlone: boardGameBox.isStandAlone,
-      baseSetId: boardGameBox.baseSetId ? boardGameBox.baseSetId.toString() : null,
-      boardGameId: boardGameBox.boardGame?.id ? boardGameBox.boardGame.id.toString() : null,
-      newBoardGame: {
-        title: '',
-        customFieldValues: []
-      },
-      customFieldValues: [...boardGameBox.customFieldValues]
-    };
-    
-    // Focus the title field after the view updates
-    setTimeout(() => {
-      if (this.titleField && this.titleField.focus) {
-        this.titleField.focus();
-      }
-    }, 0);
-  }
-
-  closeEditBoardGameBoxModal(): void {
-    this.showEditBoardGameBoxModal = false;
-    this.boardGameBoxToUpdate = null;
-    this.editBoardGameBox = {
-      title: '',
-      isExpansion: false,
-      isStandAlone: false,
-      baseSetId: null,
-      boardGameId: null,
-      newBoardGame: {
-        title: '',
-        customFieldValues: []
-      },
-      customFieldValues: []
-    };
-  }
-
-  openEditFromDetail(): void {
-    if (this.selectedBoardGameBox) {
-      const boardGameBoxToEdit = this.selectedBoardGameBox;
-      this.closeDetailBoardGameBoxModal();
-      this.openEditBoardGameBoxModal(boardGameBoxToEdit);
-    }
-  }
-
-  openDetailFromEdit(): void {
-    if (this.boardGameBoxToUpdate) {
-      const boardGameBoxToDetail = this.boardGameBoxToUpdate;
-      this.closeEditBoardGameBoxModal();
-      this.openDetailBoardGameBoxModal(boardGameBoxToDetail);
-    }
-  }
-
-  onSubmitEditBoardGameBox(): void {
-    if (this.isUpdating || !this.editBoardGameBox.title || !this.boardGameBoxToUpdate) {
-      return;
-    }
-    
-    this.isUpdating = true;
-    this.errorMessage = '';
-    
-    const boardGameBoxData = {
-      title: this.editBoardGameBox.title,
-      isExpansion: this.editBoardGameBox.isExpansion,
-      isStandAlone: this.editBoardGameBox.isStandAlone,
-      baseSetId: this.editBoardGameBox.baseSetId ? parseInt(this.editBoardGameBox.baseSetId.toString()) : null,
-      boardGameId: this.editBoardGameBox.boardGameId ? parseInt(this.editBoardGameBox.boardGameId.toString()) : null,
-      customFieldValues: this.editBoardGameBox.customFieldValues
-    };
-    
-    this.apiService.updateBoardGameBox(this.boardGameBoxToUpdate.id, boardGameBoxData).subscribe({
-      next: (response) => {
-        console.log('Board game box updated successfully:', response);
-        this.isUpdating = false;
-        this.closeEditBoardGameBoxModal();
-        this.loadBoardGameBoxes(); // Refresh the board game boxes list
-      },
-      error: (error) => {
-        console.error('Error updating board game box:', error);
-        this.errorMessage = `Failed to update board game box: ${error.message || 'Unknown error'}`;
-        this.isUpdating = false;
-      }
-    });
-  }
 
   swapView(): void {
     this.router.navigate(['/board-games']);
@@ -364,11 +251,7 @@ export class BoardGameBoxesComponent implements OnInit {
   onExpansionChange(isExpansion: boolean, isEdit: boolean = false): void {
     if (!isExpansion) {
       // Clear base set selection when expansion is unchecked
-      if (isEdit) {
-        this.editBoardGameBox.baseSetId = null;
-      } else {
-        this.newBoardGameBox.baseSetId = null;
-      }
+      this.newBoardGameBox.baseSetId = null;
     }
   }
 
@@ -415,5 +298,36 @@ export class BoardGameBoxesComponent implements OnInit {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('boardGameBox', filters);
+    this.loadBoardGameBoxes();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('boardGameBox');
+    this.loadBoardGameBoxes();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('boardGameBox');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 }
