@@ -300,3 +300,189 @@
     }
   }
 }
+
+// Dark Mode Styles
+.filter-modal.dark-mode {
+  background: #2d2d2d;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+  .modal-header {
+    background-color: #1a1a1a;
+    border-bottom-color: #404040;
+
+    h2 {
+      color: #64b5f6;
+    }
+
+    .close-button {
+      color: #b0b0b0;
+
+      &:hover {
+        background-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+  }
+
+  .modal-body {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+
+    &.loading-state,
+    &.error-state {
+      color: #b0b0b0;
+
+      .retry-button {
+        background-color: #64b5f6;
+        color: #1a1a1a;
+
+        &:hover {
+          background-color: #42a5f5;
+        }
+      }
+    }
+
+    .error-text {
+      color: #ff6b6b;
+    }
+  }
+
+  .filter-criteria-container {
+    .filter-criteria-row {
+      background-color: #1a1a1a;
+      border-color: #404040;
+
+      .criteria-controls {
+        .form-group {
+          label {
+            color: #e0e0e0;
+          }
+
+          .form-input {
+            background-color: #1a1a1a;
+            border-color: #555;
+            color: #e0e0e0;
+
+            &:focus {
+              border-color: #64b5f6;
+              box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2);
+            }
+
+            &:disabled {
+              background-color: #333;
+              color: #888;
+            }
+
+            &::placeholder {
+              color: #888;
+            }
+          }
+
+          ::ng-deep app-filterable-dropdown {
+            .dropdown-input {
+              background-color: #1a1a1a !important;
+              border-color: #555 !important;
+              color: #e0e0e0 !important;
+
+              &:focus {
+                border-color: #64b5f6 !important;
+                box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2) !important;
+              }
+
+              &:disabled {
+                background-color: #333 !important;
+                color: #888 !important;
+              }
+
+              &::placeholder {
+                color: #888 !important;
+              }
+            }
+
+            .dropdown-options {
+              background-color: #1a1a1a !important;
+              border-color: #555 !important;
+
+              .dropdown-option {
+                color: #e0e0e0 !important;
+
+                &:hover {
+                  background-color: #404040 !important;
+                }
+
+                &.selected {
+                  background-color: #64b5f6 !important;
+                  color: #1a1a1a !important;
+                }
+              }
+            }
+          }
+        }
+
+        .remove-button-group {
+          .remove-criteria-button {
+            background-color: #ff6b6b;
+
+            &:hover {
+              background-color: #ff5252;
+            }
+          }
+        }
+      }
+    }
+
+    .add-criteria-container {
+      .add-criteria-button {
+        color: #64b5f6;
+        border-color: #64b5f6;
+
+        &:hover {
+          background-color: rgba(100, 181, 246, 0.1);
+        }
+      }
+    }
+  }
+
+  .modal-actions {
+    background-color: #1a1a1a;
+    border-top-color: #404040;
+
+    .cancel-button {
+      background-color: transparent;
+      color: #b0b0b0;
+      border-color: #555;
+
+      &:hover {
+        background-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+
+    .clear-button {
+      background-color: #ff6b6b;
+
+      &:hover:not(:disabled) {
+        background-color: #ff5252;
+      }
+
+      &:disabled {
+        background-color: #555;
+        color: #888;
+      }
+    }
+
+    .apply-button {
+      background-color: #64b5f6;
+      color: #1a1a1a;
+
+      &:hover:not(:disabled) {
+        background-color: #42a5f5;
+      }
+
+      &:disabled {
+        background-color: #555;
+        color: #888;
+      }
+    }
+  }
+}

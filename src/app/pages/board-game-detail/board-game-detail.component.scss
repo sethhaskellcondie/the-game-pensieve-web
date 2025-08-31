@@ -547,4 +547,70 @@
       color: #888;
     }
   }
+
+  .boxes-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(100, 181, 246, 0.2);
+  }
+
+  .box-card {
+    background: #2d2d2d;
+    border-color: rgba(100, 181, 246, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    &::before {
+      background: linear-gradient(90deg, #64b5f6, #42a5f5);
+    }
+
+    &:hover {
+      box-shadow: 0 8px 32px rgba(100, 181, 246, 0.25);
+
+      .box-header h3 {
+        color: #93c5fd;
+      }
+    }
+  }
+
+  .box-header h3 {
+    color: #64b5f6;
+  }
+
+  .badge {
+    &.badge-expansion {
+      background-color: #4a2c00;
+      color: #ffb74d;
+      border-color: #6d4c00;
+    }
+
+    &.badge-base {
+      background-color: #1b4d1b;
+      color: #81c784;
+      border-color: #2e7d2e;
+    }
+
+    &.badge-standalone {
+      background-color: #0d3a47;
+      color: #4dd0e1;
+      border-color: #1a5a6b;
+    }
+
+    &.badge-not-standalone {
+      background-color: #4a1a1a;
+      color: #f48fb1;
+      border-color: #6d2d2d;
+    }
+  }
+
+  .box-field-item {
+    background: #1a1a1a;
+    border-color: rgba(100, 181, 246, 0.2);
+
+    .box-field-label {
+      color: #b0b0b0;
+    }
+
+    .box-field-value .box-field-text {
+      color: #e0e0e0;
+    }
+  }
 }

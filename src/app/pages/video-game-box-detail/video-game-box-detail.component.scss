@@ -524,6 +524,11 @@
     color: #ff6b6b;
   }
 
+  .hero-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(100, 181, 246, 0.2);
+  }
+
   .property-card {
     background: #2d2d2d;
     border-color: rgba(100, 181, 246, 0.2);
@@ -563,12 +568,12 @@
         color: #64b5f6;
       }
 
-      &.text-collector {
+      &.text-collection {
         color: #ffb74d;
       }
 
-      &.text-standard {
-        color: #b0b0b0;
+      &.text-single {
+        color: #f48fb1;
       }
     }
   }
@@ -598,6 +603,58 @@
 
   .field-content .field-text {
     color: #e0e0e0;
+  }
+
+  .games-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(100, 181, 246, 0.2);
+  }
+
+  .game-card {
+    background: #2d2d2d;
+    border-color: rgba(100, 181, 246, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    &::before {
+      background: linear-gradient(90deg, #64b5f6, #42a5f5);
+    }
+
+    &.clickable-card:hover {
+      box-shadow: 0 8px 32px rgba(100, 181, 246, 0.25);
+
+      .game-header h3 {
+        color: #93c5fd;
+      }
+    }
+  }
+
+  .game-header h3 {
+    color: #64b5f6;
+  }
+
+  .game-system {
+    .system-label {
+      color: #b0b0b0;
+    }
+
+    .system-name {
+      color: #e0e0e0;
+      background: #1a1a1a;
+      border-color: rgba(100, 181, 246, 0.2);
+    }
+  }
+
+  .game-field-item {
+    background: #1a1a1a;
+    border-color: rgba(100, 181, 246, 0.2);
+
+    .game-field-label {
+      color: #b0b0b0;
+    }
+
+    .game-field-value .game-field-text {
+      color: #e0e0e0;
+    }
   }
 
   .related-game-section {
