@@ -5,6 +5,9 @@
       <button type="button" class="new-button" (click)="openNewBoardGameBoxModal()">
         New
       </button>
+      <button type="button" class="filter-button" (click)="openFilterModal()">
+        Filter
+      </button>
       <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
         {{isLoading ? 'Loading...' : 'Swap View'}}
       </button>
@@ -24,6 +27,17 @@
 
     <!-- Board Games List -->
     <div *ngIf="!isLoading && !errorMessage" class="board-games-list">
+      <!-- Filter Status -->
+      <div *ngIf="filterService.hasActiveFilters('boardGameBox')" class="filter-status">
+        <div class="filter-info">
+          <span class="filter-label">Filtered by:</span>
+          <span class="filter-value">{{getActiveFilterDisplayText()}}</span>
+          <button type="button" class="clear-filter-button" (click)="clearFilters()">
+            Clear Filter
+          </button>
+        </div>
+      </div>
+      
       <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
         <p>No board game boxes found.</p>
       </div>
@@ -246,4 +260,11 @@
       </div>
     </div>
   </div>
+
+  <!-- Entity Filter Modal -->
+  <app-entity-filter-modal
+    entityType="boardGameBox"
+    [(show)]="showFilterModal"
+    (filtersApplied)="onFiltersApplied($event)">
+  </app-entity-filter-modal>
 </div>

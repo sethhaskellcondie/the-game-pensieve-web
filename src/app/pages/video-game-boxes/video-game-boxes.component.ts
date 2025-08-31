@@ -6,11 +6,13 @@ import { ApiService, VideoGameBox, System, VideoGame } from '../../services/api.
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-video-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, EntityFilterModalComponent],
   templateUrl: './video-game-boxes.component.html',
   styleUrl: './video-game-boxes.component.scss'
 })
@@ -47,8 +49,9 @@ export class VideoGameBoxesComponent implements OnInit {
   showDeleteConfirmModal = false;
   videoGameBoxToDelete: VideoGameBox | null = null;
   isDeleting = false;
+  showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadVideoGameBoxes();
@@ -59,7 +62,9 @@ export class VideoGameBoxesComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getVideoGameBoxes().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('videoGameBox');
+    
+    this.apiService.getVideoGameBoxes(activeFilters).subscribe({
       next: (videoGameBoxes) => {
         console.log('Video game boxes received:', videoGameBoxes);
         console.log('Number of video game boxes:', videoGameBoxes.length);
@@ -437,5 +442,36 @@ export class VideoGameBoxesComponent implements OnInit {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('videoGameBox', filters);
+    this.loadVideoGameBoxes();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('videoGameBox');
+    this.loadVideoGameBoxes();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('videoGameBox');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 }

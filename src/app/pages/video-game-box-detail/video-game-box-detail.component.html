@@ -55,7 +55,7 @@
             </div>
           </div>
           
-          <div class="property-card games-card">
+          <div class="property-card games-card" *ngIf="videoGameBox.isCollection">
             <div class="property-icon">🕹️</div>
             <div class="property-info">
               <span class="property-label">Games</span>
@@ -97,6 +97,10 @@
         <div class="game-card clickable-card" *ngFor="let game of videoGameBox.videoGames" (click)="navigateToVideoGame(game.id)">
           <div class="game-header">
             <h3>{{game.title}}</h3>
+            <div class="game-system">
+              <span class="system-label">System:</span>
+              <span class="system-name">{{game.system.name}}</span>
+            </div>
           </div>
           <div class="game-content" *ngIf="game.customFieldValues && game.customFieldValues.length > 0">
             <div class="game-fields-grid">

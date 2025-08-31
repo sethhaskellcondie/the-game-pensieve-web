@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,15 +8,17 @@ import { BooleanDisplayComponent } from '../../components/boolean-display/boolea
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
+import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 
 @Component({
   selector: 'app-board-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent, EntityFilterModalComponent],
   templateUrl: './board-game-boxes.component.html',
   styleUrl: './board-game-boxes.component.scss'
 })
-export class BoardGameBoxesComponent implements OnInit {
+export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   @ViewChild('titleField', { static: false }) titleField: any;
   
   boardGameBoxes: BoardGameBox[] = [];
@@ -59,18 +61,25 @@ export class BoardGameBoxesComponent implements OnInit {
   showDeleteConfirmModal = false;
   boardGameBoxToDelete: BoardGameBox | null = null;
   isDeleting = false;
+  showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
 
   ngOnInit(): void {
     this.loadBoardGameBoxes();
+  }
+
+  ngOnDestroy(): void {
+    // Component cleanup
   }
 
   loadBoardGameBoxes(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
-    this.apiService.getBoardGameBoxes().subscribe({
+    const activeFilters = this.filterService.getActiveFilters('boardGameBox');
+    
+    this.apiService.getBoardGameBoxes(activeFilters).subscribe({
       next: (boardGameBoxes) => {
         console.log('Board game boxes received:', boardGameBoxes);
         console.log('Number of board game boxes:', boardGameBoxes.length);
@@ -289,5 +298,36 @@ export class BoardGameBoxesComponent implements OnInit {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  openFilterModal(): void {
+    this.showFilterModal = true;
+  }
+
+  closeFilterModal(): void {
+    this.showFilterModal = false;
+  }
+
+  onFiltersApplied(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity('boardGameBox', filters);
+    this.loadBoardGameBoxes();
+    this.closeFilterModal();
+  }
+
+  clearFilters(): void {
+    this.filterService.clearFiltersForEntity('boardGameBox');
+    this.loadBoardGameBoxes();
+  }
+
+  getActiveFilterDisplayText(): string {
+    const activeFilters = this.filterService.getActiveFilters('boardGameBox');
+    if (activeFilters.length === 0) return '';
+    
+    if (activeFilters.length === 1) {
+      const filter = activeFilters[0];
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+    }
+    
+    return `${activeFilters.length} active filters`;
   }
 }
