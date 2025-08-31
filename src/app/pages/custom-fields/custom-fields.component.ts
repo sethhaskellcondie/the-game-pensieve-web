@@ -8,11 +8,12 @@ import { IconService } from '../../services/icon.service';
 import { SettingsService } from '../../services/settings.service';
 import { SafeHtml } from '@angular/platform-browser';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 
 @Component({
   selector: 'app-custom-fields',
   standalone: true,
-  imports: [CommonModule, FormsModule, FilterableDropdownComponent],
+  imports: [CommonModule, FormsModule, FilterableDropdownComponent, SelectableTextInputComponent],
   templateUrl: './custom-fields.component.html',
   styleUrl: './custom-fields.component.scss'
 })

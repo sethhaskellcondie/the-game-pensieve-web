@@ -79,3 +79,43 @@
 .error-message p {
   color: #dc3545;
 }
+
+// Dark Mode Styles
+.custom-fields-container.dark-mode {
+  .custom-field-label {
+    color: #e0e0e0;
+  }
+
+  .custom-field-input {
+    background-color: #1a1a1a;
+    border-color: #555;
+    color: #e0e0e0;
+
+    &:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    }
+
+    &::placeholder {
+      color: #888;
+    }
+  }
+
+  .custom-field-checkbox-text {
+    color: #e0e0e0;
+  }
+
+  .section-title {
+    color: #64b5f6;
+  }
+
+  .loading-message, .no-fields-message {
+    p {
+      color: #b0b0b0;
+    }
+  }
+
+  .error-message p {
+    color: #ff6b6b;
+  }
+}

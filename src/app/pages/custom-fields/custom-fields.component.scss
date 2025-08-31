@@ -569,6 +569,29 @@
   .header-section h1 {
     color: #64b5f6; // Lighter blue for dark mode
   }
+
+  .new-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+  }
+
+  .filter-button, .refresh-button {
+    background-color: #64b5f6;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
   
   .loading-message, .no-fields-message {
     p {

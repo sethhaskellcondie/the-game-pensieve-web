@@ -90,3 +90,60 @@
   background-color: #ccc;
   border-color: #ccc;
 }
+
+// Dark Mode Styles
+.checkbox-wrapper.dark-mode {
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+  }
+
+  .checkbox-label {
+    color: #e0e0e0;
+
+    &:hover .checkbox-custom {
+      border-color: #64b5f6;
+      background-color: rgba(100, 181, 246, 0.1);
+    }
+  }
+
+  .checkbox-custom {
+    border-color: #666;
+    background-color: #2d2d2d;
+  }
+
+  .checkbox-input:checked + .checkbox-label .checkbox-custom {
+    background-color: #64b5f6;
+    border-color: #64b5f6;
+
+    &::after {
+      border-color: #1a1a1a;
+    }
+  }
+
+  .checkbox-input:disabled + .checkbox-label {
+    color: #666;
+
+    .checkbox-custom {
+      background-color: #1a1a1a;
+      border-color: #404040;
+    }
+
+    &:hover .checkbox-custom {
+      border-color: #404040;
+      background-color: #1a1a1a;
+    }
+  }
+
+  .checkbox-input:disabled:checked + .checkbox-label .checkbox-custom {
+    background-color: #555;
+    border-color: #555;
+
+    &::after {
+      border-color: #888;
+    }
+  }
+}

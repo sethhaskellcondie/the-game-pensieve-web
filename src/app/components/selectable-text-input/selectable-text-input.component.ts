@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-selectable-text-input',
@@ -16,7 +19,8 @@ import { CommonModule } from '@angular/common';
     }
   ]
 })
-export class SelectableTextInputComponent implements ControlValueAccessor {
+export class SelectableTextInputComponent implements ControlValueAccessor, OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() placeholder: string = '';
   @Input() required: boolean = false;
   @Input() minlength: number | null = null;
@@ -27,6 +31,22 @@ export class SelectableTextInputComponent implements ControlValueAccessor {
 
   value: string = '';
   disabled: boolean = false;
+  isDarkMode = false;
+
+  constructor(private settingsService: SettingsService) {}
+
+  ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   private onChange = (value: string) => {};
   private onTouched = () => {};
