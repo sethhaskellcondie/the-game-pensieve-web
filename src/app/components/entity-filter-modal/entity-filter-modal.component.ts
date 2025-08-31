@@ -92,10 +92,22 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
   }
 
   formatFieldName(fieldName: string): string {
-    return fieldName
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, str => str.toUpperCase())
-      .trim();
+    // Handle specific field name mappings
+    switch (fieldName) {
+      case 'is_expansion':
+        return 'Expansion';
+      case 'is_stand_alone':
+        return 'Standalone';
+      case 'is_physical':
+        return 'Physical';
+      case 'is_collection':
+        return 'Collection';
+      default:
+        return fieldName
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim();
+    }
   }
 
   loadExistingFilters(): void {
