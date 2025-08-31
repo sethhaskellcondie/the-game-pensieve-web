@@ -464,6 +464,10 @@
   .board-games-table {
     thead {
       background-color: #1976d2;
+      
+      th.sortable-header:hover {
+        background-color: #1565c0;
+      }
     }
 
     tbody {

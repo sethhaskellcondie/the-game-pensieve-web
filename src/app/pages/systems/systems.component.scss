@@ -541,6 +541,10 @@
   .systems-table {
     thead {
       background-color: #1976d2;
+      
+      th.sortable-header:hover {
+        background-color: #1565c0;
+      }
     }
 
     tbody {
@@ -555,6 +559,10 @@
       td {
         &.system-name {
           color: #64b5f6;
+        }
+
+        &.system-generation {
+          color: #b0b0b0;
         }
 
         &.custom-field-value {

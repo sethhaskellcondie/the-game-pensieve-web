@@ -1,5 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-boolean-display',
@@ -8,9 +11,26 @@ import { CommonModule } from '@angular/common';
   templateUrl: './boolean-display.component.html',
   styleUrl: './boolean-display.component.scss'
 })
-export class BooleanDisplayComponent {
+export class BooleanDisplayComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() value: boolean | string | null = null;
   @Input() size: 'small' | 'medium' | 'large' = 'medium';
+  isDarkMode = false;
+
+  constructor(private settingsService: SettingsService) {}
+
+  ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   get displayValue(): boolean {
     if (typeof this.value === 'boolean') {

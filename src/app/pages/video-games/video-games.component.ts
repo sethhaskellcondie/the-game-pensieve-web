@@ -1,12 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService, VideoGame, System, VideoGameBox } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-video-games',
@@ -15,13 +18,15 @@ import { EntityFilterModalComponent } from '../../components/entity-filter-modal
   templateUrl: './video-games.component.html',
   styleUrl: './video-games.component.scss'
 })
-export class VideoGamesComponent implements OnInit {
+export class VideoGamesComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   videoGames: VideoGame[] = [];
   systems: System[] = [];
   videoGameBoxes: VideoGameBox[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  isDarkMode = false;
   
   showDetailVideoGameModal = false;
   showEditVideoGameModal = false;
@@ -37,9 +42,20 @@ export class VideoGamesComponent implements OnInit {
 
   showFilterModal = false;
 
-  constructor(private apiService: ApiService, private router: Router, public filterService: FilterService) {}
+  constructor(
+    private apiService: ApiService, 
+    private router: Router, 
+    public filterService: FilterService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+    
     this.loadVideoGames();
     this.loadSystems();
     this.loadVideoGameBoxes();
@@ -241,5 +257,10 @@ export class VideoGamesComponent implements OnInit {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
