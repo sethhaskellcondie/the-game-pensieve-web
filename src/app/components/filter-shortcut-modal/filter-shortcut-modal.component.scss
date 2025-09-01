@@ -397,11 +397,9 @@
 }
 
 /* Dark Mode Styles */
-body.dark-mode {
-  .modal-content {
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-  }
+.modal-content.dark-mode {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
   
   .modal-header {
     border-bottom-color: #444;
@@ -423,6 +421,26 @@ body.dark-mode {
     color: #e0e0e0;
   }
   
+  .form-input {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: #e0e0e0;
+    
+    &:focus {
+      border-color: #5ba7f7;
+      box-shadow: 0 0 0 3px rgba(91, 167, 247, 0.1);
+    }
+    
+    &:disabled {
+      background-color: #2a2a2a;
+      color: #888;
+    }
+    
+    &::placeholder {
+      color: #888;
+    }
+  }
+  
   .form-select {
     background-color: #3a3a3a;
     border-color: #555;
@@ -431,6 +449,37 @@ body.dark-mode {
     &:focus {
       border-color: #5ba7f7;
       box-shadow: 0 0 0 2px rgba(91, 167, 247, 0.1);
+    }
+  }
+  
+  .add-filter-button {
+    background-color: #5ba7f7;
+    
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+    
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+  
+  .error-message {
+    background-color: #442222;
+    border-color: #665555;
+    
+    p {
+      color: #ff6b6b;
+    }
+    
+    .retry-button {
+      background-color: #ff6b6b;
+      color: #1a1a1a;
+      
+      &:hover {
+        background-color: #ff5252;
+      }
     }
   }
   
@@ -455,5 +504,122 @@ body.dark-mode {
   
   .modal-actions {
     border-top-color: #444;
+  }
+  
+  .cancel-button {
+    background-color: #555;
+    color: #e0e0e0;
+    
+    &:hover {
+      background-color: #666;
+    }
+  }
+  
+  .save-button {
+    background-color: #5ba7f7;
+    color: #1a1a1a;
+    
+    &:hover:not(:disabled) {
+      background-color: #42a5f5;
+    }
+    
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+  
+  // Ensure filter criteria component has dark mode styling
+  ::ng-deep app-filter-criteria {
+    .filter-criteria-container .filter-criteria-row {
+      background-color: #3a3a3a !important;
+      border-color: #555 !important;
+      
+      .criteria-controls .form-group {
+        label {
+          color: #e0e0e0 !important;
+        }
+        
+        .form-input {
+          background-color: #2a2a2a !important;
+          border-color: #555 !important;
+          color: #e0e0e0 !important;
+          
+          &:focus {
+            border-color: #5ba7f7 !important;
+            box-shadow: 0 0 0 3px rgba(91, 167, 247, 0.1) !important;
+          }
+          
+          &:disabled {
+            background-color: #1a1a1a !important;
+            color: #888 !important;
+          }
+          
+          &::placeholder {
+            color: #888 !important;
+          }
+        }
+      }
+      
+      .remove-button-group .remove-criteria-button {
+        background-color: #ff6b6b !important;
+        
+        &:hover {
+          background-color: #ff5252 !important;
+        }
+      }
+    }
+    
+    .add-criteria-container .add-criteria-button {
+      background-color: transparent !important;
+      color: #5ba7f7 !important;
+      border-color: #5ba7f7 !important;
+      
+      &:hover {
+        background-color: rgba(91, 167, 247, 0.1) !important;
+      }
+    }
+  }
+  
+  
+  // Ensure filterable dropdown components have dark mode styling
+  ::ng-deep app-filterable-dropdown {
+    .dropdown-input {
+      background-color: #3a3a3a !important;
+      border-color: #555 !important;
+      color: #e0e0e0 !important;
+      
+      &:focus {
+        border-color: #5ba7f7 !important;
+        box-shadow: 0 0 0 3px rgba(91, 167, 247, 0.1) !important;
+      }
+      
+      &:disabled {
+        background-color: #2a2a2a !important;
+        color: #888 !important;
+      }
+      
+      &::placeholder {
+        color: #888 !important;
+      }
+    }
+    
+    .dropdown-options {
+      background-color: #3a3a3a !important;
+      border-color: #555 !important;
+      
+      .dropdown-option {
+        color: #e0e0e0 !important;
+        
+        &:hover {
+          background-color: #555 !important;
+        }
+        
+        &.selected {
+          background-color: #5ba7f7 !important;
+          color: #1a1a1a !important;
+        }
+      }
+    }
   }
 }

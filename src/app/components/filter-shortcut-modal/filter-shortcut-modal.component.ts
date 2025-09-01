@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Input, Output, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { FilterShortcutService, FilterShortcut } from '../../services/filter-shortcut.service';
 import { FilterService, FilterRequestDto, FilterSpecification } from '../../services/filter.service';
 import { SelectableTextInputComponent } from '../selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
 import { FilterCriteriaComponent } from '../filter-criteria/filter-criteria.component';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-filter-shortcut-modal',
@@ -14,7 +17,8 @@ import { FilterCriteriaComponent } from '../filter-criteria/filter-criteria.comp
   templateUrl: './filter-shortcut-modal.component.html',
   styleUrl: './filter-shortcut-modal.component.scss'
 })
-export class FilterShortcutModalComponent implements OnInit {
+export class FilterShortcutModalComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() shortcut: FilterShortcut | null = null;
   @Output() closeModal = new EventEmitter<void>();
   @ViewChild('nameField', { static: false }) nameField: any;
@@ -31,6 +35,7 @@ export class FilterShortcutModalComponent implements OnInit {
   isLoadingFilterSpec = false;
   filterSpecErrorMessage = '';
   hasLoadedFilterSpec = false;
+  isDarkMode = false;
   availablePages: DropdownOption[] = [
     { value: '/video-games', label: 'Video Games' },
     { value: '/video-game-boxes', label: 'Video Game Boxes' },
@@ -42,10 +47,17 @@ export class FilterShortcutModalComponent implements OnInit {
 
   constructor(
     private filterShortcutService: FilterShortcutService,
-    private filterService: FilterService
+    private filterService: FilterService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.settingsService.getDarkMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(darkMode => {
+        this.isDarkMode = darkMode;
+      });
+
     if (this.shortcut) {
       this.formData = {
         name: this.shortcut.name,
@@ -65,6 +77,11 @@ export class FilterShortcutModalComponent implements OnInit {
         this.nameField.focus();
       }
     }, 0);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
   
 

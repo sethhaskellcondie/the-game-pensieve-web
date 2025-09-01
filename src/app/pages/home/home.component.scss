@@ -238,6 +238,14 @@
     color: #5ba7f7;
   }
   
+  .create-button {
+    background-color: #22c55e;
+    
+    &:hover:not(:disabled) {
+      background-color: #16a34a;
+    }
+  }
+  
   .no-shortcuts {
     color: #b0b0b0;
   }
