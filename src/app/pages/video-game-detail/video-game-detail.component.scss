@@ -111,6 +111,30 @@
   border: 1px solid rgba(3, 112, 236, 0.15);
   border-radius: 12px;
   padding: 24px;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(3, 112, 236, 0.2);
+      border-color: rgba(3, 112, 236, 0.3);
+      background: #f0f4ff;
+      
+      .system-info-label {
+        color: #0256c7;
+      }
+      
+      .system-info-value {
+        color: #0370ec;
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .system-info-content {
@@ -153,6 +177,30 @@
   border: 1px solid rgba(3, 112, 236, 0.15);
   border-radius: 12px;
   padding: 20px;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(3, 112, 236, 0.2);
+      border-color: rgba(3, 112, 236, 0.3);
+      background: #f0f4ff;
+      
+      .field-name {
+        color: #0256c7;
+      }
+      
+      .field-text {
+        color: #0370ec;
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .field-header {
@@ -536,6 +584,21 @@
     .field-card {
       background: #1a1a1a;
       border-color: rgba(100, 181, 246, 0.2);
+      
+      &.clickable:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(100, 181, 246, 0.3);
+        border-color: rgba(100, 181, 246, 0.4);
+        background: #262626;
+        
+        .field-name {
+          color: #93c5fd;
+        }
+        
+        .field-text {
+          color: #bfdbfe;
+        }
+      }
     }
 
     .field-header .field-name {
@@ -550,6 +613,21 @@
   .system-info-card {
     background: #1a1a1a;
     border-color: rgba(100, 181, 246, 0.2);
+    
+    &.clickable:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(100, 181, 246, 0.3);
+      border-color: rgba(100, 181, 246, 0.4);
+      background: #262626;
+      
+      .system-info-label {
+        color: #93c5fd;
+      }
+      
+      .system-info-value {
+        color: #bfdbfe;
+      }
+    }
   }
 
   .system-info-item {

@@ -8,6 +8,7 @@ import { ApiService, VideoGame, VideoGameBox } from '../../services/api.service'
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 
 @Component({
@@ -38,6 +39,7 @@ export class VideoGameDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
+    private filterService: FilterService,
     private settingsService: SettingsService
   ) {}
 
@@ -101,6 +103,32 @@ export class VideoGameDetailComponent implements OnInit, OnDestroy {
 
   navigateToVideoGameBox(id: number): void {
     this.router.navigate(['/video-game-box', id]);
+  }
+
+  navigateToSystemFiltered(systemId: number): void {
+    const filter: FilterRequestDto = {
+      key: 'videoGame',
+      field: 'system_id',
+      operator: 'equals',
+      operand: systemId.toString()
+    };
+    
+    this.filterService.clearFiltersForEntity('videoGame');
+    this.filterService.saveFiltersForEntity('videoGame', [filter]);
+    this.router.navigate(['/video-games']);
+  }
+
+  navigateToCustomFieldFiltered(customFieldName: string, value: string): void {
+    const filter: FilterRequestDto = {
+      key: 'videoGame',
+      field: customFieldName,
+      operator: 'equals',
+      operand: value
+    };
+    
+    this.filterService.clearFiltersForEntity('videoGame');
+    this.filterService.saveFiltersForEntity('videoGame', [filter]);
+    this.router.navigate(['/video-games']);
   }
 
   openEditVideoGameModal(): void {
