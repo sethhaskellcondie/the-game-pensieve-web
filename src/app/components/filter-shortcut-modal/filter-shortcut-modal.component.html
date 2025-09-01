@@ -1,0 +1,95 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" [class.dark-mode]="isDarkMode" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{shortcut ? 'Edit' : 'New'}} Shortcut</h2>
+      <button type="button" class="close-button" (click)="onClose()">×</button>
+    </div>
+    
+    <form (ngSubmit)="onSubmit()" #shortcutForm="ngForm" class="modal-form">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <app-selectable-text-input
+          #nameField
+          id="name"
+          name="name"
+          [(ngModel)]="formData.name"
+          #nameNgModel="ngModel"
+          [required]="true"
+          [minlength]="1"
+          placeholder="">
+        </app-selectable-text-input>
+        <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
+          Name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <app-selectable-text-input
+          id="description"
+          name="description"
+          [(ngModel)]="formData.description"
+          placeholder="">
+        </app-selectable-text-input>
+      </div>
+
+      <div class="form-group">
+        <label for="targetPage">Entity *</label>
+        <app-filterable-dropdown
+          id="targetPage"
+          name="targetPage"
+          [(ngModel)]="formData.targetPage"
+          [options]="availablePages"
+          placeholder=""
+          [required]="true"
+          [disabled]="hasLoadedFilterSpec"
+          (ngModelChange)="onTargetPageChange()">
+        </app-filterable-dropdown>
+      </div>
+
+      <div class="form-group">
+        <div class="filters-header">
+          <label>Filters</label>
+          <button type="button" 
+                  class="add-filter-button" 
+                  (click)="addFilter()"
+                  [disabled]="!formData.targetPage || isLoadingFilterSpec">
+            {{isLoadingFilterSpec ? 'Loading...' : 'Add Filter'}}
+          </button>
+        </div>
+        
+        <div *ngIf="filterSpecErrorMessage" class="error-message">
+          <p>{{filterSpecErrorMessage}}</p>
+          <button type="button" class="retry-button" (click)="loadFilterSpecification()">
+            Retry
+          </button>
+        </div>
+        
+        <div *ngIf="formData.filters.length === 0 && !isLoadingFilterSpec" class="no-filters">
+          Fill out "Entity," then click "Add Filter."
+        </div>
+        
+        <!-- Filter Criteria (shared component) -->
+        <div *ngIf="hasLoadedFilterSpec">
+          <app-filter-criteria
+            [entityType]="getEntityTypeFromPage(formData.targetPage)"
+            [initialFilters]="getInitialFilters()"
+            [isDarkMode]="isDarkMode"
+            (filtersChanged)="onFiltersChanged($event)">
+          </app-filter-criteria>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="onClose()">
+          Cancel
+        </button>
+        <button type="submit" 
+                class="save-button" 
+                [disabled]="!shortcutForm.form.valid || isSubmitting">
+          {{isSubmitting ? 'Saving...' : (shortcut ? 'Update' : 'Create')}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

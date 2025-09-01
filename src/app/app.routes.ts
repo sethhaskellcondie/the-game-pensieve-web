@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { HomeComponent } from './pages/home/home.component';
 import { VideoGamesComponent } from './pages/video-games/video-games.component';
 import { VideoGameBoxesComponent } from './pages/video-game-boxes/video-game-boxes.component';
 import { BoardGamesComponent } from './pages/board-games/board-games.component';
@@ -13,7 +14,8 @@ import { CustomFieldsComponent } from './pages/custom-fields/custom-fields.compo
 import { OptionsComponent } from './pages/options/options.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/video-game-boxes', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
   { path: 'video-games', component: VideoGamesComponent },
   { path: 'video-game/:id', component: VideoGameDetailComponent },
   { path: 'video-game-boxes', component: VideoGameBoxesComponent },

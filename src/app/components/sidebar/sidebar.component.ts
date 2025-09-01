@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { IconService } from '../../services/icon.service';
 import { SafeHtml } from '@angular/platform-browser';
 
@@ -13,9 +13,13 @@ import { SafeHtml } from '@angular/platform-browser';
 })
 export class SidebarComponent {
 
-  constructor(public iconService: IconService) {}
+  constructor(public iconService: IconService, private router: Router) {}
 
   getIconHtml(iconName: string): SafeHtml {
     return this.iconService.getIcon(iconName);
+  }
+
+  navigateToHome(): void {
+    this.router.navigate(['/home']);
   }
 }
