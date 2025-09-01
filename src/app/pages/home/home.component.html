@@ -1,22 +1,17 @@
 <div class="home-container" [class.dark-mode]="isDarkMode">
-  <!-- Welcome Section -->
-  <div class="welcome-section">
-    <h1>Welcome to The Game Pensieve</h1>
-    <p>Quick access to your filtered collections</p>
-  </div>
 
-  <!-- Filter Shortcuts Section -->
+  <!-- Shortcuts Section -->
   <div class="shortcuts-section">
     <div class="section-header">
-      <h2>Filter Shortcuts</h2>
+      <h2>Shortcuts</h2>
       <button type="button" class="create-button" (click)="openCreateModal()">
-        Create New Shortcut
+        New
       </button>
     </div>
 
     <!-- No shortcuts message -->
     <div *ngIf="shortcuts.length === 0" class="no-shortcuts">
-      <p>No filter shortcuts created yet. Create your first shortcut to quickly access filtered collections.</p>
+      <p>No shortcuts created yet. Create your first shortcut with the "New" button.</p>
     </div>
 
     <!-- Shortcuts Grid -->
@@ -38,7 +33,7 @@
         </div>
         <div class="shortcut-info">
           <div class="shortcut-target">
-            <span class="info-label">Target:</span>
+            <span class="info-label">Entity:</span>
             <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
           </div>
           <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">

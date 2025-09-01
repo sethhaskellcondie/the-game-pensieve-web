@@ -5,18 +5,14 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { FilterService, FilterSpecification, FilterRequestDto } from '../../services/filter.service';
 import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
+import { FilterCriteriaComponent } from '../filter-criteria/filter-criteria.component';
 import { SettingsService } from '../../services/settings.service';
 
-interface FilterCriteria {
-  field: string;
-  operator: string;
-  operand: string;
-}
 
 @Component({
   selector: 'app-entity-filter-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, FilterableDropdownComponent],
+  imports: [CommonModule, FormsModule, FilterableDropdownComponent, FilterCriteriaComponent],
   templateUrl: './entity-filter-modal.component.html',
   styleUrl: './entity-filter-modal.component.scss'
 })
@@ -31,10 +27,6 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   isDarkMode = false;
-  
-  filterCriteria: FilterCriteria[] = [{ field: '', operator: '', operand: '' }];
-  
-  fieldOptions: DropdownOption[] = [];
 
   constructor(public filterService: FilterService, private settingsService: SettingsService) {}
 
@@ -68,8 +60,6 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
     this.filterService.getFiltersForEntity(this.entityType).subscribe({
       next: (spec) => {
         this.filterSpec = spec;
-        this.buildFieldOptions();
-        this.loadExistingFilters();
         this.isLoading = false;
       },
       error: (error) => {
@@ -78,17 +68,6 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
-  }
-
-  buildFieldOptions(): void {
-    if (!this.filterSpec) return;
-    
-    this.fieldOptions = Object.keys(this.filterSpec.fields)
-      .filter(fieldName => !['all_fields', 'pagination_fields', 'created_at', 'updated_at'].includes(fieldName))
-      .map(fieldName => ({
-        value: fieldName,
-        label: this.formatFieldName(fieldName)
-      }));
   }
 
   formatFieldName(fieldName: string): string {
@@ -110,95 +89,30 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadExistingFilters(): void {
-    const existingFilters = this.filterService.getActiveFilters(this.entityType);
-    if (existingFilters.length > 0) {
-      this.filterCriteria = existingFilters.map(filter => ({
-        field: filter.field,
-        operator: filter.operator,
-        operand: filter.operand
-      }));
-    }
+  getInitialFilters(): FilterRequestDto[] {
+    return this.filterService.getActiveFilters(this.entityType);
   }
 
-  getOperatorOptions(fieldName: string): DropdownOption[] {
-    if (!this.filterSpec || !fieldName) return [];
-    
-    const fieldType = this.filterSpec.fields[fieldName];
-    const allOperators = this.filterService.getOperatorsForFieldType(fieldType);
-    
-    // Check if any other criteria has a sort operator selected
-    const hasSortSelected = this.filterCriteria.some((criteria, index) => 
-      criteria.operator === 'sort' && criteria.field !== fieldName
-    );
-    
-    // If another field has sort selected, remove sort option from this field
-    if (hasSortSelected) {
-      return allOperators
-        .filter(op => op.value !== 'sort')
-        .map(op => ({
-          value: op.value,
-          label: op.label
-        }));
-    }
-    
-    return allOperators.map(op => ({
-      value: op.value,
-      label: op.label
-    }));
-  }
 
-  getFieldType(fieldName: string): string {
-    if (!this.filterSpec || !fieldName) return 'text';
-    return this.filterSpec.fields[fieldName] || 'text';
-  }
-
-  addFilterCriteria(): void {
-    this.filterCriteria.push({ field: '', operator: '', operand: '' });
-  }
-
-  removeFilterCriteria(index: number): void {
-    if (this.filterCriteria.length > 1) {
-      this.filterCriteria.splice(index, 1);
-    }
-  }
-
-  canRemoveCriteria(): boolean {
-    return this.filterCriteria.length > 1;
-  }
-
-  isValidFilter(filter: FilterCriteria): boolean {
-    return !!(filter.field && filter.operator && filter.operand.trim());
-  }
-
-  getValidFilters(): FilterCriteria[] {
-    return this.filterCriteria.filter(filter => this.isValidFilter(filter));
+  onFiltersChanged(filters: FilterRequestDto[]): void {
+    this.filterService.saveFiltersForEntity(this.entityType, filters);
   }
 
   canApplyFilters(): boolean {
-    return this.getValidFilters().length > 0;
+    return this.filterService.hasActiveFilters(this.entityType);
   }
 
   applyFilters(): void {
-    const validFilters = this.getValidFilters();
-    if (validFilters.length === 0) return;
+    const activeFilters = this.filterService.getActiveFilters(this.entityType);
+    if (activeFilters.length === 0) return;
 
-    let filterRequests: FilterRequestDto[] = validFilters.map(filter => ({
-      key: this.entityType,
-      field: filter.field,
-      operator: filter.operator,
-      operand: filter.operand
-    }));
-
-    // Convert sort filters to proper API format
-    filterRequests = this.filterService.convertFiltersForAPI(filterRequests);
-
+    const filterRequests = this.filterService.convertFiltersForAPI(activeFilters);
     this.filtersApplied.emit(filterRequests);
     this.closeModal();
   }
 
   clearFilters(): void {
-    this.filterCriteria = [{ field: '', operator: '', operand: '' }];
+    this.filterService.clearFiltersForEntity(this.entityType);
     this.filtersApplied.emit([]);
     this.closeModal();
   }
@@ -208,57 +122,4 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
     this.showChange.emit(false);
   }
 
-  onFieldChange(index: number): void {
-    // Reset operator and operand when field changes
-    this.filterCriteria[index].operator = '';
-    this.filterCriteria[index].operand = '';
-  }
-
-  onOperatorChange(index: number): void {
-    // Reset operand when operator changes
-    this.filterCriteria[index].operand = '';
-    
-    // If sort is selected, clear other sort selections
-    if (this.filterCriteria[index].operator === 'sort') {
-      this.filterCriteria.forEach((criteria, i) => {
-        if (i !== index && criteria.operator === 'sort') {
-          criteria.operator = '';
-          criteria.operand = '';
-        }
-      });
-    }
-  }
-
-  isSortField(operator: string): boolean {
-    return operator === 'sort';
-  }
-
-  getInputType(fieldName: string): string {
-    const fieldType = this.getFieldType(fieldName);
-    switch (fieldType) {
-      case 'number':
-        return 'number';
-      case 'boolean':
-        return 'text'; // Will be handled with dropdown
-      case 'timestamp':
-        return 'date';
-      default:
-        return 'text';
-    }
-  }
-
-  isBooleanField(fieldName: string): boolean {
-    return this.getFieldType(fieldName) === 'boolean';
-  }
-
-  getBooleanOptions(): DropdownOption[] {
-    return [
-      { value: 'true', label: 'Yes' },
-      { value: 'false', label: 'No' }
-    ];
-  }
-
-  getSortOptions(): DropdownOption[] {
-    return this.filterService.getSortOptions();
-  }
 }

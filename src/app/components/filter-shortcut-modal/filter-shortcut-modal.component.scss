@@ -83,6 +83,170 @@
   }
 }
 
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  height: 40px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+    border-color: #0370ec;
+    box-shadow: 0 0 0 3px rgba(3, 112, 236, 0.1);
+  }
+
+  &:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+}
+
+.filter-criteria-container {
+  .filter-criteria-row {
+    margin-bottom: 20px;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    .criteria-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 16px;
+      align-items: end;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+
+        label {
+          font-size: 14px;
+          font-weight: 500;
+          color: #374151;
+          margin-bottom: 6px;
+        }
+
+        // Ensure filterable dropdown components have consistent height and styling
+        ::ng-deep app-filterable-dropdown {
+          .dropdown-input {
+            padding: 8px 32px 8px 12px !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            height: 40px !important;
+            box-sizing: border-box !important;
+            
+            &:focus {
+              border-color: #0370ec !important;
+              box-shadow: 0 0 0 3px rgba(3, 112, 236, 0.1) !important;
+            }
+            
+            &:disabled {
+              background-color: #f3f4f6 !important;
+              color: #9ca3af !important;
+              cursor: not-allowed !important;
+            }
+          }
+          
+          .dropdown-arrow {
+            right: 8px !important;
+          }
+          
+          .dropdown-options {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0 0 4px 4px !important;
+          }
+        }
+      }
+
+      .remove-button-group {
+        display: flex;
+        align-items: center;
+
+        .remove-criteria-button {
+          width: 32px;
+          height: 32px;
+          background-color: #dc2626;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background-color: #b91c1c;
+          }
+        }
+      }
+    }
+  }
+
+  .add-criteria-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+
+    .add-criteria-button {
+      padding: 10px 20px;
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 2px dashed #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #e2e8f0;
+        border-color: #94a3b8;
+        color: #334155;
+      }
+    }
+  }
+}
+
+.error-message {
+  padding: 15px;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  
+  p {
+    color: #dc2626;
+    margin: 0 0 10px 0;
+  }
+  
+  .retry-button {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    
+    &:hover {
+      background-color: #b91c1c;
+    }
+  }
+}
+
 .error-text {
   color: #dc3545;
   font-size: 0.85rem;
@@ -110,8 +274,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
   
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #025bb5;
+  }
+  
+  &:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
   }
 }
 

@@ -20,101 +20,11 @@
 
     <!-- Filter Form -->
     <div *ngIf="!isLoading && !errorMessage && filterSpec" class="modal-body">
-      <div class="filter-criteria-container">
-        <div 
-          *ngFor="let criteria of filterCriteria; let i = index" 
-          class="filter-criteria-row"
-        >
-          <div class="criteria-controls">
-            <!-- Field Selection -->
-            <div class="form-group field-group">
-              <label [for]="'field-' + i">Field</label>
-              <app-filterable-dropdown
-                [id]="'field-' + i"
-                [name]="'field-' + i"
-                [(ngModel)]="criteria.field"
-                [options]="fieldOptions"
-                placeholder="Select field"
-                (ngModelChange)="onFieldChange(i)">
-              </app-filterable-dropdown>
-            </div>
-
-            <!-- Operator Selection -->
-            <div class="form-group operator-group">
-              <label [for]="'operator-' + i">Condition</label>
-              <app-filterable-dropdown
-                [id]="'operator-' + i"
-                [name]="'operator-' + i"
-                [(ngModel)]="criteria.operator"
-                [options]="getOperatorOptions(criteria.field)"
-                placeholder="Select condition"
-                [disabled]="!criteria.field"
-                (ngModelChange)="onOperatorChange(i)">
-              </app-filterable-dropdown>
-            </div>
-
-            <!-- Value Input -->
-            <div class="form-group value-group">
-              <label [for]="'value-' + i">Value</label>
-              
-              <!-- Sort Field -->
-              <app-filterable-dropdown
-                *ngIf="isSortField(criteria.operator)"
-                [id]="'value-' + i"
-                [name]="'value-' + i"
-                [(ngModel)]="criteria.operand"
-                [options]="getSortOptions()"
-                placeholder="Select sort direction"
-                [disabled]="!criteria.operator">
-              </app-filterable-dropdown>
-              
-              <!-- Boolean Field -->
-              <app-filterable-dropdown
-                *ngIf="!isSortField(criteria.operator) && isBooleanField(criteria.field)"
-                [id]="'value-' + i"
-                [name]="'value-' + i"
-                [(ngModel)]="criteria.operand"
-                [options]="getBooleanOptions()"
-                placeholder="Select value"
-                [disabled]="!criteria.operator">
-              </app-filterable-dropdown>
-              
-              <!-- Other Fields -->
-              <input
-                *ngIf="!isSortField(criteria.operator) && !isBooleanField(criteria.field)"
-                [type]="getInputType(criteria.field)"
-                [id]="'value-' + i"
-                [name]="'value-' + i"
-                [(ngModel)]="criteria.operand"
-                class="form-input"
-                placeholder="Enter value"
-                [disabled]="!criteria.operator">
-            </div>
-
-            <!-- Remove Button -->
-            <div class="remove-button-group">
-              <button 
-                *ngIf="canRemoveCriteria()"
-                type="button" 
-                class="remove-criteria-button"
-                (click)="removeFilterCriteria(i)"
-                title="Remove filter criteria">
-                ×
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add Criteria Button -->
-        <div class="add-criteria-container">
-          <button 
-            type="button" 
-            class="add-criteria-button"
-            (click)="addFilterCriteria()">
-            + Add Filter Criteria
-          </button>
-        </div>
-      </div>
+      <app-filter-criteria
+        [entityType]="entityType"
+        [initialFilters]="getInitialFilters()"
+        (filtersChanged)="onFiltersChanged($event)">
+      </app-filter-criteria>
     </div>
 
     <!-- Modal Actions -->

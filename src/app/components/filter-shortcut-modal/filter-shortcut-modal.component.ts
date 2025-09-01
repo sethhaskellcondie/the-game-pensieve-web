@@ -2,13 +2,15 @@ import { Component, EventEmitter, Input, Output, OnInit, ViewChild } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterShortcutService, FilterShortcut } from '../../services/filter-shortcut.service';
-import { FilterRequestDto } from '../../services/filter.service';
+import { FilterService, FilterRequestDto, FilterSpecification } from '../../services/filter.service';
 import { SelectableTextInputComponent } from '../selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
+import { FilterCriteriaComponent } from '../filter-criteria/filter-criteria.component';
 
 @Component({
   selector: 'app-filter-shortcut-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectableTextInputComponent],
+  imports: [CommonModule, FormsModule, SelectableTextInputComponent, FilterableDropdownComponent, FilterCriteriaComponent],
   templateUrl: './filter-shortcut-modal.component.html',
   styleUrl: './filter-shortcut-modal.component.scss'
 })
@@ -20,12 +22,16 @@ export class FilterShortcutModalComponent implements OnInit {
   formData = {
     name: '',
     description: '',
-    targetPage: '/video-game-boxes',
+    targetPage: '',
     filters: [] as FilterRequestDto[]
   };
   
   isSubmitting = false;
-  availablePages = [
+  filterSpec: FilterSpecification | null = null;
+  isLoadingFilterSpec = false;
+  filterSpecErrorMessage = '';
+  hasLoadedFilterSpec = false;
+  availablePages: DropdownOption[] = [
     { value: '/video-games', label: 'Video Games' },
     { value: '/video-game-boxes', label: 'Video Game Boxes' },
     { value: '/board-games', label: 'Board Games' },
@@ -34,7 +40,10 @@ export class FilterShortcutModalComponent implements OnInit {
     { value: '/toys', label: 'Toys' }
   ];
 
-  constructor(private filterShortcutService: FilterShortcutService) {}
+  constructor(
+    private filterShortcutService: FilterShortcutService,
+    private filterService: FilterService
+  ) {}
 
   ngOnInit(): void {
     if (this.shortcut) {
@@ -44,6 +53,11 @@ export class FilterShortcutModalComponent implements OnInit {
         targetPage: this.shortcut.targetPage,
         filters: [...this.shortcut.filters]
       };
+      
+      // Load filter spec if editing existing shortcut
+      if (this.shortcut.targetPage) {
+        this.loadFilterSpecification();
+      }
     }
     
     setTimeout(() => {
@@ -52,6 +66,7 @@ export class FilterShortcutModalComponent implements OnInit {
       }
     }, 0);
   }
+  
 
   onSubmit(): void {
     if (this.isSubmitting || !this.formData.name.trim()) {
@@ -90,19 +105,48 @@ export class FilterShortcutModalComponent implements OnInit {
   }
 
   addFilter(): void {
-    this.formData.filters.push({
-      key: this.getEntityTypeFromPage(this.formData.targetPage),
-      field: '',
-      operator: 'equals',
-      operand: ''
+    if (!this.formData.targetPage) return;
+    
+    if (!this.hasLoadedFilterSpec) {
+      this.loadFilterSpecification();
+    }
+  }
+  
+  loadFilterSpecification(): void {
+    const entityType = this.getEntityTypeFromPage(this.formData.targetPage);
+    this.isLoadingFilterSpec = true;
+    this.filterSpecErrorMessage = '';
+    
+    this.filterService.getFiltersForEntity(entityType).subscribe({
+      next: (spec) => {
+        this.filterSpec = spec;
+        this.hasLoadedFilterSpec = true;
+        this.isLoadingFilterSpec = false;
+      },
+      error: (error) => {
+        console.error('Error loading filter specification:', error);
+        this.filterSpecErrorMessage = 'Failed to load filter options';
+        this.isLoadingFilterSpec = false;
+      }
     });
   }
-
-  removeFilter(index: number): void {
-    this.formData.filters.splice(index, 1);
+  
+  getInitialFilters(): FilterRequestDto[] {
+    return this.formData.filters;
   }
 
-  private getEntityTypeFromPage(page: string): string {
+  onFiltersChanged(filters: FilterRequestDto[]): void {
+    this.formData.filters = filters;
+  }
+  
+  onTargetPageChange(): void {
+    // Reset filter specification when target page changes
+    this.filterSpec = null;
+    this.hasLoadedFilterSpec = false;
+    this.formData.filters = [];
+  }
+
+  getEntityTypeFromPage(page: string): string {
     const pageMap: { [key: string]: string } = {
       '/video-games': 'videoGame',
       '/video-game-boxes': 'videoGameBox',
@@ -113,4 +157,5 @@ export class FilterShortcutModalComponent implements OnInit {
     };
     return pageMap[page] || 'videoGameBox';
   }
+
 }
