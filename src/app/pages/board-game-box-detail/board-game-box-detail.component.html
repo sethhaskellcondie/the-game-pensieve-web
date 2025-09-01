@@ -27,7 +27,7 @@
     <div class="hero-section">
       <div class="stock-properties">
         <div class="property-row">
-          <div class="property-card expansion-card">
+          <div class="property-card expansion-card clickable" (click)="navigateToFiltered('is_expansion', boardGameBox.isExpansion)">
             <div class="property-icon">📦</div>
             <div class="property-info">
               <span class="property-label">Type</span>
@@ -37,7 +37,7 @@
             </div>
           </div>
           
-          <div class="property-card standalone-card">
+          <div class="property-card standalone-card clickable" (click)="navigateToFiltered('is_stand_alone', boardGameBox.isStandAlone)">
             <div class="property-icon">🎯</div>
             <div class="property-info">
               <span class="property-label">Playable</span>
@@ -63,7 +63,7 @@
       <h2>Additional Details</h2>
       <div class="custom-fields-modern">
         <div class="fields-grid">
-          <div class="field-card" *ngFor="let field of boardGameBox.customFieldValues">
+          <div class="field-card clickable" *ngFor="let field of boardGameBox.customFieldValues" (click)="navigateToCustomFieldFiltered(field.customFieldName, field.value)">
             <div class="field-header">
               <span class="field-name">{{field.customFieldName}}</span>
             </div>

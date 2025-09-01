@@ -28,7 +28,7 @@
       <h2>Game Details</h2>
       <div class="custom-fields-modern">
         <div class="fields-grid">
-          <div class="field-card" *ngFor="let field of boardGame.customFieldValues">
+          <div class="field-card clickable" *ngFor="let field of boardGame.customFieldValues" (click)="navigateToCustomFieldFiltered(field.customFieldName, field.value)">
             <div class="field-header">
               <span class="field-name">{{field.customFieldName}}</span>
             </div>
