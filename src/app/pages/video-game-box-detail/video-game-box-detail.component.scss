@@ -102,7 +102,43 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 64px rgba(3, 112, 236, 0.15);
+      border-color: rgba(3, 112, 236, 0.3);
+      
+      .property-value {
+        &.text-physical {
+          color: #1e7e34;
+        }
+        
+        &.text-digital {
+          color: #084951;
+        }
+        
+        &.text-collection {
+          color: #6d4c00;
+        }
+        
+        &.text-single {
+          color: #a41c1c;
+        }
+        
+        &:not(.text-physical):not(.text-digital):not(.text-collection):not(.text-single) {
+          color: #0370ec;
+        }
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
   
   .property-icon {
     font-size: 2.5rem;
@@ -196,6 +232,30 @@
   border: 1px solid rgba(3, 112, 236, 0.15);
   border-radius: 12px;
   padding: 20px;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(3, 112, 236, 0.2);
+      border-color: rgba(3, 112, 236, 0.3);
+      background: #f0f4ff;
+      
+      .field-name {
+        color: #0256c7;
+      }
+      
+      .field-text {
+        color: #0370ec;
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .field-header {
@@ -541,8 +601,30 @@
     &.clickable:hover {
       box-shadow: 0 16px 64px rgba(100, 181, 246, 0.25);
 
-      .property-value.text-base-set {
-        color: #93c5fd;
+      .property-value {
+        &.text-base-set {
+          color: #93c5fd;
+        }
+        
+        &.text-physical {
+          color: #81c784;
+        }
+        
+        &.text-digital {
+          color: #4dd0e1;
+        }
+        
+        &.text-collection {
+          color: #ffb74d;
+        }
+        
+        &.text-single {
+          color: #f48fb1;
+        }
+        
+        &:not(.text-physical):not(.text-digital):not(.text-collection):not(.text-single):not(.text-base-set) {
+          color: #93c5fd;
+        }
       }
     }
   }
@@ -595,6 +677,21 @@
   .field-card {
     background: #1a1a1a;
     border-color: rgba(100, 181, 246, 0.2);
+    
+    &.clickable:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(100, 181, 246, 0.3);
+      border-color: rgba(100, 181, 246, 0.4);
+      background: #262626;
+      
+      .field-name {
+        color: #93c5fd;
+      }
+      
+      .field-text {
+        color: #bfdbfe;
+      }
+    }
   }
 
   .field-header .field-name {

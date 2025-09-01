@@ -27,7 +27,7 @@
     <div class="hero-section">
       <div class="stock-properties">
         <div class="property-row">
-          <div class="property-card system-card">
+          <div class="property-card system-card clickable" (click)="navigateToSystemFiltered(videoGameBox.system.id)">
             <div class="property-icon">🎮</div>
             <div class="property-info">
               <span class="property-label">System</span>
@@ -35,7 +35,7 @@
             </div>
           </div>
           
-          <div class="property-card type-card">
+          <div class="property-card type-card clickable" (click)="navigateToFiltered('is_physical', videoGameBox.isPhysical)">
             <div class="property-icon">📦</div>
             <div class="property-info">
               <span class="property-label">Type</span>
@@ -45,7 +45,7 @@
             </div>
           </div>
           
-          <div class="property-card collection-card">
+          <div class="property-card collection-card clickable" (click)="navigateToFiltered('is_collection', videoGameBox.isCollection)">
             <div class="property-icon">🎯</div>
             <div class="property-info">
               <span class="property-label">Content</span>
@@ -71,7 +71,7 @@
       <h2>Additional Details</h2>
       <div class="custom-fields-modern">
         <div class="fields-grid">
-          <div class="field-card" *ngFor="let field of videoGameBox.customFieldValues">
+          <div class="field-card clickable" *ngFor="let field of videoGameBox.customFieldValues" (click)="navigateToCustomFieldFiltered(field.customFieldName, field.value)">
             <div class="field-header">
               <span class="field-name">{{field.customFieldName}}</span>
             </div>

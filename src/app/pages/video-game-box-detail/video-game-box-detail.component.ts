@@ -8,6 +8,7 @@ import { ApiService, VideoGame, VideoGameBox } from '../../services/api.service'
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 
 @Component({
@@ -37,6 +38,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
+    private filterService: FilterService,
     private settingsService: SettingsService
   ) {}
 
@@ -81,6 +83,45 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   navigateToVideoGame(videoGameId: number): void {
     this.router.navigate(['/video-game', videoGameId]);
+  }
+
+  navigateToFiltered(field: string, value: boolean): void {
+    const filter: FilterRequestDto = {
+      key: 'videoGameBox',
+      field: field,
+      operator: 'equals',
+      operand: value.toString()
+    };
+    
+    this.filterService.clearFiltersForEntity('videoGameBox');
+    this.filterService.saveFiltersForEntity('videoGameBox', [filter]);
+    this.router.navigate(['/video-game-boxes']);
+  }
+
+  navigateToSystemFiltered(systemId: number): void {
+    const filter: FilterRequestDto = {
+      key: 'videoGameBox',
+      field: 'system_id',
+      operator: 'equals',
+      operand: systemId.toString()
+    };
+    
+    this.filterService.clearFiltersForEntity('videoGameBox');
+    this.filterService.saveFiltersForEntity('videoGameBox', [filter]);
+    this.router.navigate(['/video-game-boxes']);
+  }
+
+  navigateToCustomFieldFiltered(customFieldName: string, value: string): void {
+    const filter: FilterRequestDto = {
+      key: 'videoGameBox',
+      field: customFieldName,
+      operator: 'equals',
+      operand: value
+    };
+    
+    this.filterService.clearFiltersForEntity('videoGameBox');
+    this.filterService.saveFiltersForEntity('videoGameBox', [filter]);
+    this.router.navigate(['/video-game-boxes']);
   }
 
   openEditVideoGameBoxModal(): void {

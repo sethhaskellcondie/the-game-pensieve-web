@@ -123,6 +123,22 @@
       .property-value.text-base-set {
         color: #0256c7;
       }
+      
+      .property-value.text-expansion {
+        color: #e65100;
+      }
+      
+      .property-value.text-base {
+        color: #2e7d32;
+      }
+      
+      .property-value.text-standalone {
+        color: #084951;
+      }
+      
+      .property-value.text-requires-base {
+        color: #b71c1c;
+      }
     }
     
     &:active {
@@ -225,6 +241,30 @@
   border: 1px solid rgba(3, 112, 236, 0.15);
   border-radius: 12px;
   padding: 20px;
+  transition: all 0.3s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(3, 112, 236, 0.2);
+      border-color: rgba(3, 112, 236, 0.3);
+      background: #f0f4ff;
+      
+      .field-name {
+        color: #0256c7;
+      }
+      
+      .field-text {
+        color: #0370ec;
+      }
+    }
+    
+    &:active {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .field-header {
@@ -540,6 +580,22 @@
       .property-value.text-base-set {
         color: #93c5fd;
       }
+      
+      .property-value.text-expansion {
+        color: #ffcc80;
+      }
+      
+      .property-value.text-base {
+        color: #a5d6a7;
+      }
+      
+      .property-value.text-standalone {
+        color: #80deea;
+      }
+      
+      .property-value.text-requires-base {
+        color: #f8bbd9;
+      }
     }
   }
 
@@ -595,6 +651,21 @@
   .field-card {
     background: #1a1a1a;
     border-color: rgba(100, 181, 246, 0.2);
+    
+    &.clickable:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(100, 181, 246, 0.3);
+      border-color: rgba(100, 181, 246, 0.4);
+      background: #262626;
+      
+      .field-name {
+        color: #93c5fd;
+      }
+      
+      .field-text {
+        color: #bfdbfe;
+      }
+    }
   }
 
   .field-header .field-name {

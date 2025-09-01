@@ -10,6 +10,7 @@ import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fi
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 
 @Component({
@@ -61,6 +62,7 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
+    private filterService: FilterService,
     private settingsService: SettingsService
   ) {}
 
@@ -127,6 +129,32 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
 
   navigateToBoardGame(boardGameId: number): void {
     this.router.navigate(['/board-game', boardGameId]);
+  }
+
+  navigateToFiltered(field: string, value: boolean): void {
+    const filter: FilterRequestDto = {
+      key: 'boardGameBox',
+      field: field,
+      operator: 'equals',
+      operand: value.toString()
+    };
+    
+    this.filterService.clearFiltersForEntity('boardGameBox');
+    this.filterService.saveFiltersForEntity('boardGameBox', [filter]);
+    this.router.navigate(['/board-game-boxes']);
+  }
+
+  navigateToCustomFieldFiltered(customFieldName: string, value: string): void {
+    const filter: FilterRequestDto = {
+      key: 'boardGameBox',
+      field: customFieldName,
+      operator: 'equals',
+      operand: value
+    };
+    
+    this.filterService.clearFiltersForEntity('boardGameBox');
+    this.filterService.saveFiltersForEntity('boardGameBox', [filter]);
+    this.router.navigate(['/board-game-boxes']);
   }
 
   openEditBoardGameBoxModal(): void {

@@ -8,6 +8,7 @@ import { ApiService, BoardGame, BoardGameBox } from '../../services/api.service'
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 
 @Component({
@@ -38,6 +39,7 @@ export class BoardGameDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
+    private filterService: FilterService,
     private settingsService: SettingsService
   ) {}
 
@@ -99,6 +101,19 @@ export class BoardGameDetailComponent implements OnInit, OnDestroy {
 
   navigateToBoardGameBox(id: number): void {
     this.router.navigate(['/board-game-box', id]);
+  }
+
+  navigateToCustomFieldFiltered(customFieldName: string, value: string): void {
+    const filter: FilterRequestDto = {
+      key: 'boardGame',
+      field: customFieldName,
+      operator: 'equals',
+      operand: value
+    };
+    
+    this.filterService.clearFiltersForEntity('boardGame');
+    this.filterService.saveFiltersForEntity('boardGame', [filter]);
+    this.router.navigate(['/board-games']);
   }
 
   openEditBoardGameModal(): void {
