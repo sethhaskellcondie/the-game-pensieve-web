@@ -1,0 +1,232 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  border-radius: 8px 8px 0 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background-color: #e2e8f0;
+      color: #1e293b;
+    }
+  }
+}
+
+.modal-body {
+  padding: 24px;
+  min-height: 200px;
+
+  &.loading-state,
+  &.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748b;
+
+    .retry-button {
+      margin-top: 16px;
+      padding: 8px 16px;
+      background-color: #0370ec;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+
+      &:hover {
+        background-color: #0c63d6;
+      }
+    }
+  }
+
+  .error-text {
+    color: #dc2626;
+    margin-bottom: 16px;
+  }
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+}
+
+.modal-actions {
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: #f8fafc;
+  border-radius: 0 0 8px 8px;
+
+  .cancel-button {
+    padding: 8px 16px;
+    background-color: transparent;
+    color: #64748b;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f1f5f9;
+      color: #475569;
+    }
+  }
+
+  .save-button {
+    padding: 8px 16px;
+    background-color: #0370ec;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #0c63d6;
+    }
+
+    &:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Dark Mode Styles
+.modal-content.dark-mode {
+  background: #2d2d2d;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+  .modal-header {
+    background-color: #1a1a1a;
+    border-bottom-color: #404040;
+
+    h2 {
+      color: #64b5f6;
+    }
+
+    .close-button {
+      color: #b0b0b0;
+
+      &:hover {
+        background-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+  }
+
+  .modal-body {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+
+    &.loading-state,
+    &.error-state {
+      color: #b0b0b0;
+
+      .retry-button {
+        background-color: #64b5f6;
+        color: #1a1a1a;
+
+        &:hover {
+          background-color: #42a5f5;
+        }
+      }
+    }
+
+    .error-text {
+      color: #ff6b6b;
+    }
+  }
+
+  .form-group label {
+    color: #e0e0e0;
+  }
+
+  .modal-actions {
+    background-color: #1a1a1a;
+    border-top-color: #404040;
+
+    .cancel-button {
+      background-color: transparent;
+      color: #b0b0b0;
+      border-color: #555;
+
+      &:hover {
+        background-color: #404040;
+        color: #e0e0e0;
+      }
+    }
+
+    .save-button {
+      background-color: #64b5f6;
+      color: #1a1a1a;
+
+      &:hover:not(:disabled) {
+        background-color: #42a5f5;
+      }
+
+      &:disabled {
+        background-color: #555;
+        color: #888;
+      }
+    }
+  }
+}

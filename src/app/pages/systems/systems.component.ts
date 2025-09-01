@@ -73,8 +73,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     
     const activeFilters = this.filterService.getActiveFilters('system');
+    const filtersWithDefaults = this.filterService.getFiltersWithDefaults('system', activeFilters);
     
-    this.apiService.getSystems(activeFilters).subscribe({
+    this.apiService.getSystems(filtersWithDefaults).subscribe({
       next: (systems) => {
         console.log('Systems received:', systems);
         console.log('Number of systems:', systems.length);

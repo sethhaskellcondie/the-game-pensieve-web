@@ -75,8 +75,9 @@ export class ToysComponent implements OnInit, OnDestroy {
     console.log('Loading toys...');
     
     const activeFilters = this.filterService.getActiveFilters('toy');
+    const filtersWithDefaults = this.filterService.getFiltersWithDefaults('toy', activeFilters);
     
-    this.apiService.getToys(activeFilters).subscribe({
+    this.apiService.getToys(filtersWithDefaults).subscribe({
       next: (toys) => {
         console.log('Toys received:', toys);
         console.log('Number of toys:', toys.length);

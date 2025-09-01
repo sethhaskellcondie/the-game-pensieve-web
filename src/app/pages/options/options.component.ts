@@ -5,11 +5,13 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { SettingsService } from '../../services/settings.service';
+import { DefaultSortService, DefaultSortFilter } from '../../services/default-sort.service';
+import { DefaultSortModalComponent } from '../../components/default-sort-modal/default-sort-modal.component';
 
 @Component({
   selector: 'app-options',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DefaultSortModalComponent],
   templateUrl: './options.component.html',
   styleUrl: './options.component.scss'
 })
@@ -25,9 +27,22 @@ export class OptionsComponent implements OnInit, OnDestroy {
 
   isDarkMode = false;
 
+  entityTypes = [
+    { key: 'videoGame', label: 'Video Games' },
+    { key: 'videoGameBox', label: 'Video Game Boxes' },
+    { key: 'boardGame', label: 'Board Games' },
+    { key: 'boardGameBox', label: 'Board Game Boxes' },
+    { key: 'toy', label: 'Toys' },
+    { key: 'system', label: 'Systems' }
+  ];
+
+  showDefaultSortModal = false;
+  editingEntityType = '';
+
   constructor(
     private apiService: ApiService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    public defaultSortService: DefaultSortService
   ) {}
 
   ngOnInit(): void {
@@ -106,5 +121,50 @@ export class OptionsComponent implements OnInit, OnDestroy {
         this.isSeeding = false;
       }
     });
+  }
+
+  getDefaultSort(entityType: string): DefaultSortFilter | null {
+    return this.defaultSortService.getDefaultSort(entityType);
+  }
+
+  editDefaultSort(entityType: string): void {
+    this.editingEntityType = entityType;
+    this.showDefaultSortModal = true;
+  }
+
+  removeDefaultSort(entityType: string): void {
+    this.defaultSortService.removeDefaultSort(entityType).subscribe({
+      next: (success) => {
+        if (!success) {
+          console.error('Failed to remove default sort');
+        }
+      },
+      error: (error) => {
+        console.error('Error removing default sort:', error);
+      }
+    });
+  }
+
+  onDefaultSortModalClose(): void {
+    this.showDefaultSortModal = false;
+    this.editingEntityType = '';
+  }
+
+  formatFieldName(fieldName: string): string {
+    switch (fieldName) {
+      case 'is_expansion':
+        return 'Expansion';
+      case 'is_stand_alone':
+        return 'Standalone';
+      case 'is_physical':
+        return 'Physical';
+      case 'is_collection':
+        return 'Collection';
+      default:
+        return fieldName
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim();
+    }
   }
 }

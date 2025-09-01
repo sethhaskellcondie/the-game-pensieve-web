@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DefaultSortService } from './default-sort.service';
 
 export interface FilterRequestDto {
   key: string;
@@ -30,7 +31,10 @@ export class FilterService {
   
   public activeFilters$ = this.activeFiltersSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private defaultSortService: DefaultSortService
+  ) {
     this.loadAllFiltersFromStorage();
   }
 
@@ -174,6 +178,38 @@ export class FilterService {
       { value: 'Ascending', label: 'Ascending' },
       { value: 'Descending', label: 'Descending' }
     ];
+  }
+
+  /**
+   * Get filters with defaults applied
+   * Priority: explicit sort > default sort > no sort
+   */
+  getFiltersWithDefaults(entityType: string, providedFilters: FilterRequestDto[]): FilterRequestDto[] {
+    // Check if there's already a sort filter in the provided filters
+    const hasSortFilter = providedFilters.some(filter => 
+      filter.operator === 'sort' || filter.operator === 'order_by' || filter.operator === 'order_by_desc'
+    );
+    
+    if (hasSortFilter) {
+      // Convert sort filters to API format and return
+      return this.convertFiltersForAPI(providedFilters);
+    }
+    
+    // Check for default sort filter
+    const defaultSort = this.defaultSortService.getDefaultSort(entityType);
+    if (defaultSort) {
+      // Add default sort to the provided filters
+      const defaultSortFilter: FilterRequestDto = {
+        key: entityType,
+        field: defaultSort.field,
+        operator: defaultSort.operand.toLowerCase() === 'ascending' ? 'order_by' : 'order_by_desc',
+        operand: defaultSort.field
+      };
+      return [...providedFilters, defaultSortFilter];
+    }
+    
+    // No sort filter - return provided filters as-is
+    return providedFilters;
   }
 
   private saveFiltersToStorage(entityType: string, filters: FilterRequestDto[]): void {
