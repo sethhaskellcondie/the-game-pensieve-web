@@ -79,8 +79,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     
     const activeFilters = this.filterService.getActiveFilters('videoGameBox');
+    const filtersWithDefaults = this.filterService.getFiltersWithDefaults('videoGameBox', activeFilters);
     
-    this.apiService.getVideoGameBoxes(activeFilters).subscribe({
+    this.apiService.getVideoGameBoxes(filtersWithDefaults).subscribe({
       next: (videoGameBoxes) => {
         console.log('Video game boxes received:', videoGameBoxes);
         console.log('Number of video game boxes:', videoGameBoxes.length);

@@ -95,8 +95,9 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     
     const activeFilters = this.filterService.getActiveFilters('boardGameBox');
+    const filtersWithDefaults = this.filterService.getFiltersWithDefaults('boardGameBox', activeFilters);
     
-    this.apiService.getBoardGameBoxes(activeFilters).subscribe({
+    this.apiService.getBoardGameBoxes(filtersWithDefaults).subscribe({
       next: (boardGameBoxes) => {
         console.log('Board game boxes received:', boardGameBoxes);
         console.log('Number of board game boxes:', boardGameBoxes.length);

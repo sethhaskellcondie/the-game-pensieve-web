@@ -14,6 +14,42 @@
     </div>
   </div>
 
+  <div class="default-sort-section">
+    <h2>Default Sort Filters</h2>
+    <p class="section-description">Set default sort filters for each entity type. These will be applied when no sort filter is specified in searches.</p>
+    
+    <div class="entity-cards">
+      <div 
+        *ngFor="let entity of entityTypes" 
+        class="entity-card"
+        (click)="editDefaultSort(entity.key)">
+        <div class="entity-header">
+          <h3>{{entity.label}}</h3>
+          <button 
+            *ngIf="getDefaultSort(entity.key)"
+            type="button" 
+            class="remove-button"
+            (click)="removeDefaultSort(entity.key); $event.stopPropagation()">
+            ×
+          </button>
+        </div>
+        
+        <div class="current-sort" *ngIf="getDefaultSort(entity.key); else noSort">
+          <span class="sort-info">
+            <strong>Field:</strong> {{formatFieldName(getDefaultSort(entity.key)!.field)}}
+          </span>
+          <span class="sort-info">
+            <strong>Direction:</strong> {{getDefaultSort(entity.key)!.operand}}
+          </span>
+        </div>
+        
+        <ng-template #noSort>
+          <div class="no-sort">No default sort set</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
   <div class="api-section">
     <h2>API Tools</h2>
     <div class="button-group">
@@ -41,3 +77,10 @@
     </div>
   </div>
 </div>
+
+<app-default-sort-modal
+  [show]="showDefaultSortModal"
+  [entityType]="editingEntityType"
+  (showChange)="onDefaultSortModalClose()"
+  (sortSaved)="onDefaultSortModalClose()">
+</app-default-sort-modal>
