@@ -191,8 +191,8 @@ export class FilterService {
     );
     
     if (hasSortFilter) {
-      // Use provided sort filter
-      return providedFilters;
+      // Convert sort filters to API format and return
+      return this.convertFiltersForAPI(providedFilters);
     }
     
     // Check for default sort filter
@@ -200,10 +200,10 @@ export class FilterService {
     if (defaultSort) {
       // Add default sort to the provided filters
       const defaultSortFilter: FilterRequestDto = {
-        key: `default_sort_${entityType}`,
+        key: entityType,
         field: defaultSort.field,
-        operator: 'sort',
-        operand: defaultSort.operand
+        operator: defaultSort.operand.toLowerCase() === 'ascending' ? 'order_by' : 'order_by_desc',
+        operand: defaultSort.field
       };
       return [...providedFilters, defaultSortFilter];
     }
