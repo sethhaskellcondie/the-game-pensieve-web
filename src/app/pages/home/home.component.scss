@@ -1,0 +1,291 @@
+.home-container {
+  padding: 20px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 40px;
+  
+  h1 {
+    color: #0370ec;
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+    font-family: 'Press Start 2P', monospace;
+  }
+  
+  p {
+    color: #9e9e9e;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.shortcuts-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  
+  h2 {
+    color: #0370ec;
+    font-size: 1.8rem;
+    margin: 0;
+  }
+}
+
+.create-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+  }
+}
+
+.no-shortcuts {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9e9e9e;
+  font-size: 1.1rem;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.shortcut-card {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  &.clickable {
+    cursor: pointer;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #0370ec;
+  }
+}
+
+.shortcut-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  
+  h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 600;
+    flex: 1;
+    padding-right: 10px;
+  }
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+}
+
+.shortcut-description {
+  margin-bottom: 15px;
+  
+  p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.shortcut-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-target,
+.shortcut-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: #0370ec;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  h2 {
+    color: #333;
+    margin: 0;
+    font-size: 1.4rem;
+  }
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    color: #333;
+  }
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+/* Dark Mode Styles */
+.home-container.dark-mode {
+  .welcome-section {
+    h1 {
+      color: #5ba7f7;
+    }
+    
+    p {
+      color: #b0b0b0;
+    }
+  }
+  
+  .section-header h2 {
+    color: #5ba7f7;
+  }
+  
+  .no-shortcuts {
+    color: #b0b0b0;
+  }
+  
+  .shortcut-card {
+    background-color: #2a2a2a;
+    border-color: #444;
+    
+    &:hover {
+      border-color: #5ba7f7;
+      box-shadow: 0 4px 12px rgba(91, 167, 247, 0.2);
+    }
+    
+    h3 {
+      color: #e0e0e0;
+    }
+  }
+  
+  .shortcut-description p {
+    color: #b0b0b0;
+  }
+  
+  .info-label {
+    color: #b0b0b0;
+  }
+  
+  .info-value {
+    color: #5ba7f7;
+  }
+  
+  .modal-content {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+  }
+  
+  .modal-header {
+    border-bottom-color: #444;
+    
+    h2 {
+      color: #e0e0e0;
+    }
+  }
+  
+  .close-button {
+    color: #b0b0b0;
+    
+    &:hover {
+      color: #e0e0e0;
+    }
+  }
+}

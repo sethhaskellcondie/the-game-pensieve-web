@@ -1,0 +1,58 @@
+<div class="home-container" [class.dark-mode]="isDarkMode">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <h1>Welcome to The Game Pensieve</h1>
+    <p>Quick access to your filtered collections</p>
+  </div>
+
+  <!-- Filter Shortcuts Section -->
+  <div class="shortcuts-section">
+    <div class="section-header">
+      <h2>Filter Shortcuts</h2>
+      <button type="button" class="create-button" (click)="openCreateModal()">
+        Create New Shortcut
+      </button>
+    </div>
+
+    <!-- No shortcuts message -->
+    <div *ngIf="shortcuts.length === 0" class="no-shortcuts">
+      <p>No filter shortcuts created yet. Create your first shortcut to quickly access filtered collections.</p>
+    </div>
+
+    <!-- Shortcuts Grid -->
+    <div *ngIf="shortcuts.length > 0" class="shortcuts-grid">
+      <div class="shortcut-card clickable" 
+           *ngFor="let shortcut of shortcuts" 
+           (click)="onShortcutClick(shortcut)">
+        <div class="shortcut-header">
+          <h3>{{shortcut.name}}</h3>
+          <button type="button" 
+                  class="delete-button" 
+                  (click)="deleteShortcut(shortcut, $event)"
+                  title="Delete shortcut">
+            ×
+          </button>
+        </div>
+        <div class="shortcut-description" *ngIf="shortcut.description">
+          <p>{{shortcut.description}}</p>
+        </div>
+        <div class="shortcut-info">
+          <div class="shortcut-target">
+            <span class="info-label">Target:</span>
+            <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
+          </div>
+          <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
+            <span class="info-label">Filters:</span>
+            <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Shortcut Modal -->
+  <app-filter-shortcut-modal 
+    *ngIf="showCreateModal"
+    (closeModal)="closeCreateModal()">
+  </app-filter-shortcut-modal>
+</div>

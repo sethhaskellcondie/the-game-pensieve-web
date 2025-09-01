@@ -1,0 +1,117 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{shortcut ? 'Edit' : 'Create'}} Filter Shortcut</h2>
+      <button type="button" class="close-button" (click)="onClose()">×</button>
+    </div>
+    
+    <form (ngSubmit)="onSubmit()" #shortcutForm="ngForm" class="modal-form">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <app-selectable-text-input
+          #nameField
+          id="name"
+          name="name"
+          [(ngModel)]="formData.name"
+          #nameNgModel="ngModel"
+          [required]="true"
+          [minlength]="1"
+          placeholder="Enter shortcut name">
+        </app-selectable-text-input>
+        <div *ngIf="nameNgModel.invalid && nameNgModel.touched" class="error-text">
+          Name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <app-selectable-text-input
+          id="description"
+          name="description"
+          [(ngModel)]="formData.description"
+          placeholder="Optional description">
+        </app-selectable-text-input>
+      </div>
+
+      <div class="form-group">
+        <label for="targetPage">Target Page *</label>
+        <select 
+          id="targetPage" 
+          name="targetPage" 
+          [(ngModel)]="formData.targetPage" 
+          class="form-select"
+          required>
+          <option *ngFor="let page of availablePages" [value]="page.value">
+            {{page.label}}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <div class="filters-header">
+          <label>Filters</label>
+          <button type="button" class="add-filter-button" (click)="addFilter()">
+            Add Filter
+          </button>
+        </div>
+        
+        <div *ngIf="formData.filters.length === 0" class="no-filters">
+          No filters added. This shortcut will show all items.
+        </div>
+        
+        <div class="filters-list" *ngIf="formData.filters.length > 0">
+          <div class="filter-item" *ngFor="let filter of formData.filters; let i = index">
+            <div class="filter-fields">
+              <div class="field-group">
+                <label>Field</label>
+                <app-selectable-text-input
+                  [(ngModel)]="filter.field"
+                  [name]="'field_' + i"
+                  placeholder="Field name">
+                </app-selectable-text-input>
+              </div>
+              
+              <div class="field-group">
+                <label>Operator</label>
+                <select [(ngModel)]="filter.operator" [name]="'operator_' + i" class="form-select">
+                  <option value="equals">Equals</option>
+                  <option value="not_equals">Not Equals</option>
+                  <option value="contains">Contains</option>
+                  <option value="starts_with">Starts With</option>
+                  <option value="ends_with">Ends With</option>
+                </select>
+              </div>
+              
+              <div class="field-group">
+                <label>Value</label>
+                <app-selectable-text-input
+                  [(ngModel)]="filter.operand"
+                  [name]="'value_' + i"
+                  placeholder="Filter value">
+                </app-selectable-text-input>
+              </div>
+            </div>
+            
+            <button type="button" 
+                    class="remove-filter-button" 
+                    (click)="removeFilter(i)"
+                    title="Remove filter">
+              ×
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="onClose()">
+          Cancel
+        </button>
+        <button type="submit" 
+                class="save-button" 
+                [disabled]="!shortcutForm.form.valid || isSubmitting">
+          {{isSubmitting ? 'Saving...' : (shortcut ? 'Update' : 'Create')}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

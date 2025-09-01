@@ -12,6 +12,16 @@
   text-shadow: 2px 2px 0px var(--secondary-grey);
 }
 
+.retro-title.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retro-title.clickable:hover {
+  transform: translateY(-2px);
+  color: var(--primary-blue-hover, #025bb5);
+}
+
 body.dark-mode .retro-title {
   text-shadow: none;
 }
