@@ -74,6 +74,7 @@
           <app-filter-criteria
             [entityType]="getEntityTypeFromPage(formData.targetPage)"
             [initialFilters]="getInitialFilters()"
+            [isDarkMode]="isDarkMode"
             (filtersChanged)="onFiltersChanged($event)">
           </app-filter-criteria>
         </div>

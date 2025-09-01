@@ -25,12 +25,12 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
   
   @Input() entityType: string = '';
   @Input() initialFilters: FilterRequestDto[] = [];
+  @Input() isDarkMode: boolean = false;
   @Output() filtersChanged = new EventEmitter<FilterRequestDto[]>();
   
   filterSpec: FilterSpecification | null = null;
   isLoading = false;
   errorMessage = '';
-  isDarkMode = false;
   
   filterCriteria: FilterCriteria[] = [{ field: '', operator: '', operand: '' }];
   fieldOptions: DropdownOption[] = [];
@@ -41,12 +41,6 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.settingsService.getDarkMode$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(darkMode => {
-        this.isDarkMode = darkMode;
-      });
-
     if (this.entityType) {
       this.loadFilterSpecification();
     }

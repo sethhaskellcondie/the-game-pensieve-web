@@ -12,7 +12,7 @@
 </div>
 
 <!-- Filter Criteria -->
-<div *ngIf="!isLoading && !errorMessage && filterSpec" class="filter-criteria-container">
+<div *ngIf="!isLoading && !errorMessage && filterSpec" class="filter-criteria-container" [class.dark-mode]="isDarkMode">
   <div 
     *ngFor="let criteria of filterCriteria; let i = index" 
     class="filter-criteria-row">

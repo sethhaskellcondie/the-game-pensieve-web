@@ -23,6 +23,7 @@
       <app-filter-criteria
         [entityType]="entityType"
         [initialFilters]="getInitialFilters()"
+        [isDarkMode]="isDarkMode"
         (filtersChanged)="onFiltersChanged($event)">
       </app-filter-criteria>
     </div>
