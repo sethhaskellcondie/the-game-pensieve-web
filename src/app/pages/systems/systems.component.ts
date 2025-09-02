@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -12,6 +12,7 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-systems',
@@ -29,6 +30,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   errorMessage = '';
   customFieldNames: string[] = [];
   isDarkMode = false;
+  isMassInputMode = false;
   
   showNewSystemModal = false;
   isCreating = false;
@@ -50,7 +52,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -59,6 +62,12 @@ export class SystemsComponent implements OnInit, OnDestroy {
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
       });
+
+    this.settingsService.getMassInputMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massInputMode => {
+        this.isMassInputMode = massInputMode;
+      });
     
     this.loadSystems();
   }
@@ -66,6 +75,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showNewSystemModal) {
+      this.closeNewSystemModal();
+    }
   }
 
   loadSystems(): void {
@@ -221,6 +237,52 @@ export class SystemsComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  onSubmitAndAddAnother(): void {
+    if (this.isCreating || !this.newSystem.name || this.newSystem.generation === null) {
+      return;
+    }
+    
+    this.isCreating = true;
+    
+    const systemData = {
+      name: this.newSystem.name,
+      generation: this.newSystem.generation,
+      handheld: this.newSystem.handheld,
+      customFieldValues: this.newSystem.customFieldValues
+    };
+    
+    // Only for creating new systems, not updating
+    this.apiService.createSystem(systemData).subscribe({
+      next: (response) => {
+        console.log('System created successfully:', response);
+        this.isCreating = false;
+        this.loadSystems(); // Refresh the systems list
+        
+        // Show success toast
+        this.errorSnackbarService.showSuccess('System created successfully');
+        
+        // Clear the name field but keep other fields
+        this.newSystem.name = '';
+        
+        // Focus the name input
+        this.focusNameInput();
+      },
+      error: (error) => {
+        console.error('Error creating system:', error);
+        this.isCreating = false;
+        // Error snackbar will be shown automatically by API service
+      }
+    });
+  }
+
+  private focusNameInput(): void {
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 100);
   }
 
   confirmDeleteSystem(system: System): void {
