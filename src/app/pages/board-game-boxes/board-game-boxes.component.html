@@ -229,8 +229,20 @@
           <button type="button" class="cancel-button" (click)="closeNewBoardGameBoxModal()">
             Cancel
           </button>
-          <button type="submit" class="create-button" [disabled]="!boardGameBoxForm.form.valid || isCreating">
+          <button 
+            *ngIf="!isMassInputMode"
+            type="submit" 
+            class="create-button" 
+            [disabled]="!boardGameBoxForm.form.valid || isCreating">
             {{isCreating ? 'Creating...' : 'Create'}}
+          </button>
+          <button 
+            *ngIf="isMassInputMode"
+            type="button" 
+            class="create-and-add-button" 
+            [disabled]="!boardGameBoxForm.form.valid || isCreating"
+            (click)="onSubmitAndAddAnother()">
+            {{isCreating ? 'Creating...' : 'Create and Add Another'}}
           </button>
         </div>
       </form>

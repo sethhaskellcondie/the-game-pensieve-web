@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-video-game-boxes',
@@ -21,12 +22,15 @@ import { SettingsService } from '../../services/settings.service';
 })
 export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  @ViewChild('titleField', { static: false }) titleField: any;
+  
   videoGameBoxes: VideoGameBox[] = [];
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
   isDarkMode = false;
+  isMassInputMode = false;
   
   showDetailVideoGameBoxModal = false;
   showNewVideoGameBoxModal = false;
@@ -60,7 +64,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     private apiService: ApiService, 
     private router: Router, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +73,12 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
+      });
+
+    this.settingsService.getMassInputMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massInputMode => {
+        this.isMassInputMode = massInputMode;
       });
     
     this.loadVideoGameBoxes();
@@ -294,6 +305,98 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           this.isCreating = false;
         }
       });
+    }
+  }
+
+  onSubmitAndAddAnother(): void {
+    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null) {
+      return;
+    }
+
+    // Validate video games if any are added
+    for (let i = 0; i < this.newVideoGameBox.videoGames.length; i++) {
+      const videoGame = this.newVideoGameBox.videoGames[i];
+      
+      if (videoGame.type === 'existing') {
+        if (!videoGame.existingVideoGameId) {
+          this.errorMessage = `Please select an existing video game for item ${i + 1}.`;
+          return;
+        }
+      } else if (videoGame.type === 'new') {
+        if (!videoGame.title || videoGame.title.trim() === '') {
+          this.errorMessage = `Please enter a title for new video game item ${i + 1}.`;
+          return;
+        }
+        if (!videoGame.systemId) {
+          this.errorMessage = `Please select a system for new video game item ${i + 1}.`;
+          return;
+        }
+      }
+    }
+    
+    this.isCreating = true;
+    this.errorMessage = '';
+    
+    // Separate existing and new video games
+    const existingVideoGameIds = this.newVideoGameBox.videoGames
+      .filter(game => game.type === 'existing' && game.existingVideoGameId)
+      .map(game => game.existingVideoGameId!);
+    
+    const newVideoGames = this.newVideoGameBox.videoGames
+      .filter(game => game.type === 'new')
+      .map(game => ({
+        title: game.title!,
+        systemId: game.systemId!,
+        customFieldValues: game.customFieldValues
+      }));
+    
+    const videoGameBoxData = {
+      title: this.newVideoGameBox.title,
+      systemId: this.newVideoGameBox.systemId,
+      isPhysical: this.newVideoGameBox.isPhysical,
+      isCollection: this.newVideoGameBox.isCollection,
+      existingVideoGameIds: existingVideoGameIds,
+      newVideoGames: newVideoGames,
+      customFieldValues: this.newVideoGameBox.customFieldValues
+    };
+    
+    this.apiService.createVideoGameBox(videoGameBoxData).subscribe({
+      next: (response) => {
+        console.log('Video game box created successfully:', response);
+        this.isCreating = false;
+        this.loadVideoGameBoxes();
+        
+        this.errorSnackbarService.showSuccess('Video Game Box created successfully');
+        
+        this.newVideoGameBox.title = '';
+        
+        this.focusTitleInput();
+      },
+      error: (error) => {
+        console.error('Error creating video game box:', error);
+        this.errorMessage = `Failed to create video game box: ${error.message || 'Unknown error'}`;
+        this.isCreating = false;
+      }
+    });
+  }
+
+  private focusTitleInput(): void {
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      } else {
+        const titleInput = document.querySelector('#title') as HTMLInputElement;
+        if (titleInput) {
+          titleInput.focus();
+        }
+      }
+    }, 100);
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showNewVideoGameBoxModal) {
+      this.closeNewVideoGameBoxModal();
     }
   }
 

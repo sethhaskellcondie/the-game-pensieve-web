@@ -355,8 +355,20 @@
           <button type="button" class="cancel-button" (click)="closeNewVideoGameBoxModal()">
             Cancel
           </button>
-          <button type="submit" class="create-button" [disabled]="!videoGameBoxForm.form.valid || isCreating">
+          <button 
+            *ngIf="isUpdateMode || !isMassInputMode"
+            type="submit" 
+            class="create-button" 
+            [disabled]="!videoGameBoxForm.form.valid || isCreating">
             {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
+          </button>
+          <button 
+            *ngIf="!isUpdateMode && isMassInputMode"
+            type="button" 
+            class="create-and-add-button" 
+            [disabled]="!videoGameBoxForm.form.valid || isCreating"
+            (click)="onSubmitAndAddAnother()">
+            {{isCreating ? 'Creating...' : 'Create and Add Another'}}
           </button>
         </div>
       </form>

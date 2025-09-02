@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { FilterableDropdownComponent, DropdownOption } from '../../components/fi
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-board-game-boxes',
@@ -30,6 +31,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   errorMessage = '';
   customFieldNames: string[] = [];
   isDarkMode = false;
+  isMassInputMode = false;
   
   showNewBoardGameBoxModal = false;
   isCreating = false;
@@ -72,7 +74,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     private apiService: ApiService, 
     private router: Router, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -81,6 +84,12 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
       });
+
+    this.settingsService.getMassInputMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massInputMode => {
+        this.isMassInputMode = massInputMode;
+      });
     
     this.loadBoardGameBoxes();
   }
@@ -88,6 +97,13 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showNewBoardGameBoxModal) {
+      this.closeNewBoardGameBoxModal();
+    }
   }
 
   loadBoardGameBoxes(): void {
@@ -254,6 +270,69 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         this.isCreating = false;
       }
     });
+  }
+
+  onSubmitAndAddAnother(): void {
+    if (this.isCreating || !this.newBoardGameBox.title) {
+      return;
+    }
+    
+    // Validate based on board game selection mode
+    if (this.boardGameSelectionMode === 'existing' && !this.newBoardGameBox.boardGameId) {
+      this.errorMessage = 'Please select an existing board game.';
+      return;
+    }
+    
+    if (this.boardGameSelectionMode === 'new' && !this.newBoardGameBox.newBoardGame.title) {
+      this.errorMessage = 'Please enter a title for the new board game.';
+      return;
+    }
+    
+    this.isCreating = true;
+    this.errorMessage = '';
+    
+    const boardGameBoxData = {
+      title: this.newBoardGameBox.title,
+      isExpansion: this.newBoardGameBox.isExpansion,
+      isStandAlone: this.newBoardGameBox.isStandAlone,
+      baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
+      boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
+      boardGame: this.boardGameSelectionMode === 'new' ? this.newBoardGameBox.newBoardGame : null,
+      customFieldValues: this.newBoardGameBox.customFieldValues
+    };
+    
+    this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
+      next: (response) => {
+        console.log('Board game box created successfully:', response);
+        this.isCreating = false;
+        this.loadBoardGameBoxes(); // Refresh the board game boxes list
+        
+        // Show success toast
+        this.errorSnackbarService.showSuccess('Board Game Box created successfully');
+        
+        // Clear the title field but keep other fields
+        this.newBoardGameBox.title = '';
+        if (this.boardGameSelectionMode === 'new') {
+          this.newBoardGameBox.newBoardGame.title = '';
+        }
+        
+        // Focus the title input
+        this.focusTitleInput();
+      },
+      error: (error) => {
+        console.error('Error creating board game box:', error);
+        this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
+        this.isCreating = false;
+      }
+    });
+  }
+
+  private focusTitleInput(): void {
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      }
+    }, 100);
   }
 
   navigateToDetail(id: number): void {
