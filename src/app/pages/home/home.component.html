@@ -21,12 +21,20 @@
            (click)="onShortcutClick(shortcut)">
         <div class="shortcut-header">
           <h3>{{shortcut.name}}</h3>
-          <button type="button" 
-                  class="delete-button" 
-                  (click)="deleteShortcut(shortcut, $event)"
-                  title="Delete shortcut">
-            ×
-          </button>
+          <div class="shortcut-actions">
+            <button type="button" 
+                    class="edit-button" 
+                    (click)="editShortcut(shortcut, $event)"
+                    title="Edit shortcut"
+                    [innerHTML]="iconService.getIcon('pencil')">
+            </button>
+            <button type="button" 
+                    class="delete-button" 
+                    (click)="deleteShortcut(shortcut, $event)"
+                    title="Delete shortcut">
+              ×
+            </button>
+          </div>
         </div>
         <div class="shortcut-description" *ngIf="shortcut.description">
           <p>{{shortcut.description}}</p>
@@ -49,5 +57,12 @@
   <app-filter-shortcut-modal 
     *ngIf="showCreateModal"
     (closeModal)="closeCreateModal()">
+  </app-filter-shortcut-modal>
+
+  <!-- Edit Shortcut Modal -->
+  <app-filter-shortcut-modal 
+    *ngIf="showEditModal"
+    [shortcut]="editingShortcut"
+    (closeModal)="closeEditModal()">
   </app-filter-shortcut-modal>
 </div>

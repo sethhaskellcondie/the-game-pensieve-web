@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { FilterShortcutService, FilterShortcut } from '../../services/filter-shortcut.service';
 import { FilterService } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
+import { IconService } from '../../services/icon.service';
 import { FilterShortcutModalComponent } from '../../components/filter-shortcut-modal/filter-shortcut-modal.component';
 
 @Component({
@@ -21,12 +22,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   shortcuts: FilterShortcut[] = [];
   isDarkMode = false;
   showCreateModal = false;
+  showEditModal = false;
+  editingShortcut: FilterShortcut | null = null;
 
   constructor(
     private filterShortcutService: FilterShortcutService,
     private filterService: FilterService,
     private router: Router,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    public iconService: IconService
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +86,17 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   closeCreateModal(): void {
     this.showCreateModal = false;
+  }
+
+  editShortcut(shortcut: FilterShortcut, event: Event): void {
+    event.stopPropagation();
+    this.editingShortcut = shortcut;
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editingShortcut = null;
   }
 
   getPageDisplayName(page: string): string {

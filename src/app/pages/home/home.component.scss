@@ -105,6 +105,37 @@
   }
 }
 
+.shortcut-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  color: #0370ec;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #0370ec;
+    color: white;
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .delete-button {
   background: none;
   border: none;
@@ -274,6 +305,15 @@
   
   .info-value {
     color: #5ba7f7;
+  }
+  
+  .edit-button {
+    color: #5ba7f7;
+    
+    &:hover {
+      background-color: #5ba7f7;
+      color: #2a2a2a;
+    }
   }
   
   .modal-content {
