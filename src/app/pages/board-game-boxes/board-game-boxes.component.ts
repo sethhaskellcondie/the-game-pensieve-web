@@ -27,6 +27,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   @ViewChild('titleField', { static: false }) titleField: any;
   
   boardGameBoxes: BoardGameBox[] = [];
+  boardGameBoxesCount = 0;
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -118,12 +119,14 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         console.log('Board game boxes received:', boardGameBoxes);
         console.log('Number of board game boxes:', boardGameBoxes.length);
         this.boardGameBoxes = boardGameBoxes;
+        this.boardGameBoxesCount = boardGameBoxes.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading board game boxes:', error);
         this.errorMessage = `Failed to load board game boxes: ${error.message || 'Unknown error'}`;
+        this.boardGameBoxesCount = 0;
         this.isLoading = false;
       }
     });

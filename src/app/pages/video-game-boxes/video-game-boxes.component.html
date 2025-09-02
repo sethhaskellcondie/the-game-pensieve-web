@@ -43,6 +43,9 @@
       </div>
       
       <div *ngIf="videoGameBoxes.length > 0" class="table-container">
+        <div class="table-header">
+          <span class="item-count">{{videoGameBoxesCount}} {{videoGameBoxesCount === 1 ? 'Video Game Box' : 'Video Game Boxes'}}</span>
+        </div>
         <table class="video-game-boxes-table">
           <thead>
             <tr>

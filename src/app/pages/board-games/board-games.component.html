@@ -40,6 +40,9 @@
       </div>
       
       <div *ngIf="boardGames.length > 0" class="table-container">
+        <div class="table-header">
+          <span class="item-count">{{boardGamesCount}} {{boardGamesCount === 1 ? 'Board Game' : 'Board Games'}}</span>
+        </div>
         <table class="board-games-table">
           <thead>
             <tr>
