@@ -54,6 +54,17 @@ export class CustomCheckboxComponent implements ControlValueAccessor, OnInit, On
     this.onTouched();
   }
 
+  onWrapperClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target.tagName.toLowerCase() === 'input') {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggle();
+  }
+
+
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Enter') {
       event.preventDefault();
