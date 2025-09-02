@@ -6,6 +6,7 @@ import { ErrorSnackbarService } from './error-snackbar.service';
 
 export interface UiSettings {
   darkMode: boolean;
+  massInputMode: boolean;
 }
 
 @Injectable({
@@ -14,7 +15,8 @@ export interface UiSettings {
 export class SettingsService {
   private readonly SETTINGS_KEY = 'ui_settings';
   private readonly defaultSettings: UiSettings = {
-    darkMode: false
+    darkMode: false,
+    massInputMode: false
   };
 
   private settingsSubject = new BehaviorSubject<UiSettings>(this.defaultSettings);
@@ -78,9 +80,36 @@ export class SettingsService {
     });
   }
 
+  updateMassInputMode(enabled: boolean): void {
+    const currentSettings = this.settingsSubject.value;
+    const newSettings: UiSettings = {
+      ...currentSettings,
+      massInputMode: enabled
+    };
+
+    this.settingsSubject.next(newSettings);
+    
+    this.metadataService.setMetadata(this.SETTINGS_KEY, newSettings).subscribe({
+      next: (success) => {
+        if (!success) {
+          console.error('Failed to save settings to backend');
+        }
+      },
+      error: (error) => {
+        console.error('Error saving settings:', error);
+      }
+    });
+  }
+
   getDarkMode$(): Observable<boolean> {
     return this.settings$.pipe(
       map(settings => settings.darkMode)
+    );
+  }
+
+  getMassInputMode$(): Observable<boolean> {
+    return this.settings$.pipe(
+      map(settings => settings.massInputMode)
     );
   }
 

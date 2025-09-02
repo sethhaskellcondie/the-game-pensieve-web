@@ -136,9 +136,20 @@
 }
 
 .button-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  
+  @media (min-width: 500px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+}
+
+.button-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   align-items: flex-start;
 }
 
@@ -180,9 +191,14 @@
 }
 
 .settings-group {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 15px;
+  
+  @media (min-width: 500px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
 }
 
 .toggle-container {

@@ -11,6 +11,15 @@
           (change)="onDarkModeToggle($any($event.target).checked)"
           class="toggle-input">
       </div>
+      <div class="toggle-container">
+        <label for="massInputModeToggle" class="toggle-label">Mass Input Mode</label>
+        <input 
+          type="checkbox" 
+          id="massInputModeToggle"
+          [checked]="isMassInputMode"
+          (change)="onMassInputModeToggle($any($event.target).checked)"
+          class="toggle-input">
+      </div>
     </div>
   </div>
 
@@ -53,26 +62,30 @@
   <div class="api-section">
     <h2>API Tools</h2>
     <div class="button-group">
-      <button 
-        type="button" 
-        class="api-button" 
-        (click)="checkHeartbeat()" 
-        [disabled]="isChecking">
-        {{isChecking ? 'Checking...' : 'API Heartbeat Check'}}
-      </button>
-      <div class="result-message" *ngIf="heartbeatResult">
-        <span class="status" [class]="heartbeatStatus">{{heartbeatResult}}</span>
+      <div class="button-container">
+        <button 
+          type="button" 
+          class="api-button" 
+          (click)="checkHeartbeat()" 
+          [disabled]="isChecking">
+          {{isChecking ? 'Checking...' : 'API Heartbeat Check'}}
+        </button>
+        <div class="result-message" *ngIf="heartbeatResult">
+          <span class="status" [class]="heartbeatStatus">{{heartbeatResult}}</span>
+        </div>
       </div>
       
-      <button 
-        type="button" 
-        class="api-button seed-button" 
-        (click)="seedSampleData()" 
-        [disabled]="isSeeding">
-        {{isSeeding ? 'Seeding...' : 'Seed Sample Data'}}
-      </button>
-      <div class="result-message" *ngIf="seedResult">
-        <span class="status" [class]="seedStatus">{{seedResult}}</span>
+      <div class="button-container">
+        <button 
+          type="button" 
+          class="api-button seed-button" 
+          (click)="seedSampleData()" 
+          [disabled]="isSeeding">
+          {{isSeeding ? 'Seeding...' : 'Seed Sample Data'}}
+        </button>
+        <div class="result-message" *ngIf="seedResult">
+          <span class="status" [class]="seedStatus">{{seedResult}}</span>
+        </div>
       </div>
     </div>
   </div>
