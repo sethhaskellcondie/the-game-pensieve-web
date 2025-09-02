@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -10,6 +10,7 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-toys',
@@ -26,6 +27,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   errorMessage = '';
   customFieldNames: string[] = [];
   isDarkMode = false;
+  isMassInputMode = false;
   
   showNewToyModal = false;
   isCreating = false;
@@ -46,7 +48,8 @@ export class ToysComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {
     console.log('ToysComponent constructor called');
   }
@@ -59,6 +62,12 @@ export class ToysComponent implements OnInit, OnDestroy {
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
       });
+
+    this.settingsService.getMassInputMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massInputMode => {
+        this.isMassInputMode = massInputMode;
+      });
     
     this.loadToys();
   }
@@ -66,6 +75,13 @@ export class ToysComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showNewToyModal) {
+      this.closeNewToyModal();
+    }
   }
 
   loadToys(): void {
@@ -216,6 +232,48 @@ export class ToysComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  onSubmitAndAddAnother(): void {
+    if (this.isCreating) return;
+    
+    this.isCreating = true;
+    
+    const toyData = {
+      ...this.newToy,
+      customFieldValues: this.newToy.customFieldValues
+    };
+    
+    // Only for creating new toys, not updating
+    this.apiService.createToy(toyData).subscribe({
+      next: (response) => {
+        console.log('Toy created successfully:', response);
+        this.isCreating = false;
+        this.loadToys(); // Refresh the toys list
+        
+        // Show success toast
+        this.errorSnackbarService.showSuccess('Toy created successfully');
+        
+        // Clear the name field but keep other fields
+        this.newToy.name = '';
+        
+        // Focus the name input
+        this.focusNameInput();
+      },
+      error: (error) => {
+        console.error('Error creating toy:', error);
+        this.isCreating = false;
+        // Error snackbar will be shown automatically by API service
+      }
+    });
+  }
+
+  private focusNameInput(): void {
+    setTimeout(() => {
+      if (this.nameField && this.nameField.focus) {
+        this.nameField.focus();
+      }
+    }, 100);
   }
 
   confirmDeleteToy(toy: Toy): void {
