@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ApiService, CustomField } from '../../services/api.service';
 import { IconService } from '../../services/icon.service';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 import { SafeHtml } from '@angular/platform-browser';
 import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
@@ -18,6 +19,7 @@ import { SelectableTextInputComponent } from '../../components/selectable-text-i
   styleUrl: './custom-fields.component.scss'
 })
 export class CustomFieldsComponent implements OnInit, OnDestroy {
+  @ViewChild('nameInputComponent') nameInputComponent!: SelectableTextInputComponent;
   private destroy$ = new Subject<void>();
   customFields: CustomField[] = [];
   sortedCustomFields: CustomField[] = [];
@@ -66,11 +68,13 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   currentFilter: string | null = null;
 
   isDarkMode = false;
+  isMassInputMode = false;
 
   constructor(
     private apiService: ApiService, 
     public iconService: IconService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -78,6 +82,12 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
+      });
+
+    this.settingsService.getMassInputMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massInputMode => {
+        this.isMassInputMode = massInputMode;
       });
     
     this.loadSavedFilter();
@@ -87,6 +97,13 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showNewCustomFieldModal) {
+      this.closeNewCustomFieldModal();
+    }
   }
 
   getIconHtml(iconName: string): SafeHtml {
@@ -146,12 +163,7 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     };
     
     // Focus the name input after the modal is rendered
-    setTimeout(() => {
-      const nameInput = document.querySelector('#name') as HTMLInputElement;
-      if (nameInput) {
-        nameInput.focus();
-      }
-    }, 0);
+    this.focusNameInput();
   }
 
   closeNewCustomFieldModal(): void {
@@ -182,6 +194,48 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
         // Error snackbar will be shown automatically by API service
       }
     });
+  }
+
+  onSubmitAndAddAnother(): void {
+    if (this.isCreating) return;
+    
+    this.isCreating = true;
+    
+    this.apiService.createCustomField(this.newCustomField).subscribe({
+      next: (response) => {
+        console.log('Custom field created successfully:', response);
+        this.isCreating = false;
+        this.loadCustomFields();
+        
+        // Show success toast
+        this.errorSnackbarService.showSuccess('Custom Field created successfully');
+        
+        // Clear the name field but keep type and entity selections
+        this.newCustomField.name = '';
+        
+        // Focus the name input
+        this.focusNameInput();
+      },
+      error: (error) => {
+        console.error('Error creating custom field:', error);
+        this.isCreating = false;
+        // Error snackbar will be shown automatically by API service
+      }
+    });
+  }
+
+  private focusNameInput(): void {
+    setTimeout(() => {
+      if (this.nameInputComponent) {
+        this.nameInputComponent.focus();
+      } else {
+        // Fallback: try to find the input element directly
+        const nameInput = document.querySelector('#name input') as HTMLInputElement;
+        if (nameInput) {
+          nameInput.focus();
+        }
+      }
+    }, 100);
   }
 
   startEditingField(field: CustomField): void {

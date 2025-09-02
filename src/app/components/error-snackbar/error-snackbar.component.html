@@ -1,14 +1,14 @@
-<div *ngIf="errorState.show" class="error-snackbar">
-  <div class="error-content">
-    <div class="error-icon">
-      ⚠️
+<div *ngIf="snackbarState.show" class="snackbar" [class.success-snackbar]="snackbarState.type === 'success'" [class.error-snackbar]="snackbarState.type === 'error'">
+  <div class="snackbar-content">
+    <div class="snackbar-icon">
+      <span *ngIf="snackbarState.type === 'error'">⚠️</span>
     </div>
-    <div class="error-messages">
-      <div *ngFor="let error of errorState.errors" class="error-message">
-        {{ error }}
+    <div class="snackbar-messages">
+      <div *ngFor="let message of snackbarState.messages" class="snackbar-message">
+        {{ message }}
       </div>
     </div>
-    <button type="button" class="dismiss-button" (click)="dismiss()" title="Dismiss errors">
+    <button type="button" class="dismiss-button" (click)="dismiss()" title="Dismiss">
       ×
     </button>
   </div>

@@ -1,40 +1,61 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface ErrorSnackbarState {
+export interface SnackbarState {
   show: boolean;
-  errors: string[];
+  messages: string[];
+  type: 'error' | 'success';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ErrorSnackbarService {
-  private errorState = new BehaviorSubject<ErrorSnackbarState>({
+  private snackbarState = new BehaviorSubject<SnackbarState>({
     show: false,
-    errors: []
+    messages: [],
+    type: 'error'
   });
 
-  public errorState$ = this.errorState.asObservable();
+  public snackbarState$ = this.snackbarState.asObservable();
 
   /**
    * Show errors in the snackbar
    */
   showErrors(errors: string[] | string): void {
     const errorArray = Array.isArray(errors) ? errors : [errors];
-    this.errorState.next({
+    this.snackbarState.next({
       show: true,
-      errors: errorArray
+      messages: errorArray,
+      type: 'error'
     });
   }
 
   /**
-   * Dismiss the error snackbar
+   * Show success messages in the snackbar
+   */
+  showSuccess(messages: string[] | string): void {
+    const messageArray = Array.isArray(messages) ? messages : [messages];
+    this.snackbarState.next({
+      show: true,
+      messages: messageArray,
+      type: 'success'
+    });
+
+    // Auto-dismiss success messages after 3 seconds
+    setTimeout(() => {
+      this.dismissErrors();
+    }, 3000);
+  }
+
+  /**
+   * Dismiss the snackbar
    */
   dismissErrors(): void {
-    this.errorState.next({
+    this.snackbarState.next({
       show: false,
-      errors: []
+      messages: [],
+      type: 'error'
     });
   }
 

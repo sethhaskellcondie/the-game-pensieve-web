@@ -110,6 +110,7 @@
             name="name" 
             [(ngModel)]="newCustomField.name"
             #nameField="ngModel"
+            #nameInputComponent
             [required]="true"
             [minlength]="1"
             placeholder="">
@@ -155,8 +156,20 @@
           <button type="button" class="cancel-button" (click)="closeNewCustomFieldModal()">
             Cancel
           </button>
-          <button type="submit" class="create-button" [disabled]="!customFieldForm.form.valid || isCreating">
+          <button 
+            *ngIf="!isMassInputMode"
+            type="submit" 
+            class="create-button" 
+            [disabled]="!customFieldForm.form.valid || isCreating">
             {{isCreating ? 'Creating...' : 'Create'}}
+          </button>
+          <button 
+            *ngIf="isMassInputMode"
+            type="button" 
+            class="create-and-add-button" 
+            [disabled]="!customFieldForm.form.valid || isCreating"
+            (click)="onSubmitAndAddAnother()">
+            {{isCreating ? 'Creating...' : 'Create and Add Another'}}
           </button>
         </div>
       </form>

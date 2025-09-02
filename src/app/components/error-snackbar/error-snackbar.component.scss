@@ -1,4 +1,4 @@
-.error-snackbar {
+.snackbar {
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -10,31 +10,39 @@
   animation: slideUp 0.3s ease-out;
 }
 
-.error-content {
-  background-color: #e53e3e;
+.snackbar-content {
   color: white;
   border-radius: 8px;
   padding: 16px 20px;
-  box-shadow: 0 8px 32px rgba(229, 62, 62, 0.3);
   display: flex;
   align-items: flex-start;
   gap: 12px;
   position: relative;
 }
 
-.error-icon {
+.error-snackbar .snackbar-content {
+  background-color: #e53e3e;
+  box-shadow: 0 8px 32px rgba(229, 62, 62, 0.3);
+}
+
+.success-snackbar .snackbar-content {
+  background-color: #28a745;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+}
+
+.snackbar-icon {
   font-size: 20px;
   line-height: 1;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-.error-messages {
+.snackbar-messages {
   flex: 1;
   min-width: 0;
 }
 
-.error-message {
+.snackbar-message {
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
@@ -81,7 +89,7 @@
 
 // Responsive design
 @media (max-width: 768px) {
-  .error-snackbar {
+  .snackbar {
     bottom: 10px;
     left: 10px;
     right: 10px;
@@ -90,11 +98,11 @@
     width: auto;
   }
   
-  .error-content {
+  .snackbar-content {
     padding: 14px 16px;
   }
   
-  .error-message {
+  .snackbar-message {
     font-size: 13px;
   }
 }

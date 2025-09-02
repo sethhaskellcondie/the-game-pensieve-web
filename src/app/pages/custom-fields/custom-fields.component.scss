@@ -318,7 +318,7 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.cancel-button, .create-button {
+.cancel-button, .create-button, .create-and-add-button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -339,6 +339,22 @@
 }
 
 .create-button {
+  background-color: #28a745;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.create-and-add-button {
   background-color: #28a745;
   color: white;
   
@@ -753,6 +769,24 @@
     
     &:hover {
       background-color: #555;
+    }
+  }
+
+  .create-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+    
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+  }
+
+  .create-and-add-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+    
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
     }
   }
   

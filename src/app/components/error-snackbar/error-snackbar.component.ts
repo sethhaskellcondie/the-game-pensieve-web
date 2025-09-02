@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { ErrorSnackbarService, ErrorSnackbarState } from '../../services/error-snackbar.service';
+import { ErrorSnackbarService, SnackbarState } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-error-snackbar',
@@ -11,14 +11,14 @@ import { ErrorSnackbarService, ErrorSnackbarState } from '../../services/error-s
   styleUrl: './error-snackbar.component.scss'
 })
 export class ErrorSnackbarComponent implements OnInit, OnDestroy {
-  errorState: ErrorSnackbarState = { show: false, errors: [] };
+  snackbarState: SnackbarState = { show: false, messages: [], type: 'error' };
   private subscription: Subscription = new Subscription();
 
   constructor(private errorSnackbarService: ErrorSnackbarService) {}
 
   ngOnInit(): void {
-    this.subscription = this.errorSnackbarService.errorState$.subscribe(
-      state => this.errorState = state
+    this.subscription = this.errorSnackbarService.snackbarState$.subscribe(
+      state => this.snackbarState = state
     );
   }
 
