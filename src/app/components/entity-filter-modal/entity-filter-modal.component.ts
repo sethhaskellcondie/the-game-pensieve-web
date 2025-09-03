@@ -27,6 +27,7 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   isDarkMode = false;
+  localFilters: FilterRequestDto[] = [];
 
   constructor(public filterService: FilterService, private settingsService: SettingsService) {}
 
@@ -90,34 +91,38 @@ export class EntityFilterModalComponent implements OnInit, OnDestroy {
   }
 
   getInitialFilters(): FilterRequestDto[] {
+    if (this.localFilters.length > 0) {
+      return this.localFilters;
+    }
     return this.filterService.getActiveFilters(this.entityType);
   }
 
-
   onFiltersChanged(filters: FilterRequestDto[]): void {
-    this.filterService.saveFiltersForEntity(this.entityType, filters);
+    this.localFilters = filters;
   }
 
   canApplyFilters(): boolean {
-    return this.filterService.hasActiveFilters(this.entityType);
+    return this.localFilters.length > 0;
   }
 
   applyFilters(): void {
-    const activeFilters = this.filterService.getActiveFilters(this.entityType);
-    if (activeFilters.length === 0) return;
+    if (this.localFilters.length === 0) return;
 
-    const filterRequests = this.filterService.convertFiltersForAPI(activeFilters);
+    this.filterService.saveFiltersForEntity(this.entityType, this.localFilters);
+    const filterRequests = this.filterService.convertFiltersForAPI(this.localFilters);
     this.filtersApplied.emit(filterRequests);
     this.closeModal();
   }
 
   clearFilters(): void {
+    this.localFilters = [];
     this.filterService.clearFiltersForEntity(this.entityType);
     this.filtersApplied.emit([]);
     this.closeModal();
   }
 
   closeModal(): void {
+    this.localFilters = [];
     this.show = false;
     this.showChange.emit(false);
   }

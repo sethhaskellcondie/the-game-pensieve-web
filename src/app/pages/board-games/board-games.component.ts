@@ -21,6 +21,7 @@ import { SettingsService } from '../../services/settings.service';
 export class BoardGamesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   boardGames: BoardGame[] = [];
+  boardGamesCount = 0;
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -64,12 +65,14 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
         console.log('Board games received:', boardGames);
         console.log('Number of board games:', boardGames.length);
         this.boardGames = boardGames;
+        this.boardGamesCount = boardGames.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading board games:', error);
         this.errorMessage = `Failed to load board games: ${error.message || 'Unknown error'}`;
+        this.boardGamesCount = 0;
         this.isLoading = false;
       }
     });

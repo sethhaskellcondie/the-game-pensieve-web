@@ -26,6 +26,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   @ViewChild('nameField', { static: false }) nameField: any;
   
   systems: System[] = [];
+  systemsCount = 0;
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -96,11 +97,13 @@ export class SystemsComponent implements OnInit, OnDestroy {
         console.log('Systems received:', systems);
         console.log('Number of systems:', systems.length);
         this.systems = systems;
+        this.systemsCount = systems.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading systems:', error);
+        this.systemsCount = 0;
         this.isLoading = false;
         // Error snackbar will be shown automatically by API service
       }

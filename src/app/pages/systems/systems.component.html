@@ -40,6 +40,9 @@
       </div>
       
       <div *ngIf="systems.length > 0" class="table-container">
+        <div class="table-header">
+          <span class="item-count">{{systemsCount}} {{systemsCount === 1 ? 'System' : 'Systems'}}</span>
+        </div>
         <table class="systems-table">
           <thead>
             <tr>

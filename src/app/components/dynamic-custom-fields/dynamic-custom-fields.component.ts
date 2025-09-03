@@ -7,6 +7,7 @@ import { ApiService, CustomField, CustomFieldValue } from '../../services/api.se
 import { SettingsService } from '../../services/settings.service';
 import { CustomCheckboxComponent } from '../custom-checkbox/custom-checkbox.component';
 import { SelectableNumberInputComponent } from '../selectable-number-input/selectable-number-input.component';
+import { SelectableTextInputComponent } from '../selectable-text-input/selectable-text-input.component';
 
 export interface DynamicFieldValue {
   [key: string]: any;
@@ -15,7 +16,7 @@ export interface DynamicFieldValue {
 @Component({
   selector: 'app-dynamic-custom-fields',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomCheckboxComponent, SelectableNumberInputComponent],
+  imports: [CommonModule, FormsModule, CustomCheckboxComponent, SelectableNumberInputComponent, SelectableTextInputComponent],
   templateUrl: './dynamic-custom-fields.component.html',
   styleUrl: './dynamic-custom-fields.component.scss'
 })

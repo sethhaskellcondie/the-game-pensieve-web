@@ -40,6 +40,9 @@
       </div>
       
       <div *ngIf="toys.length > 0" class="table-container">
+        <div class="table-header">
+          <span class="item-count">{{toysCount}} {{toysCount === 1 ? 'Toy' : 'Toys'}}</span>
+        </div>
         <table class="toys-table">
           <thead>
             <tr>

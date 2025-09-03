@@ -159,6 +159,21 @@
   margin-top: 20px;
 }
 
+.table-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+}
+
 .video-game-boxes-table {
   width: 100%;
   border-collapse: collapse;
@@ -433,33 +448,6 @@
   }
 }
 
-// Checkbox styles
-.checkbox-label {
-  display: flex !important;
-  align-items: center;
-  cursor: pointer;
-  margin-bottom: 0 !important;
-  font-weight: 500 !important;
-  user-select: none;
-}
-
-.checkbox-input {
-  width: 18px !important;
-  height: 18px;
-  margin-right: 12px;
-  accent-color: #0370ec;
-  cursor: pointer;
-  
-  &:focus {
-    outline: 2px solid rgba(3, 112, 236, 0.2);
-    outline-offset: 2px;
-  }
-}
-
-.checkbox-text {
-  font-size: 1rem;
-  color: #333;
-}
 
 // Detail Modal Specific Styles
 .edit-button, .details-button {
@@ -984,6 +972,15 @@
   .table-container {
     background: #2d2d2d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .table-header {
+    background-color: #404040;
+    border-bottom-color: #555;
+  }
+
+  .item-count {
+    color: #b0b0b0;
   }
 
   .video-game-boxes-table {
