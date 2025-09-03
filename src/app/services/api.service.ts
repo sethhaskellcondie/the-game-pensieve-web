@@ -139,6 +139,29 @@ export class ApiService {
     });
   }
 
+  backup(): Observable<any> {
+    return this.http.post(`${this.baseUrl}/function/backup`, {})
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
+  importFromFile(fileContent: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/function/importFromFile`, {
+      fileContent: fileContent
+    })
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
+  import(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/function/import`, data)
+      .pipe(
+        catchError(this.handleHttpError)
+      );
+  }
+
   getCustomFields(): Observable<CustomField[]> {
     return this.http.get<{data: CustomField[], errors: any}>(`${this.baseUrl}/custom_fields`)
       .pipe(

@@ -56,7 +56,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   newBoardGameBox = {
     title: '',
     isExpansion: false,
-    isStandAlone: false,
+    isStandAlone: true,
     baseSetId: null as string | null,
     boardGameId: null as string | null,
     newBoardGame: {
