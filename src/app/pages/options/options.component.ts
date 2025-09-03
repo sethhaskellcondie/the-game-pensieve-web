@@ -97,7 +97,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
         this.isChecking = false;
       },
       error: (error) => {
-        this.errorSnackbarService.showError(`API connection failed: ${error.message || 'Unknown error'}`);
+        this.errorSnackbarService.showErrors(`API connection failed: ${error.message || 'Unknown error'}`);
         this.isChecking = false;
       }
     });
@@ -119,9 +119,9 @@ export class OptionsComponent implements OnInit, OnDestroy {
         } else {
           const responseBody = httpResponse.body;
           if (responseBody?.errors) {
-            this.errorSnackbarService.showError(`Seeding failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`);
+            this.errorSnackbarService.showErrors(`Seeding failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`);
           } else {
-            this.errorSnackbarService.showError(`Seeding failed with status code: ${httpResponse.status}`);
+            this.errorSnackbarService.showErrors(`Seeding failed with status code: ${httpResponse.status}`);
           }
         }
         this.isSeeding = false;
@@ -137,7 +137,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
           errorMessage = `HTTP ${error.status} ${error.statusText || ''}`;
         }
         
-        this.errorSnackbarService.showError(`Seeding failed: ${errorMessage}`);
+        this.errorSnackbarService.showErrors(`Seeding failed: ${errorMessage}`);
         this.isSeeding = false;
       }
     });
@@ -181,7 +181,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
         this.downloadBackupFile(response);
       },
       error: (error: any) => {
-        this.errorSnackbarService.showError(`Backup failed: ${error.message || 'Unknown error'}`);
+        this.errorSnackbarService.showErrors(`Backup failed: ${error.message || 'Unknown error'}`);
         this.isBackingUp = false;
       }
     });
@@ -212,7 +212,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
     try {
       parsedData = JSON.parse(fileContent);
     } catch (error) {
-      this.errorSnackbarService.showError('Invalid JSON file format');
+      this.errorSnackbarService.showErrors('Invalid JSON file format');
       this.isImporting = false;
       return;
     }
@@ -223,7 +223,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
         this.isImporting = false;
       },
       error: (error: any) => {
-        this.errorSnackbarService.showError(`Import failed: ${error.message || 'Unknown error'}`);
+        this.errorSnackbarService.showErrors(`Import failed: ${error.message || 'Unknown error'}`);
         this.isImporting = false;
       }
     });
@@ -239,7 +239,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
         this.isImportingFromBackup = false;
       },
       error: (error: any) => {
-        this.errorSnackbarService.showError(`Import from backup failed: ${error.message || 'Unknown error'}`);
+        this.errorSnackbarService.showErrors(`Import from backup failed: ${error.message || 'Unknown error'}`);
         this.isImportingFromBackup = false;
       }
     });
