@@ -21,6 +21,7 @@ import { SettingsService } from '../../services/settings.service';
 export class VideoGamesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   videoGames: VideoGame[] = [];
+  videoGamesCount = 0;
   systems: System[] = [];
   videoGameBoxes: VideoGameBox[] = [];
   isLoading = false;
@@ -73,12 +74,14 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
         console.log('Video games received:', videoGames);
         console.log('Number of video games:', videoGames.length);
         this.videoGames = videoGames;
+        this.videoGamesCount = videoGames.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading video games:', error);
         this.errorMessage = `Failed to load video games: ${error.message || 'Unknown error'}`;
+        this.videoGamesCount = 0;
         this.isLoading = false;
       }
     });

@@ -23,6 +23,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   @ViewChild('nameField', { static: false }) nameField: any;
   toys: Toy[] = [];
+  toysCount = 0;
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -98,11 +99,13 @@ export class ToysComponent implements OnInit, OnDestroy {
         console.log('Toys received:', toys);
         console.log('Number of toys:', toys.length);
         this.toys = toys;
+        this.toysCount = toys.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading toys:', error);
+        this.toysCount = 0;
         this.isLoading = false;
         // Error snackbar will be shown automatically by API service
       }
@@ -328,15 +331,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('toy');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('toy');
   }
 
 }

@@ -22,6 +22,7 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   @ViewChild('nameInputComponent') nameInputComponent!: SelectableTextInputComponent;
   private destroy$ = new Subject<void>();
   customFields: CustomField[] = [];
+  customFieldsCount = 0;
   sortedCustomFields: CustomField[] = [];
   isLoading = false;
   errorMessage = '';
@@ -124,12 +125,14 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
           console.log('Filtered custom fields received:', fields);
           console.log('Number of filtered fields:', fields.length);
           this.customFields = fields;
+          this.customFieldsCount = fields.length;
           this.sortedCustomFields = [...fields];
           this.applySorting();
           this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading filtered custom fields:', error);
+          this.customFieldsCount = 0;
           this.isLoading = false;
           // Error snackbar will be shown automatically by API service
         }
@@ -141,12 +144,14 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
           console.log('Custom fields received:', fields);
           console.log('Number of fields:', fields.length);
           this.customFields = fields;
+          this.customFieldsCount = fields.length;
           this.sortedCustomFields = [...fields];
           this.applySorting();
           this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading custom fields:', error);
+          this.customFieldsCount = 0;
           this.isLoading = false;
           // Error snackbar will be shown automatically by API service
         }
@@ -426,6 +431,7 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
       next: (fields) => {
         console.log('Filtered custom fields received:', fields);
         this.customFields = fields;
+        this.customFieldsCount = fields.length;
         this.sortedCustomFields = [...fields];
         this.applySorting();
         this.isFiltering = false;

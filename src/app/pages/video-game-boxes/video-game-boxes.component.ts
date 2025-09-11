@@ -25,6 +25,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   @ViewChild('titleField', { static: false }) titleField: any;
   
   videoGameBoxes: VideoGameBox[] = [];
+  videoGameBoxesCount = 0;
   systems: System[] = [];
   isLoading = false;
   errorMessage = '';
@@ -97,12 +98,14 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         console.log('Video game boxes received:', videoGameBoxes);
         console.log('Number of video game boxes:', videoGameBoxes.length);
         this.videoGameBoxes = videoGameBoxes;
+        this.videoGameBoxesCount = videoGameBoxes.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading video game boxes:', error);
         this.errorMessage = `Failed to load video game boxes: ${error.message || 'Unknown error'}`;
+        this.videoGameBoxesCount = 0;
         this.isLoading = false;
       }
     });

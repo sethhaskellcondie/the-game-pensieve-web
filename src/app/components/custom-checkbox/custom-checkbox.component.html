@@ -1,4 +1,4 @@
-<div class="checkbox-wrapper" [class.dark-mode]="isDarkMode" (keydown)="onKeyDown($event)" (click)="toggle()" tabindex="0">
+<div class="checkbox-wrapper" [class.dark-mode]="isDarkMode" (keydown)="onKeyDown($event)" (click)="onWrapperClick($event)" tabindex="0">
   <input
     type="checkbox"
     [id]="id"

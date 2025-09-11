@@ -19,15 +19,13 @@
       <label [for]="'field-' + field.id" class="custom-field-label">
         {{field.name}}
       </label>
-      <input 
-        type="text"
+      <app-selectable-text-input
         [id]="'field-' + field.id"
         [name]="'field-' + field.id"
         [(ngModel)]="fieldValues[field.id]"
         (ngModelChange)="onFieldValueChange()"
-        (keyup.enter)="onEnterPressed()"
-        class="custom-field-input"
-        [placeholder]="">
+        (keyup.enter)="onEnterPressed()">
+      </app-selectable-text-input>
     </div>
     
     <!-- Number Field -->

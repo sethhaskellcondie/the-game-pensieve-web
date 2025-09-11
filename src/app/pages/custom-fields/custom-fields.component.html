@@ -40,6 +40,9 @@
       </div>
       
       <div *ngIf="customFields.length > 0" class="table-container">
+        <div class="table-header">
+          <span class="item-count">{{customFieldsCount}} {{customFieldsCount === 1 ? 'Custom Field' : 'Custom Fields'}}</span>
+        </div>
         <table class="custom-fields-table">
           <thead>
             <tr>

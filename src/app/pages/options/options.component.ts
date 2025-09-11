@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { SettingsService } from '../../services/settings.service';
 import { DefaultSortService, DefaultSortFilter } from '../../services/default-sort.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 import { DefaultSortModalComponent } from '../../components/default-sort-modal/default-sort-modal.component';
 
 @Component({
@@ -25,6 +26,18 @@ export class OptionsComponent implements OnInit, OnDestroy {
   seedResult = '';
   seedStatus: 'success' | 'error' = 'success';
 
+  isBackingUp = false;
+  backupResult = '';
+  backupStatus: 'success' | 'error' = 'success';
+
+  isImporting = false;
+  importResult = '';
+  importStatus: 'success' | 'error' = 'success';
+
+  isImportingFromBackup = false;
+  importFromBackupResult = '';
+  importFromBackupStatus: 'success' | 'error' = 'success';
+
   isDarkMode = false;
   isMassInputMode = false;
 
@@ -43,7 +56,8 @@ export class OptionsComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private settingsService: SettingsService,
-    public defaultSortService: DefaultSortService
+    public defaultSortService: DefaultSortService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -79,13 +93,11 @@ export class OptionsComponent implements OnInit, OnDestroy {
     
     this.apiService.heartbeat().subscribe({
       next: (response) => {
-        this.heartbeatResult = `API is healthy: ${response}`;
-        this.heartbeatStatus = 'success';
+        this.errorSnackbarService.showSuccess(`API is healthy: ${response}`);
         this.isChecking = false;
       },
       error: (error) => {
-        this.heartbeatResult = `API connection failed: ${error.message || 'Unknown error'}`;
-        this.heartbeatStatus = 'error';
+        this.errorSnackbarService.showErrors(`API connection failed: ${error.message || 'Unknown error'}`);
         this.isChecking = false;
       }
     });
@@ -100,19 +112,17 @@ export class OptionsComponent implements OnInit, OnDestroy {
         if (httpResponse.status === 200) {
           const responseBody = httpResponse.body;
           if (responseBody?.data) {
-            this.seedResult = `Sample data seeded successfully:\n${JSON.stringify(responseBody.data, null, 2)}`;
+            this.errorSnackbarService.showSuccess(`Sample data seeded successfully`);
           } else {
-            this.seedResult = 'Sample data seeded successfully!';
+            this.errorSnackbarService.showSuccess('Sample data seeded successfully!');
           }
-          this.seedStatus = 'success';
         } else {
           const responseBody = httpResponse.body;
           if (responseBody?.errors) {
-            this.seedResult = `Seeding failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`;
+            this.errorSnackbarService.showErrors(`Seeding failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`);
           } else {
-            this.seedResult = `Seeding failed with status code: ${httpResponse.status}`;
+            this.errorSnackbarService.showErrors(`Seeding failed with status code: ${httpResponse.status}`);
           }
-          this.seedStatus = 'error';
         }
         this.isSeeding = false;
       },
@@ -127,8 +137,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
           errorMessage = `HTTP ${error.status} ${error.statusText || ''}`;
         }
         
-        this.seedResult = `Seeding failed: ${errorMessage}`;
-        this.seedStatus = 'error';
+        this.errorSnackbarService.showErrors(`Seeding failed: ${errorMessage}`);
         this.isSeeding = false;
       }
     });
@@ -159,6 +168,97 @@ export class OptionsComponent implements OnInit, OnDestroy {
   onDefaultSortModalClose(): void {
     this.showDefaultSortModal = false;
     this.editingEntityType = '';
+  }
+
+  backupData(): void {
+    this.isBackingUp = true;
+    this.backupResult = '';
+    
+    this.apiService.backup().subscribe({
+      next: (response: any) => {
+        this.errorSnackbarService.showSuccess('Data backup completed successfully');
+        this.isBackingUp = false;
+        this.downloadBackupFile(response);
+      },
+      error: (error: any) => {
+        this.errorSnackbarService.showErrors(`Backup failed: ${error.message || 'Unknown error'}`);
+        this.isBackingUp = false;
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.readFile(file);
+    }
+  }
+
+  private readFile(file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const fileContent = e.target.result;
+      this.importData(fileContent);
+    };
+    reader.readAsText(file);
+  }
+
+  importData(fileContent: string): void {
+    this.isImporting = true;
+    this.importResult = '';
+    
+    let parsedData: any;
+    try {
+      parsedData = JSON.parse(fileContent);
+    } catch (error) {
+      this.errorSnackbarService.showErrors('Invalid JSON file format');
+      this.isImporting = false;
+      return;
+    }
+    
+    this.apiService.import(parsedData).subscribe({
+      next: (response: any) => {
+        this.errorSnackbarService.showSuccess('Data import completed successfully');
+        this.isImporting = false;
+      },
+      error: (error: any) => {
+        this.errorSnackbarService.showErrors(`Import failed: ${error.message || 'Unknown error'}`);
+        this.isImporting = false;
+      }
+    });
+  }
+
+  importFromBackup(): void {
+    this.isImportingFromBackup = true;
+    this.importFromBackupResult = '';
+    
+    this.apiService.importFromFile('').subscribe({
+      next: (response: any) => {
+        this.errorSnackbarService.showSuccess('Import from backup completed successfully');
+        this.isImportingFromBackup = false;
+      },
+      error: (error: any) => {
+        this.errorSnackbarService.showErrors(`Import from backup failed: ${error.message || 'Unknown error'}`);
+        this.isImportingFromBackup = false;
+      }
+    });
+  }
+
+  private downloadBackupFile(data: any): void {
+    const backupContent = JSON.stringify(data, null, 2);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `backup-${timestamp}.txt`;
+    
+    const blob = new Blob([backupContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    
+    window.URL.revokeObjectURL(url);
   }
 
   formatFieldName(fieldName: string): string {
