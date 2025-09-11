@@ -128,8 +128,8 @@ export class FilterService {
           ...baseOperators,
           { value: 'greater_than', label: 'Greater Than' },
           { value: 'less_than', label: 'Less Than' },
-          { value: 'greater_than_or_equal_to', label: 'Greater Than or Equal' },
-          { value: 'less_than_or_equal_to', label: 'Less Than or Equal' },
+          { value: 'greater_than_equal_to', label: 'Greater Than or Equal' },
+          { value: 'less_than_equal_to', label: 'Less Than or Equal' },
           sortOperator
         ];
       
