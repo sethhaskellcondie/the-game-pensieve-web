@@ -264,8 +264,8 @@ describe('SystemsComponent', () => {
           expect(component.shouldDisplayCustomField(systemWithCustomFields, 'Test Number Field')).toBe(true);
         });
 
-        it('should return false for number field with zero value', () => {
-          expect(component.shouldDisplayCustomField(systemWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+        it('should return true for number field with zero value', () => {
+          expect(component.shouldDisplayCustomField(systemWithEmptyCustomFields, 'Test Number Field')).toBe(true);
         });
 
         it('should return false for boolean fields (handled separately)', () => {
@@ -294,6 +294,130 @@ describe('SystemsComponent', () => {
         it('should return false for non-existent custom fields', () => {
           expect(component.shouldDisplayBooleanBadge(systemWithNoCustomFields, 'Test Boolean Field')).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('edit system modal logic', () => {
+    beforeEach(() => {
+      component.availableCustomFields = mockCustomFields;
+      fixture.detectChanges();
+    });
+
+    describe('mergeWithDefaultCustomFieldValues', () => {
+      it('should merge existing custom field values with defaults for missing fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
+      });
+
+      it('should create all default values when no existing values provided', () => {
+        const existingCustomFieldValues: any[] = [];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve all existing values when they match available fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual(existingCustomFieldValues);
+      });
+    });
+
+    describe('openUpdateSystemModal', () => {
+      it('should populate modal with system data and merged custom field values', () => {
+        const systemToUpdate = {
+          key: 'system1',
+          id: 1,
+          name: 'Nintendo Switch',
+          generation: 8,
+          handheld: true,
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Existing text' }
+          ]
+        };
+
+        component.openUpdateSystemModal(systemToUpdate);
+
+        expect(component.isUpdateMode).toBe(true);
+        expect(component.systemToUpdate).toBe(systemToUpdate);
+        expect(component.showNewSystemModal).toBe(true);
+        expect(component.newSystem.name).toBe('Nintendo Switch');
+        expect(component.newSystem.generation).toBe(8);
+        expect(component.newSystem.handheld).toBe(true);
+        expect(component.newSystem.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should provide default values for all custom fields when system has no custom field values', () => {
+        const systemToUpdate = {
+          key: 'system1',
+          id: 1,
+          name: 'Nintendo Switch',
+          generation: 8,
+          handheld: true,
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        component.openUpdateSystemModal(systemToUpdate);
+
+        expect(component.newSystem.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve existing custom field values and add defaults for new fields', () => {
+        const systemToUpdate = {
+          key: 'system1',
+          id: 1,
+          name: 'Nintendo Switch',
+          generation: 8,
+          handheld: true,
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '25' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'true' }
+          ]
+        };
+
+        component.openUpdateSystemModal(systemToUpdate);
+
+        expect(component.newSystem.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '25' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
       });
     });
   });
