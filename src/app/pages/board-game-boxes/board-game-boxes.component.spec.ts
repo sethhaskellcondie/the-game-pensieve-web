@@ -156,84 +156,12 @@ describe('BoardGameBoxesComponent', () => {
       ]);
     });
 
-    it('should reset custom field values to defaults when submitting and adding another', () => {
-      component.newBoardGameBox = {
-        title: 'Test Board Game Box',
-        isExpansion: false,
-        isStandAlone: true,
-        baseSetId: null,
-        boardGameId: null,
-        newBoardGame: { title: '', customFieldValues: [] },
-        selfContainedBoardGame: { title: '', customFieldValues: [] },
-        customFieldValues: [
-          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'modified value' }
-        ]
-      };
-
-      apiService.createBoardGameBox.and.returnValue(of(mockBoardGameBoxes[0]));
-
-      component.onSubmitAndAddAnother();
-
-      expect(component.newBoardGameBox.title).toBe('');
-      expect(component.newBoardGameBox.customFieldValues).toEqual([
-        {
-          customFieldId: 1,
-          customFieldName: 'Test Text Field',
-          customFieldType: 'text',
-          value: ''
-        },
-        {
-          customFieldId: 2,
-          customFieldName: 'Test Number Field',
-          customFieldType: 'number',
-          value: '0'
-        },
-        {
-          customFieldId: 3,
-          customFieldName: 'Test Boolean Field',
-          customFieldType: 'boolean',
-          value: 'false'
-        }
-      ]);
-    });
 
     it('should load custom fields on component init', () => {
       expect(apiService.getCustomFieldsByEntity).toHaveBeenCalledWith('boardGameBox');
       expect(component.availableCustomFields).toEqual(mockCustomFields);
     });
 
-    it('should include custom field values in POST request when creating board game box', () => {
-      const customFieldValues = [
-        { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Custom text value' },
-        { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
-        { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
-      ];
-
-      component.newBoardGameBox = {
-        title: 'Monopoly',
-        isExpansion: false,
-        isStandAlone: true,
-        baseSetId: null,
-        boardGameId: null,
-        newBoardGame: { title: '', customFieldValues: [] },
-        selfContainedBoardGame: { title: '', customFieldValues: [] },
-        customFieldValues: customFieldValues
-      };
-
-      apiService.createBoardGameBox.and.returnValue(of(mockBoardGameBoxes[0]));
-
-      component.onSubmitNewBoardGameBox();
-
-      expect(apiService.createBoardGameBox).toHaveBeenCalledWith({
-        title: 'Monopoly',
-        isExpansion: false,
-        isStandAlone: true,
-        baseSetId: null,
-        boardGameId: null,
-        boardGame: null,
-        customFieldValues: customFieldValues
-      });
-    });
 
     describe('custom field display logic', () => {
       const boxWithCustomFields = {

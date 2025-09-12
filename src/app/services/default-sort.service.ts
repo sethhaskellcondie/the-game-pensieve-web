@@ -28,7 +28,25 @@ export class DefaultSortService {
   private loadDefaultSorts(): void {
     this.metadataService.getMetadata<DefaultSortFilters>(this.METADATA_KEY).subscribe({
       next: (sorts) => {
-        this.defaultSortsSubject.next(sorts || {});
+        if (sorts === null) {
+          // Metadata doesn't exist (404), create it with empty object
+          this.metadataService.setMetadata(this.METADATA_KEY, {}).subscribe({
+            next: (success) => {
+              if (success) {
+                this.defaultSortsSubject.next({});
+              } else {
+                console.error('Failed to create default sorts metadata');
+                this.defaultSortsSubject.next({});
+              }
+            },
+            error: (error) => {
+              console.error('Error creating default sorts metadata:', error);
+              this.defaultSortsSubject.next({});
+            }
+          });
+        } else {
+          this.defaultSortsSubject.next(sorts || {});
+        }
       },
       error: (error) => {
         console.error('Error loading default sorts:', error);

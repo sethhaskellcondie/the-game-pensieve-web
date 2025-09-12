@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FilterableDropdownComponent } from './filterable-dropdown.component';
+import { SettingsService } from '../../services/settings.service';
+import { mockSettingsService } from '../../testing/test-utils';
 
 describe('FilterableDropdownComponent', () => {
   let component: FilterableDropdownComponent;
@@ -8,7 +10,10 @@ describe('FilterableDropdownComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FilterableDropdownComponent]
+      imports: [FilterableDropdownComponent],
+      providers: [
+        { provide: SettingsService, useValue: mockSettingsService }
+      ]
     })
     .compileComponents();
     

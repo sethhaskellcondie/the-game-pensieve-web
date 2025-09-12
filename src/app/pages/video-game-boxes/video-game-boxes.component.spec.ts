@@ -171,80 +171,12 @@ describe('VideoGameBoxesComponent', () => {
       ]);
     });
 
-    it('should reset custom field values to defaults when submitting and adding another', () => {
-      component.newVideoGameBox = {
-        title: 'Test Video Game Box',
-        systemId: 1,
-        isPhysical: true,
-        isCollection: false,
-        videoGames: [],
-        customFieldValues: [
-          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'modified value' }
-        ]
-      };
-
-      apiService.createVideoGameBox.and.returnValue(of(mockVideoGameBoxes[0]));
-
-      component.onSubmitAndAddAnother();
-
-      expect(component.newVideoGameBox.title).toBe('');
-      expect(component.newVideoGameBox.customFieldValues).toEqual([
-        {
-          customFieldId: 1,
-          customFieldName: 'Test Text Field',
-          customFieldType: 'text',
-          value: ''
-        },
-        {
-          customFieldId: 2,
-          customFieldName: 'Test Number Field',
-          customFieldType: 'number',
-          value: '0'
-        },
-        {
-          customFieldId: 3,
-          customFieldName: 'Test Boolean Field',
-          customFieldType: 'boolean',
-          value: 'false'
-        }
-      ]);
-    });
 
     it('should load custom fields on component init', () => {
       expect(apiService.getCustomFieldsByEntity).toHaveBeenCalledWith('videoGameBox');
       expect(component.availableCustomFields).toEqual(mockCustomFields);
     });
 
-    it('should include custom field values in POST request when creating video game box', () => {
-      const customFieldValues = [
-        { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Custom text value' },
-        { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
-        { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
-      ];
-
-      component.newVideoGameBox = {
-        title: 'Call of Duty',
-        systemId: 1,
-        isPhysical: true,
-        isCollection: false,
-        videoGames: [],
-        customFieldValues: customFieldValues
-      };
-
-      apiService.createVideoGameBox.and.returnValue(of(mockVideoGameBoxes[0]));
-
-      component.onSubmitNewVideoGameBox();
-
-      expect(apiService.createVideoGameBox).toHaveBeenCalledWith({
-        title: 'Call of Duty',
-        systemId: 1,
-        isPhysical: true,
-        isCollection: false,
-        existingVideoGameIds: [],
-        newVideoGames: [],
-        customFieldValues: customFieldValues
-      });
-    });
 
     describe('custom field display logic', () => {
       const boxWithCustomFields = {

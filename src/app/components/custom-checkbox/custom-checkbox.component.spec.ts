@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CustomCheckboxComponent } from './custom-checkbox.component';
+import { SettingsService } from '../../services/settings.service';
+import { mockSettingsService } from '../../testing/test-utils';
 
 describe('CustomCheckboxComponent', () => {
   let component: CustomCheckboxComponent;
@@ -8,7 +10,10 @@ describe('CustomCheckboxComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CustomCheckboxComponent]
+      imports: [CustomCheckboxComponent],
+      providers: [
+        { provide: SettingsService, useValue: mockSettingsService }
+      ]
     })
     .compileComponents();
     
