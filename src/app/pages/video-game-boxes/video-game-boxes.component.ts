@@ -30,6 +30,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
   
@@ -84,6 +85,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     this.loadVideoGameBoxes();
     this.loadSystems();
+    this.loadCustomFields();
   }
 
   loadVideoGameBoxes(): void {
@@ -111,6 +113,40 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('videoGameBox').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for video game boxes:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for video game boxes:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -127,6 +163,42 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   getCustomFieldValue(box: VideoGameBox, fieldName: string): string {
     const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  shouldDisplayCustomField(box: VideoGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, don't display if no meaningful value exists
+    if (fieldType === 'number') {
+      return customField.value !== '' && customField.value !== '0';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(box: VideoGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
   }
 
   navigateToDetail(id: number): void {
@@ -165,7 +237,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       isPhysical: false,
       isCollection: false,
       videoGames: [],
-      customFieldValues: [] as any[]
+      customFieldValues: this.createDefaultCustomFieldValues()
     };
   }
 
@@ -371,7 +443,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         
         this.errorSnackbarService.showSuccess('Video Game Box created successfully');
         
+        // Clear the title field but reset custom field values to defaults
         this.newVideoGameBox.title = '';
+        this.newVideoGameBox.customFieldValues = this.createDefaultCustomFieldValues();
         
         this.focusTitleInput();
       },
@@ -459,7 +533,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
               customFieldId: field.id,
               customFieldName: field.name,
               customFieldType: field.type,
-              value: '' // Leave empty for manual entry
+              value: this.getDefaultValueForType(field.type) // Use default values
             }))
           };
           this.newVideoGameBox.videoGames.push(newVideoGame);

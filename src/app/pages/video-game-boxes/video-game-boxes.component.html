@@ -69,13 +69,13 @@
               </td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 
-                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  *ngIf="shouldDisplayBooleanBadge(box, fieldName)"
                   [value]="getCustomFieldValue(box, fieldName)"
                   size="small">
                 </app-boolean-display>
-                <ng-template #textValue>
+                <span *ngIf="shouldDisplayCustomField(box, fieldName)">
                   {{getCustomFieldValue(box, fieldName)}}
-                </ng-template>
+                </span>
               </td>
               <td class="field-actions">
                 <button 
