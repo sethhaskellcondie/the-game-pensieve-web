@@ -25,10 +25,18 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   
   showDetailBoardGameModal = false;
+  showEditBoardGameModal = false;
+  isUpdating = false;
   selectedBoardGame: BoardGame | null = null;
+  boardGameToUpdate: BoardGame | null = null;
+  editBoardGame = {
+    title: '',
+    customFieldValues: [] as any[]
+  };
   showFilterModal = false;
 
   constructor(
@@ -46,6 +54,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       });
     
     this.loadBoardGames();
+    this.loadCustomFields();
   }
 
   ngOnDestroy(): void {
@@ -78,6 +87,19 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for board games:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for board games:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -96,6 +118,66 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     return customField ? customField.value : '';
   }
 
+  shouldDisplayCustomField(game: BoardGame, fieldName: string): boolean {
+    const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, display if there's any value (including 0)
+    if (fieldType === 'number') {
+      return customField.value !== '';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(game: BoardGame, fieldName: string): boolean {
+    const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
+  }
+
+  shouldDisplayCustomFieldInModal(field: any): boolean {
+    // For boolean fields, always display the badge if the field exists
+    if (field.customFieldType === 'boolean') {
+      return true;
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (field.customFieldType === 'text') {
+      return field.value !== '';
+    }
+    
+    // For number fields, display if there's any value (including 0)
+    if (field.customFieldType === 'number') {
+      return field.value !== '';
+    }
+    
+    // Default to displaying if we're unsure about the type
+    return field.value !== '';
+  }
+
+  hasDisplayableCustomFields(boardGame: BoardGame): boolean {
+    return boardGame.customFieldValues.some(field => this.shouldDisplayCustomFieldInModal(field));
+  }
+
   navigateToDetail(id: number): void {
     this.router.navigate(['/board-game', id]);
   }
@@ -108,6 +190,67 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   closeDetailBoardGameModal(): void {
     this.showDetailBoardGameModal = false;
     this.selectedBoardGame = null;
+  }
+
+  openEditFromDetail(): void {
+    if (this.selectedBoardGame) {
+      const boardGameToEdit = this.selectedBoardGame;
+      this.closeDetailBoardGameModal();
+      this.openEditBoardGameModal(boardGameToEdit);
+    }
+  }
+
+  openDetailFromEdit(): void {
+    if (this.boardGameToUpdate) {
+      const boardGameToDetail = this.boardGameToUpdate;
+      this.closeEditBoardGameModal();
+      this.openDetailBoardGameModal(boardGameToDetail);
+    }
+  }
+
+  openEditBoardGameModal(boardGame: BoardGame): void {
+    this.boardGameToUpdate = boardGame;
+    this.showEditBoardGameModal = true;
+    this.editBoardGame = {
+      title: boardGame.title,
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(boardGame.customFieldValues)
+    };
+  }
+
+  closeEditBoardGameModal(): void {
+    this.showEditBoardGameModal = false;
+    this.boardGameToUpdate = null;
+    this.editBoardGame = {
+      title: '',
+      customFieldValues: [] as any[]
+    };
+  }
+
+  onSubmitEditBoardGame(): void {
+    if (this.isUpdating || !this.editBoardGame.title || !this.boardGameToUpdate) {
+      return;
+    }
+    
+    this.isUpdating = true;
+    
+    const boardGameData = {
+      title: this.editBoardGame.title,
+      customFieldValues: this.editBoardGame.customFieldValues
+    };
+    
+    this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
+      next: (response) => {
+        console.log('Board game updated successfully:', response);
+        this.isUpdating = false;
+        this.closeEditBoardGameModal();
+        this.loadBoardGames(); // Refresh the board games list
+      },
+      error: (error) => {
+        console.error('Error updating board game:', error);
+        this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+      }
+    });
   }
 
 
@@ -159,5 +302,42 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
   }
 }

@@ -31,6 +31,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
   
@@ -60,6 +61,10 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     baseSetId: null as string | null,
     boardGameId: null as string | null,
     newBoardGame: {
+      title: '',
+      customFieldValues: [] as any[]
+    },
+    selfContainedBoardGame: {
       title: '',
       customFieldValues: [] as any[]
     },
@@ -93,6 +98,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       });
     
     this.loadBoardGameBoxes();
+    this.loadCustomFields();
   }
 
   ngOnDestroy(): void {
@@ -132,6 +138,49 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for board game boxes:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for board game boxes:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  createDefaultBoardGameCustomFieldValues(boardGameCustomFields: any[]): any[] {
+    return boardGameCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -148,6 +197,42 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   getCustomFieldValue(box: BoardGameBox, fieldName: string): string {
     const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  shouldDisplayCustomField(box: BoardGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, display if there's any value (including 0)
+    if (fieldType === 'number') {
+      return customField.value !== '';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(box: BoardGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
   }
 
   getBoardGameBoxTitle(baseSetId: number): string {
@@ -172,27 +257,15 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       }
     });
     
-    // Get custom fields for board game boxes when opening modal
-    this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
-      next: (customFields: any[]) => {
-        console.log('Custom fields for board game boxes:', customFields);
-        this.newBoardGameBox.customFieldValues = customFields.map((field: any) => ({
-          customFieldId: field.id,
-          customFieldName: field.name,
-          customFieldType: field.type,
-          value: field.type === 'boolean' ? 'false' : ''
-        }));
-      },
-      error: (error: any) => {
-        console.error('Error loading custom fields:', error);
-        this.newBoardGameBox.customFieldValues = [];
-      }
-    });
+    // Set default custom field values for board game boxes
+    this.newBoardGameBox.customFieldValues = this.createDefaultCustomFieldValues();
     
-    // Get custom fields for new board games when opening modal
+    // Only load custom fields for new board games when opening modal (not for self-contained)
     this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
       next: (customFields: any[]) => {
         console.log('Custom fields for board games:', customFields);
+        
+        // Set up custom fields for new board games (create new mode)
         this.newBoardGameBox.newBoardGame.customFieldValues = customFields.map((field: any) => ({
           customFieldId: field.id,
           customFieldName: field.name,
@@ -214,6 +287,44 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+
+  private loadSelfContainedCustomFields(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
+        next: (customFields: any[]) => {
+          console.log('Loading custom fields for self-contained board game:', customFields);
+          const defaultValues = this.createDefaultBoardGameCustomFieldValues(customFields);
+          resolve(defaultValues);
+        },
+        error: (error: any) => {
+          console.error('Error loading custom fields for self-contained board game:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private async prepareBoardGameForSubmission(): Promise<any> {
+    switch (this.boardGameSelectionMode) {
+      case 'new':
+        return this.newBoardGameBox.newBoardGame;
+      case 'self-contained':
+        // Load custom fields on demand for self-contained games
+        try {
+          const customFieldValues = await this.loadSelfContainedCustomFields();
+          return {
+            title: this.newBoardGameBox.title,
+            customFieldValues: customFieldValues
+          };
+        } catch (error) {
+          throw new Error('Failed to load custom fields for self-contained board game');
+        }
+      case 'existing':
+      default:
+        return null;
+    }
+  }
+
   closeNewBoardGameBoxModal(): void {
     this.showNewBoardGameBoxModal = false;
     this.boardGameSelectionMode = 'self-contained';
@@ -227,11 +338,15 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         title: '',
         customFieldValues: []
       },
+      selfContainedBoardGame: {
+        title: '',
+        customFieldValues: []
+      },
       customFieldValues: []
     };
   }
 
-  onSubmitNewBoardGameBox(): void {
+  async onSubmitNewBoardGameBox(): Promise<void> {
     if (this.isCreating || !this.newBoardGameBox.title) {
       return;
     }
@@ -250,32 +365,40 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     this.isCreating = true;
     this.errorMessage = '';
     
-    const boardGameBoxData = {
-      title: this.newBoardGameBox.title,
-      isExpansion: this.newBoardGameBox.isExpansion,
-      isStandAlone: this.newBoardGameBox.isStandAlone,
-      baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
-      boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
-      boardGame: this.boardGameSelectionMode === 'new' ? this.newBoardGameBox.newBoardGame : null,
-      customFieldValues: this.newBoardGameBox.customFieldValues
-    };
-    
-    this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
-      next: (response) => {
-        console.log('Board game box created successfully:', response);
-        this.isCreating = false;
-        this.closeNewBoardGameBoxModal();
-        this.loadBoardGameBoxes(); // Refresh the board game boxes list
-      },
-      error: (error) => {
-        console.error('Error creating board game box:', error);
-        this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
-        this.isCreating = false;
-      }
-    });
+    try {
+      const boardGame = await this.prepareBoardGameForSubmission();
+      
+      const boardGameBoxData = {
+        title: this.newBoardGameBox.title,
+        isExpansion: this.newBoardGameBox.isExpansion,
+        isStandAlone: this.newBoardGameBox.isStandAlone,
+        baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
+        boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
+        boardGame: boardGame,
+        customFieldValues: this.newBoardGameBox.customFieldValues
+      };
+      
+      this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
+        next: (response) => {
+          console.log('Board game box created successfully:', response);
+          this.isCreating = false;
+          this.closeNewBoardGameBoxModal();
+          this.loadBoardGameBoxes(); // Refresh the board game boxes list
+        },
+        error: (error) => {
+          console.error('Error creating board game box:', error);
+          this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error preparing board game for submission:', error);
+      this.errorMessage = 'Failed to load custom fields for board game.';
+      this.isCreating = false;
+    }
   }
 
-  onSubmitAndAddAnother(): void {
+  async onSubmitAndAddAnother(): Promise<void> {
     if (this.isCreating || !this.newBoardGameBox.title) {
       return;
     }
@@ -294,40 +417,65 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     this.isCreating = true;
     this.errorMessage = '';
     
-    const boardGameBoxData = {
-      title: this.newBoardGameBox.title,
-      isExpansion: this.newBoardGameBox.isExpansion,
-      isStandAlone: this.newBoardGameBox.isStandAlone,
-      baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
-      boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
-      boardGame: this.boardGameSelectionMode === 'new' ? this.newBoardGameBox.newBoardGame : null,
-      customFieldValues: this.newBoardGameBox.customFieldValues
-    };
-    
-    this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
-      next: (response) => {
-        console.log('Board game box created successfully:', response);
-        this.isCreating = false;
-        this.loadBoardGameBoxes(); // Refresh the board game boxes list
-        
-        // Show success toast
-        this.errorSnackbarService.showSuccess('Board Game Box created successfully');
-        
-        // Clear the title field but keep other fields
-        this.newBoardGameBox.title = '';
-        if (this.boardGameSelectionMode === 'new') {
-          this.newBoardGameBox.newBoardGame.title = '';
+    try {
+      const boardGame = await this.prepareBoardGameForSubmission();
+      
+      const boardGameBoxData = {
+        title: this.newBoardGameBox.title,
+        isExpansion: this.newBoardGameBox.isExpansion,
+        isStandAlone: this.newBoardGameBox.isStandAlone,
+        baseSetId: this.newBoardGameBox.baseSetId ? parseInt(this.newBoardGameBox.baseSetId) : null,
+        boardGameId: this.boardGameSelectionMode === 'existing' && this.newBoardGameBox.boardGameId ? parseInt(this.newBoardGameBox.boardGameId) : null,
+        boardGame: boardGame,
+        customFieldValues: this.newBoardGameBox.customFieldValues
+      };
+      
+      this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
+        next: (response) => {
+          console.log('Board game box created successfully:', response);
+          this.isCreating = false;
+          this.loadBoardGameBoxes(); // Refresh the board game boxes list
+          
+          // Show success toast
+          this.errorSnackbarService.showSuccess('Board Game Box created successfully');
+          
+          // Clear the title field but reset custom field values to defaults
+          this.newBoardGameBox.title = '';
+          this.newBoardGameBox.customFieldValues = this.createDefaultCustomFieldValues();
+          
+          if (this.boardGameSelectionMode === 'new') {
+            this.newBoardGameBox.newBoardGame.title = '';
+            // Reset new board game custom fields if needed
+            this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
+              next: (customFields: any[]) => {
+                this.newBoardGameBox.newBoardGame.customFieldValues = customFields.map((field: any) => ({
+                  customFieldId: field.id,
+                  customFieldName: field.name,
+                  customFieldType: field.type,
+                  value: this.getDefaultValueForType(field.type)
+                }));
+              },
+              error: () => {
+                this.newBoardGameBox.newBoardGame.customFieldValues = [];
+              }
+            });
+          }
+          // Note: No need to reset self-contained custom fields since they're loaded on-demand
+          
+          // Focus the title input
+          this.focusTitleInput();
+        },
+        error: (error) => {
+          console.error('Error creating board game box:', error);
+          this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
+          this.isCreating = false;
         }
-        
-        // Focus the title input
-        this.focusTitleInput();
-      },
-      error: (error) => {
-        console.error('Error creating board game box:', error);
-        this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
-        this.isCreating = false;
-      }
-    });
+      });
+    } catch (error) {
+      console.error('Error preparing board game for submission:', error);
+      this.errorMessage = 'Failed to load custom fields for board game.';
+      this.isCreating = false;
+    }
   }
 
   private focusTitleInput(): void {

@@ -57,6 +57,8 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
     boardGameId: null as string | null,
     customFieldValues: [] as any[]
   };
+  
+  availableCustomFields: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -157,36 +159,112 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/board-game-boxes']);
   }
 
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
+  }
+
   openEditBoardGameBoxModal(): void {
     if (!this.boardGameBox) return;
     
     this.showEditBoardGameBoxModal = true;
     this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
     
-    // Load existing board games for the dropdown
-    this.apiService.getBoardGames().subscribe({
-      next: (boardGames) => {
-        this.boardGamesForDropdown = boardGames;
+    // Load available custom fields for board game boxes
+    this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
+      next: (customFields) => {
+        this.availableCustomFields = customFields;
         
-        // Set form data after board games are loaded
-        this.editBoardGameBoxData = {
-          title: this.boardGameBox!.title,
-          isExpansion: this.boardGameBox!.isExpansion,
-          isStandAlone: this.boardGameBox!.isStandAlone,
-          baseSetId: this.boardGameBox!.baseSetId ? this.boardGameBox!.baseSetId.toString() : null,
-          boardGameId: this.boardGameBox!.boardGame?.id ? this.boardGameBox!.boardGame.id.toString() : null,
-          customFieldValues: [...this.boardGameBox!.customFieldValues]
-        };
-        
-        // Focus the title field after the view updates
-        setTimeout(() => {
-          if (this.titleField && this.titleField.focus) {
-            this.titleField.focus();
+        // Load existing board games for the dropdown
+        this.apiService.getBoardGames().subscribe({
+          next: (boardGames) => {
+            this.boardGamesForDropdown = boardGames;
+            
+            // Set form data after board games are loaded
+            this.editBoardGameBoxData = {
+              title: this.boardGameBox!.title,
+              isExpansion: this.boardGameBox!.isExpansion,
+              isStandAlone: this.boardGameBox!.isStandAlone,
+              baseSetId: this.boardGameBox!.baseSetId ? this.boardGameBox!.baseSetId.toString() : null,
+              boardGameId: this.boardGameBox!.boardGame?.id ? this.boardGameBox!.boardGame.id.toString() : null,
+              customFieldValues: this.mergeWithDefaultCustomFieldValues(this.boardGameBox!.customFieldValues)
+            };
+            
+            // Focus the title field after the view updates
+            setTimeout(() => {
+              if (this.titleField && this.titleField.focus) {
+                this.titleField.focus();
+              }
+            }, 0);
+          },
+          error: (error) => {
+            console.error('Error loading board games:', error);
           }
-        }, 0);
+        });
       },
       error: (error) => {
-        console.error('Error loading board games:', error);
+        console.error('Error loading custom fields for board game box:', error);
+        // Fallback to original behavior if custom fields can't be loaded
+        this.availableCustomFields = [];
+        
+        // Load existing board games for the dropdown
+        this.apiService.getBoardGames().subscribe({
+          next: (boardGames) => {
+            this.boardGamesForDropdown = boardGames;
+            
+            // Set form data after board games are loaded
+            this.editBoardGameBoxData = {
+              title: this.boardGameBox!.title,
+              isExpansion: this.boardGameBox!.isExpansion,
+              isStandAlone: this.boardGameBox!.isStandAlone,
+              baseSetId: this.boardGameBox!.baseSetId ? this.boardGameBox!.baseSetId.toString() : null,
+              boardGameId: this.boardGameBox!.boardGame?.id ? this.boardGameBox!.boardGame.id.toString() : null,
+              customFieldValues: [...this.boardGameBox!.customFieldValues]
+            };
+            
+            // Focus the title field after the view updates
+            setTimeout(() => {
+              if (this.titleField && this.titleField.focus) {
+                this.titleField.focus();
+              }
+            }, 0);
+          },
+          error: (error) => {
+            console.error('Error loading board games:', error);
+          }
+        });
       }
     });
   }

@@ -48,6 +48,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   systems: any[] = [];
   allVideoGames: any[] = [];
   editingVideoGameIndex: number | null = null;
+  availableCustomFields: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -139,6 +140,43 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/video-game-boxes']);
   }
 
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
+  }
+
   openEditVideoGameBoxModal(): void {
     if (!this.videoGameBox) return;
     
@@ -153,40 +191,88 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
         console.error('Error loading systems:', error);
       }
     });
-    
-    // Load all video games for dropdown
-    this.apiService.getVideoGames().subscribe({
-      next: (videoGames) => {
-        this.allVideoGames = videoGames;
+
+    // Load available custom fields for video game boxes
+    this.apiService.getCustomFieldsByEntity('videoGameBox').subscribe({
+      next: (customFields) => {
+        this.availableCustomFields = customFields;
         
-        // Convert existing video games to the format we need
-        const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
-          type: 'existing' as 'existing' | 'new',
-          existingVideoGameId: game.id,
-          title: undefined,
-          systemId: undefined,
-          customFieldValues: []
-        }));
-        
-        this.editVideoGameBoxData = {
-          title: this.videoGameBox!.title,
-          systemId: this.videoGameBox!.system.id,
-          isPhysical: this.videoGameBox!.isPhysical,
-          isCollection: this.videoGameBox!.isCollection,
-          videoGames: existingVideoGames,
-          customFieldValues: [...this.videoGameBox!.customFieldValues]
-        };
+        // Load all video games for dropdown
+        this.apiService.getVideoGames().subscribe({
+          next: (videoGames) => {
+            this.allVideoGames = videoGames;
+            
+            // Convert existing video games to the format we need
+            const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
+              type: 'existing' as 'existing' | 'new',
+              existingVideoGameId: game.id,
+              title: undefined,
+              systemId: undefined,
+              customFieldValues: []
+            }));
+            
+            this.editVideoGameBoxData = {
+              title: this.videoGameBox!.title,
+              systemId: this.videoGameBox!.system.id,
+              isPhysical: this.videoGameBox!.isPhysical,
+              isCollection: this.videoGameBox!.isCollection,
+              videoGames: existingVideoGames,
+              customFieldValues: this.mergeWithDefaultCustomFieldValues(this.videoGameBox!.customFieldValues)
+            };
+          },
+          error: (error) => {
+            console.error('Error loading video games:', error);
+            this.editVideoGameBoxData = {
+              title: this.videoGameBox!.title,
+              systemId: this.videoGameBox!.system.id,
+              isPhysical: this.videoGameBox!.isPhysical,
+              isCollection: this.videoGameBox!.isCollection,
+              videoGames: [],
+              customFieldValues: this.mergeWithDefaultCustomFieldValues(this.videoGameBox!.customFieldValues)
+            };
+          }
+        });
       },
       error: (error) => {
-        console.error('Error loading video games:', error);
-        this.editVideoGameBoxData = {
-          title: this.videoGameBox!.title,
-          systemId: this.videoGameBox!.system.id,
-          isPhysical: this.videoGameBox!.isPhysical,
-          isCollection: this.videoGameBox!.isCollection,
-          videoGames: [],
-          customFieldValues: [...this.videoGameBox!.customFieldValues]
-        };
+        console.error('Error loading custom fields for video game box:', error);
+        // Fallback to original behavior if custom fields can't be loaded
+        this.availableCustomFields = [];
+        
+        // Load all video games for dropdown
+        this.apiService.getVideoGames().subscribe({
+          next: (videoGames) => {
+            this.allVideoGames = videoGames;
+            
+            // Convert existing video games to the format we need
+            const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
+              type: 'existing' as 'existing' | 'new',
+              existingVideoGameId: game.id,
+              title: undefined,
+              systemId: undefined,
+              customFieldValues: []
+            }));
+            
+            this.editVideoGameBoxData = {
+              title: this.videoGameBox!.title,
+              systemId: this.videoGameBox!.system.id,
+              isPhysical: this.videoGameBox!.isPhysical,
+              isCollection: this.videoGameBox!.isCollection,
+              videoGames: existingVideoGames,
+              customFieldValues: [...this.videoGameBox!.customFieldValues]
+            };
+          },
+          error: (error) => {
+            console.error('Error loading video games:', error);
+            this.editVideoGameBoxData = {
+              title: this.videoGameBox!.title,
+              systemId: this.videoGameBox!.system.id,
+              isPhysical: this.videoGameBox!.isPhysical,
+              isCollection: this.videoGameBox!.isCollection,
+              videoGames: [],
+              customFieldValues: [...this.videoGameBox!.customFieldValues]
+            };
+          }
+        });
       }
     });
     

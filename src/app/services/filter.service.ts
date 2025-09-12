@@ -88,7 +88,7 @@ export class FilterService {
   }
 
   /**
-   * Get filter display text for UI with human-readable labels
+   * Get filter display text for UI
    */
   getFilterDisplayText(entityType: string): string {
     const filters = this.getActiveFilters(entityType);
@@ -96,65 +96,10 @@ export class FilterService {
     
     if (filters.length === 1) {
       const filter = filters[0];
-      const fieldLabel = this.formatFieldNameForDisplay(filter.field);
-      const operatorLabel = this.formatOperatorForDisplay(filter.operator);
-      return `${fieldLabel} ${operatorLabel} "${filter.operand}"`;
+      return `${filter.field} ${filter.operator} "${filter.operand}"`;
     }
     
     return `${filters.length} filters active`;
-  }
-
-  /**
-   * Format field name for display
-   */
-  formatFieldNameForDisplay(fieldName: string): string {
-    switch (fieldName) {
-      case 'is_expansion':
-        return 'Expansion';
-      case 'is_stand_alone':
-        return 'Standalone';
-      case 'is_physical':
-        return 'Physical';
-      case 'is_collection':
-        return 'Collection';
-      default:
-        return fieldName
-          .replace(/([A-Z])/g, ' $1')
-          .replace(/^./, str => str.toUpperCase())
-          .trim();
-    }
-  }
-
-  /**
-   * Format operator for display
-   */
-  formatOperatorForDisplay(operator: string): string {
-    switch (operator) {
-      case 'equals':
-        return 'equals';
-      case 'not_equals':
-        return 'does not equal';
-      case 'contains':
-        return 'contains';
-      case 'starts_with':
-        return 'starts with';
-      case 'ends_with':
-        return 'ends with';
-      case 'greater_than':
-        return 'greater than';
-      case 'less_than':
-        return 'less than';
-      case 'greater_than_or_equal_to':
-        return 'greater than or equal to';
-      case 'less_than_or_equal_to':
-        return 'less than or equal to';
-      case 'order_by':
-        return 'sorted by';
-      case 'order_by_desc':
-        return 'sorted by';
-      default:
-        return operator.replace(/_/g, ' ');
-    }
   }
 
   /**
@@ -186,7 +131,7 @@ export class FilterService {
           { value: 'greater_than_equal_to', label: 'Greater Than or Equal To' },
           { value: 'less_than_equal_to', label: 'Less Than or Equal To' },
           sortOperator
-        ];
+      ];
       
       case 'boolean':
         return [

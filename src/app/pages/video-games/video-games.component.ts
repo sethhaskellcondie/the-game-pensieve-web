@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ApiService, VideoGame, System, VideoGameBox } from '../../services/api.service';
+import { ApiService, VideoGame, System, VideoGameBox, CustomField } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
@@ -24,6 +24,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   videoGamesCount = 0;
   systems: System[] = [];
   videoGameBoxes: VideoGameBox[] = [];
+  availableCustomFields: CustomField[] = [];
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
@@ -60,6 +61,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.loadVideoGames();
     this.loadSystems();
     this.loadVideoGameBoxes();
+    this.loadCustomFields();
   }
 
   loadVideoGames(): void {
@@ -133,6 +135,17 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
+      next: (customFields) => {
+        this.availableCustomFields = customFields;
+      },
+      error: (error) => {
+        console.error('Error loading custom fields:', error);
+      }
+    });
+  }
+
   getVideoGameBoxesForGame(videoGame: VideoGame): VideoGameBox[] {
     return this.videoGameBoxes.filter(box => 
       box.videoGames.some((game: VideoGame) => game.id === videoGame.id)
@@ -171,7 +184,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.editVideoGame = {
       title: videoGame.title,
       systemId: videoGame.system.id,
-      customFieldValues: [...videoGame.customFieldValues]
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(videoGame.customFieldValues)
     };
   }
 
@@ -230,6 +243,89 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  shouldDisplayCustomField(videoGame: VideoGame, fieldName: string): boolean {
+    const customField = videoGame.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false;
+    }
+    
+    if (customField.customFieldType === 'boolean') {
+      return false;
+    }
+    
+    if (customField.customFieldType === 'text') {
+      return customField.value.trim() !== '';
+    }
+    
+    if (customField.customFieldType === 'number') {
+      return customField.value.trim() !== '';
+    }
+    
+    return customField.value.trim() !== '';
+  }
+
+  shouldDisplayBooleanBadge(videoGame: VideoGame, fieldName: string): boolean {
+    const customField = videoGame.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    return customField?.customFieldType === 'boolean';
+  }
+
+  shouldDisplayCustomFieldInModal(field: any): boolean {
+    if (field.customFieldType === 'boolean') {
+      return true;
+    }
+    
+    if (field.customFieldType === 'text') {
+      return field.value.trim() !== '';
+    }
+    
+    if (field.customFieldType === 'number') {
+      return field.value.trim() !== '';
+    }
+    
+    return field.value.trim() !== '';
+  }
+
+  hasDisplayableCustomFields(videoGame: VideoGame): boolean {
+    return videoGame.customFieldValues.some(field => this.shouldDisplayCustomFieldInModal(field));
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
   }
 
   openFilterModal(): void {
