@@ -97,7 +97,7 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges, OnDestro
   initializeFieldValues(): void {
     this.fieldValues = {};
     this.customFields.forEach(field => {
-      // Set default values based on field type - use empty/blank defaults
+      // Set default values based on field type - use empty/blank defaults initially
       switch (field.type) {
         case 'text':
           this.fieldValues[field.id] = '';
@@ -124,7 +124,8 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges, OnDestro
         // Convert string value back to appropriate type
         switch (cfv.customFieldType) {
           case 'number':
-            this.fieldValues[cfv.customFieldId] = +cfv.value || 0;
+            // Handle '0' properly - don't use || 0 as it converts '0' to 0 which is falsy
+            this.fieldValues[cfv.customFieldId] = cfv.value === '' ? 0 : +cfv.value;
             break;
           case 'boolean':
             this.fieldValues[cfv.customFieldId] = cfv.value === 'true';
@@ -158,7 +159,11 @@ export class DynamicCustomFieldsComponent implements OnInit, OnChanges, OnDestro
   private convertValueToString(value: any, type: string): string {
     switch (type) {
       case 'number':
-        return value === '' || value === null || value === undefined ? '' : value.toString();
+        // Always convert numbers to string, including 0
+        if (value === null || value === undefined || value === '') {
+          return '0'; // Default to '0' for empty number fields
+        }
+        return value.toString();
       case 'boolean':
         return (!!value).toString();
       default:

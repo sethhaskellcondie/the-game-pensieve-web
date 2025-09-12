@@ -184,7 +184,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.editVideoGame = {
       title: videoGame.title,
       systemId: videoGame.system.id,
-      customFieldValues: [...videoGame.customFieldValues]
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(videoGame.customFieldValues)
     };
   }
 
@@ -260,7 +260,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     }
     
     if (customField.customFieldType === 'number') {
-      return customField.value !== '0' && customField.value.trim() !== '';
+      return customField.value.trim() !== '';
     }
     
     return customField.value.trim() !== '';
@@ -281,7 +281,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     }
     
     if (field.customFieldType === 'number') {
-      return field.value !== '0' && field.value.trim() !== '';
+      return field.value.trim() !== '';
     }
     
     return field.value.trim() !== '';
@@ -289,6 +289,43 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
 
   hasDisplayableCustomFields(videoGame: VideoGame): boolean {
     return videoGame.customFieldValues.some(field => this.shouldDisplayCustomFieldInModal(field));
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
   }
 
   openFilterModal(): void {

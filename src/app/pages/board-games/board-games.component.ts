@@ -29,7 +29,14 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   isDarkMode = false;
   
   showDetailBoardGameModal = false;
+  showEditBoardGameModal = false;
+  isUpdating = false;
   selectedBoardGame: BoardGame | null = null;
+  boardGameToUpdate: BoardGame | null = null;
+  editBoardGame = {
+    title: '',
+    customFieldValues: [] as any[]
+  };
   showFilterModal = false;
 
   constructor(
@@ -129,9 +136,9 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       return customField.value !== '';
     }
     
-    // For number fields, don't display if no meaningful value exists
+    // For number fields, display if there's any value (including 0)
     if (fieldType === 'number') {
-      return customField.value !== '' && customField.value !== '0';
+      return customField.value !== '';
     }
     
     return false;
@@ -158,9 +165,9 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       return field.value !== '';
     }
     
-    // For number fields, don't display if no meaningful value exists
+    // For number fields, display if there's any value (including 0)
     if (field.customFieldType === 'number') {
-      return field.value !== '' && field.value !== '0';
+      return field.value !== '';
     }
     
     // Default to displaying if we're unsure about the type
@@ -183,6 +190,67 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   closeDetailBoardGameModal(): void {
     this.showDetailBoardGameModal = false;
     this.selectedBoardGame = null;
+  }
+
+  openEditFromDetail(): void {
+    if (this.selectedBoardGame) {
+      const boardGameToEdit = this.selectedBoardGame;
+      this.closeDetailBoardGameModal();
+      this.openEditBoardGameModal(boardGameToEdit);
+    }
+  }
+
+  openDetailFromEdit(): void {
+    if (this.boardGameToUpdate) {
+      const boardGameToDetail = this.boardGameToUpdate;
+      this.closeEditBoardGameModal();
+      this.openDetailBoardGameModal(boardGameToDetail);
+    }
+  }
+
+  openEditBoardGameModal(boardGame: BoardGame): void {
+    this.boardGameToUpdate = boardGame;
+    this.showEditBoardGameModal = true;
+    this.editBoardGame = {
+      title: boardGame.title,
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(boardGame.customFieldValues)
+    };
+  }
+
+  closeEditBoardGameModal(): void {
+    this.showEditBoardGameModal = false;
+    this.boardGameToUpdate = null;
+    this.editBoardGame = {
+      title: '',
+      customFieldValues: [] as any[]
+    };
+  }
+
+  onSubmitEditBoardGame(): void {
+    if (this.isUpdating || !this.editBoardGame.title || !this.boardGameToUpdate) {
+      return;
+    }
+    
+    this.isUpdating = true;
+    
+    const boardGameData = {
+      title: this.editBoardGame.title,
+      customFieldValues: this.editBoardGame.customFieldValues
+    };
+    
+    this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
+      next: (response) => {
+        console.log('Board game updated successfully:', response);
+        this.isUpdating = false;
+        this.closeEditBoardGameModal();
+        this.loadBoardGames(); // Refresh the board games list
+      },
+      error: (error) => {
+        console.error('Error updating board game:', error);
+        this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
+        this.isUpdating = false;
+      }
+    });
   }
 
 
@@ -234,5 +302,42 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
   }
 }

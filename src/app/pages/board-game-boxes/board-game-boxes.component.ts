@@ -204,9 +204,9 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       return customField.value !== '';
     }
     
-    // For number fields, don't display if no meaningful value exists
+    // For number fields, display if there's any value (including 0)
     if (fieldType === 'number') {
-      return customField.value !== '' && customField.value !== '0';
+      return customField.value !== '';
     }
     
     return false;

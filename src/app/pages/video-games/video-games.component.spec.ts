@@ -178,8 +178,8 @@ describe('VideoGamesComponent', () => {
         expect(component.shouldDisplayCustomField(gameWithCustomFields, 'Test Number Field')).toBe(true);
       });
 
-      it('should return false for number field with zero value', () => {
-        expect(component.shouldDisplayCustomField(gameWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+      it('should return true for number field with zero value', () => {
+        expect(component.shouldDisplayCustomField(gameWithEmptyCustomFields, 'Test Number Field')).toBe(true);
       });
 
       it('should return false for boolean fields (handled separately)', () => {
@@ -234,9 +234,9 @@ describe('VideoGamesComponent', () => {
         expect(component.shouldDisplayCustomFieldInModal(numberField)).toBe(true);
       });
 
-      it('should return false for number fields with zero values', () => {
+      it('should return true for number fields with zero values', () => {
         const zeroNumberField = { customFieldName: 'Test Number', customFieldType: 'number', value: '0' };
-        expect(component.shouldDisplayCustomFieldInModal(zeroNumberField)).toBe(false);
+        expect(component.shouldDisplayCustomFieldInModal(zeroNumberField)).toBe(true);
       });
 
       it('should return false for number fields with empty values', () => {
@@ -254,12 +254,131 @@ describe('VideoGamesComponent', () => {
         expect(component.hasDisplayableCustomFields(gameWithEmptyCustomFields)).toBe(true);
       });
 
-      it('should return false for video game with only empty text and number fields', () => {
-        expect(component.hasDisplayableCustomFields(gameWithOnlyEmptyFields)).toBe(false);
+      it('should return true for video game with only empty text and number fields', () => {
+        expect(component.hasDisplayableCustomFields(gameWithOnlyEmptyFields)).toBe(true);
       });
 
       it('should return false for video game with no custom fields', () => {
         expect(component.hasDisplayableCustomFields(gameWithNoCustomFields)).toBe(false);
+      });
+    });
+  });
+
+  describe('edit video game modal logic', () => {
+    beforeEach(() => {
+      component.availableCustomFields = mockCustomFields;
+      fixture.detectChanges();
+    });
+
+    describe('mergeWithDefaultCustomFieldValues', () => {
+      it('should merge existing custom field values with defaults for missing fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
+      });
+
+      it('should create all default values when no existing values provided', () => {
+        const existingCustomFieldValues: any[] = [];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve all existing values when they match available fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual(existingCustomFieldValues);
+      });
+    });
+
+    describe('openEditVideoGameModal', () => {
+      it('should populate modal with video game data and merged custom field values', () => {
+        const videoGameToUpdate = {
+          key: 'game1',
+          id: 1,
+          title: 'Super Mario Bros',
+          system: mockSystems[0],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Existing text' }
+          ]
+        };
+
+        component.openEditVideoGameModal(videoGameToUpdate);
+
+        expect(component.videoGameToUpdate).toBe(videoGameToUpdate);
+        expect(component.showEditVideoGameModal).toBe(true);
+        expect(component.editVideoGame.title).toBe('Super Mario Bros');
+        expect(component.editVideoGame.systemId).toBe(1);
+        expect(component.editVideoGame.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should provide default values for all custom fields when video game has no custom field values', () => {
+        const videoGameToUpdate = {
+          key: 'game1',
+          id: 1,
+          title: 'Super Mario Bros',
+          system: mockSystems[0],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        component.openEditVideoGameModal(videoGameToUpdate);
+
+        expect(component.editVideoGame.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve existing custom field values and add defaults for new fields', () => {
+        const videoGameToUpdate = {
+          key: 'game1',
+          id: 1,
+          title: 'Super Mario Bros',
+          system: mockSystems[0],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '25' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'true' }
+          ]
+        };
+
+        component.openEditVideoGameModal(videoGameToUpdate);
+
+        expect(component.editVideoGame.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '25' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
       });
     });
   });

@@ -298,8 +298,8 @@ describe('BoardGameBoxesComponent', () => {
           expect(component.shouldDisplayCustomField(boxWithCustomFields, 'Test Number Field')).toBe(true);
         });
 
-        it('should return false for number field with zero value', () => {
-          expect(component.shouldDisplayCustomField(boxWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+        it('should return true for number field with zero value', () => {
+          expect(component.shouldDisplayCustomField(boxWithEmptyCustomFields, 'Test Number Field')).toBe(true);
         });
 
         it('should return false for boolean fields (handled separately)', () => {
