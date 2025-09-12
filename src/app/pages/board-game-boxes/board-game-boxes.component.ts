@@ -31,6 +31,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
   
@@ -93,6 +94,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       });
     
     this.loadBoardGameBoxes();
+    this.loadCustomFields();
   }
 
   ngOnDestroy(): void {
@@ -132,6 +134,40 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for board game boxes:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for board game boxes:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -148,6 +184,42 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   getCustomFieldValue(box: BoardGameBox, fieldName: string): string {
     const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  shouldDisplayCustomField(box: BoardGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, don't display if no meaningful value exists
+    if (fieldType === 'number') {
+      return customField.value !== '' && customField.value !== '0';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(box: BoardGameBox, fieldName: string): boolean {
+    const customField = box.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
   }
 
   getBoardGameBoxTitle(baseSetId: number): string {
@@ -172,22 +244,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       }
     });
     
-    // Get custom fields for board game boxes when opening modal
-    this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
-      next: (customFields: any[]) => {
-        console.log('Custom fields for board game boxes:', customFields);
-        this.newBoardGameBox.customFieldValues = customFields.map((field: any) => ({
-          customFieldId: field.id,
-          customFieldName: field.name,
-          customFieldType: field.type,
-          value: field.type === 'boolean' ? 'false' : ''
-        }));
-      },
-      error: (error: any) => {
-        console.error('Error loading custom fields:', error);
-        this.newBoardGameBox.customFieldValues = [];
-      }
-    });
+    // Set default custom field values for board game boxes
+    this.newBoardGameBox.customFieldValues = this.createDefaultCustomFieldValues();
     
     // Get custom fields for new board games when opening modal
     this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
@@ -313,10 +371,25 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         // Show success toast
         this.errorSnackbarService.showSuccess('Board Game Box created successfully');
         
-        // Clear the title field but keep other fields
+        // Clear the title field but reset custom field values to defaults
         this.newBoardGameBox.title = '';
+        this.newBoardGameBox.customFieldValues = this.createDefaultCustomFieldValues();
         if (this.boardGameSelectionMode === 'new') {
           this.newBoardGameBox.newBoardGame.title = '';
+          // Reset new board game custom fields if needed
+          this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
+            next: (customFields: any[]) => {
+              this.newBoardGameBox.newBoardGame.customFieldValues = customFields.map((field: any) => ({
+                customFieldId: field.id,
+                customFieldName: field.name,
+                customFieldType: field.type,
+                value: this.getDefaultValueForType(field.type)
+              }));
+            },
+            error: () => {
+              this.newBoardGameBox.newBoardGame.customFieldValues = [];
+            }
+          });
         }
         
         // Focus the title input
