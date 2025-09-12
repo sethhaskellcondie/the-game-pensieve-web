@@ -73,15 +73,12 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     
     this.apiService.getVideoGames(filtersWithDefaults).subscribe({
       next: (videoGames) => {
-        console.log('Video games received:', videoGames);
-        console.log('Number of video games:', videoGames.length);
         this.videoGames = videoGames;
         this.videoGamesCount = videoGames.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading video games:', error);
         this.errorMessage = `Failed to load video games: ${error.message || 'Unknown error'}`;
         this.videoGamesCount = 0;
         this.isLoading = false;
@@ -99,7 +96,6 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(game: VideoGame, fieldName: string): string {
@@ -119,7 +115,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
         this.systems = systems;
       },
       error: (error) => {
-        console.error('Error loading systems:', error);
+        // Error loading systems
       }
     });
   }
@@ -130,7 +126,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
         this.videoGameBoxes = videoGameBoxes;
       },
       error: (error) => {
-        console.error('Error loading video game boxes:', error);
+        // Error loading video game boxes
       }
     });
   }
@@ -141,7 +137,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
         this.availableCustomFields = customFields;
       },
       error: (error) => {
-        console.error('Error loading custom fields:', error);
+        // Error loading custom fields
       }
     });
   }
@@ -213,13 +209,11 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     
     this.apiService.updateVideoGame(this.videoGameToUpdate.id, videoGameData).subscribe({
       next: (response) => {
-        console.log('Video game updated successfully:', response);
         this.isUpdating = false;
         this.closeEditVideoGameModal();
         this.loadVideoGames(); // Refresh the video games list
       },
       error: (error) => {
-        console.error('Error updating video game:', error);
         this.errorMessage = `Failed to update video game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
       }
