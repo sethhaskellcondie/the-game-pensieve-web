@@ -97,15 +97,12 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     this.apiService.getVideoGameBoxes(filtersWithDefaults).subscribe({
       next: (videoGameBoxes) => {
-        console.log('Video game boxes received:', videoGameBoxes);
-        console.log('Number of video game boxes:', videoGameBoxes.length);
         this.videoGameBoxes = videoGameBoxes;
         this.videoGameBoxesCount = videoGameBoxes.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading video game boxes:', error);
         this.errorMessage = `Failed to load video game boxes: ${error.message || 'Unknown error'}`;
         this.videoGameBoxesCount = 0;
         this.isLoading = false;
@@ -117,10 +114,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('videoGameBox').subscribe({
       next: (fields) => {
         this.availableCustomFields = fields;
-        console.log('Available custom fields for video game boxes:', this.availableCustomFields);
       },
       error: (error) => {
-        console.error('Error loading custom fields for video game boxes:', error);
         this.availableCustomFields = [];
       }
     });
@@ -157,7 +152,6 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(box: VideoGameBox, fieldName: string): string {
@@ -211,7 +205,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         this.systems = systems;
       },
       error: (error) => {
-        console.error('Error loading systems:', error);
+        // Error loading systems
       }
     });
   }
@@ -227,7 +221,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         this.allVideoGames = videoGames;
       },
       error: (error) => {
-        console.error('Error loading video games:', error);
+        // Error loading video games
       }
     });
     
@@ -246,8 +240,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.videoGameBoxToUpdate = videoGameBox;
     this.showNewVideoGameBoxModal = true;
     
-    console.log('Opening edit modal for video game box:', videoGameBox);
-    console.log('Available custom fields when opening modal:', this.availableCustomFields);
+    // Opening edit modal for video game box
     
     // Load all video games for the dropdown
     this.apiService.getVideoGames().subscribe({
@@ -275,7 +268,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           customFieldValues: mergedCustomFieldValues
         };
         
-        console.log('Set newVideoGameBox.customFieldValues to:', this.newVideoGameBox.customFieldValues);
+        // Set newVideoGameBox.customFieldValues
       },
       error: (error) => {
         console.error('Error loading video games:', error);
@@ -292,7 +285,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           customFieldValues: mergedCustomFieldValues
         };
         
-        console.log('Set newVideoGameBox.customFieldValues to (error case):', this.newVideoGameBox.customFieldValues);
+        // Set newVideoGameBox.customFieldValues (error case)
       }
     });
   }
@@ -370,18 +363,15 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     };
     
     if (this.isUpdateMode && this.videoGameBoxToUpdate) {
-      console.log('Updating video game box with data:', videoGameBoxData);
-      console.log('Custom fields being sent in update:', videoGameBoxData.customFieldValues);
+      // Updating video game box
       // Update existing video game box
       this.apiService.updateVideoGameBox(this.videoGameBoxToUpdate.id, videoGameBoxData).subscribe({
         next: (response) => {
-          console.log('Video game box updated successfully:', response);
           this.isCreating = false;
           this.closeNewVideoGameBoxModal();
           this.loadVideoGameBoxes(); // Refresh the video game boxes list
         },
         error: (error) => {
-          console.error('Error updating video game box:', error);
           this.errorMessage = `Failed to update video game box: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
         }
@@ -390,13 +380,11 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       // Create new video game box
       this.apiService.createVideoGameBox(videoGameBoxData).subscribe({
         next: (response) => {
-          console.log('Video game box created successfully:', response);
           this.isCreating = false;
           this.closeNewVideoGameBoxModal();
           this.loadVideoGameBoxes(); // Refresh the video game boxes list
         },
         error: (error) => {
-          console.error('Error creating video game box:', error);
           this.errorMessage = `Failed to create video game box: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
         }
@@ -458,7 +446,6 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     this.apiService.createVideoGameBox(videoGameBoxData).subscribe({
       next: (response) => {
-        console.log('Video game box created successfully:', response);
         this.isCreating = false;
         this.loadVideoGameBoxes();
         
@@ -471,7 +458,6 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         this.focusTitleInput();
       },
       error: (error) => {
-        console.error('Error creating video game box:', error);
         this.errorMessage = `Failed to create video game box: ${error.message || 'Unknown error'}`;
         this.isCreating = false;
       }
@@ -560,7 +546,6 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           this.newVideoGameBox.videoGames.push(newVideoGame);
         },
         error: (error: any) => {
-          console.error('Error loading custom fields for video game:', error);
           this.newVideoGameBox.videoGames.push({
             type: 'new' as 'existing' | 'new',
             existingVideoGameId: null,
@@ -634,13 +619,11 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
 
     this.apiService.deleteVideoGameBox(this.videoGameBoxToDelete.id).subscribe({
       next: () => {
-        console.log('Video game box deleted successfully');
         this.isDeleting = false;
         this.closeDeleteConfirmModal();
         this.loadVideoGameBoxes();
       },
       error: (error) => {
-        console.error('Error deleting video game box:', error);
         this.errorMessage = `Failed to delete video game box: ${error.message || 'Unknown error'}`;
         this.isDeleting = false;
       }
@@ -725,10 +708,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
     const defaultValues = this.createDefaultCustomFieldValues();
     
-    console.log('Merging custom field values:');
-    console.log('Available custom fields:', this.availableCustomFields);
-    console.log('Default values generated:', defaultValues);
-    console.log('Existing values:', existingCustomFieldValues);
+    // Merging custom field values
     
     // Create a map of existing values for quick lookup
     const existingValuesMap = new Map();
@@ -742,14 +722,12 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       return existingValue || defaultValue;
     });
     
-    console.log('Merged custom field values result:', mergedValues);
+    // Merged custom field values result
     return mergedValues;
   }
 
   onCustomFieldValuesChange(newValues: any[]): void {
-    console.log('Custom field values changed from dynamic component:', newValues);
     this.newVideoGameBox.customFieldValues = newValues;
-    console.log('Updated newVideoGameBox.customFieldValues:', this.newVideoGameBox.customFieldValues);
   }
 
   ngOnDestroy(): void {

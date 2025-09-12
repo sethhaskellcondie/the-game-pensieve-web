@@ -14,12 +14,11 @@ describe('VideoGamesComponent', () => {
   let apiService: jasmine.SpyObj<ApiService>;
   let filterService: jasmine.SpyObj<FilterService>;
   let settingsService: jasmine.SpyObj<SettingsService>;
-  let router: jasmine.SpyObj<Router>;
 
   const mockCustomFields = [
-    { id: 1, name: 'Test Text Field', type: 'text' as const, entityKey: 'videoGame' },
-    { id: 2, name: 'Test Number Field', type: 'number' as const, entityKey: 'videoGame' },
-    { id: 3, name: 'Test Boolean Field', type: 'boolean' as const, entityKey: 'videoGame' }
+    {id: 1, name: 'Test Text Field', type: 'text' as const, entityKey: 'videoGame'},
+    {id: 2, name: 'Test Number Field', type: 'number' as const, entityKey: 'videoGame'},
+    {id: 3, name: 'Test Boolean Field', type: 'boolean' as const, entityKey: 'videoGame'}
   ];
 
   const mockSystems = [
@@ -71,20 +70,19 @@ describe('VideoGamesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [VideoGamesComponent, HttpClientTestingModule],
       providers: [
-        { provide: ApiService, useValue: apiSpy },
-        { provide: FilterService, useValue: filterSpy },
-        { provide: SettingsService, useValue: settingsSpy },
-        { provide: Router, useValue: routerSpy }
+        {provide: ApiService, useValue: apiSpy},
+        {provide: FilterService, useValue: filterSpy},
+        {provide: SettingsService, useValue: settingsSpy},
+        {provide: Router, useValue: routerSpy}
       ]
     })
-    .compileComponents();
+        .compileComponents();
 
     fixture = TestBed.createComponent(VideoGamesComponent);
     component = fixture.componentInstance;
     apiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     filterService = TestBed.inject(FilterService) as jasmine.SpyObj<FilterService>;
     settingsService = TestBed.inject(SettingsService) as jasmine.SpyObj<SettingsService>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 
     // Setup default spy returns
     apiService.getVideoGames.and.returnValue(of(mockVideoGames));

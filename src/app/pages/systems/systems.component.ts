@@ -96,15 +96,12 @@ export class SystemsComponent implements OnInit, OnDestroy {
     
     this.apiService.getSystems(filtersWithDefaults).subscribe({
       next: (systems) => {
-        console.log('Systems received:', systems);
-        console.log('Number of systems:', systems.length);
         this.systems = systems;
         this.systemsCount = systems.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading systems:', error);
         this.systemsCount = 0;
         this.isLoading = false;
         // Error snackbar will be shown automatically by API service
@@ -116,10 +113,8 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('system').subscribe({
       next: (fields) => {
         this.availableCustomFields = fields;
-        console.log('Available custom fields for systems:', this.availableCustomFields);
       },
       error: (error) => {
-        console.error('Error loading custom fields for systems:', error);
         this.availableCustomFields = [];
       }
     });
@@ -172,7 +167,6 @@ export class SystemsComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(system: System, fieldName: string): string {
@@ -299,13 +293,11 @@ export class SystemsComponent implements OnInit, OnDestroy {
       // Update existing system
       this.apiService.updateSystem(this.systemToUpdate.id, systemData).subscribe({
         next: (response) => {
-          console.log('System updated successfully:', response);
           this.isCreating = false;
           this.closeNewSystemModal();
           this.loadSystems(); // Refresh the systems list
         },
         error: (error) => {
-          console.error('Error updating system:', error);
           this.isCreating = false;
           this.closeNewSystemModal(); // Close the modal on error
           // Error snackbar will be shown automatically by API service
@@ -315,13 +307,11 @@ export class SystemsComponent implements OnInit, OnDestroy {
       // Create new system
       this.apiService.createSystem(systemData).subscribe({
         next: (response) => {
-          console.log('System created successfully:', response);
           this.isCreating = false;
           this.closeNewSystemModal();
           this.loadSystems(); // Refresh the systems list
         },
         error: (error) => {
-          console.error('Error creating system:', error);
           this.isCreating = false;
           this.closeNewSystemModal(); // Close the modal on error
           // Error snackbar will be shown automatically by API service
@@ -347,7 +337,6 @@ export class SystemsComponent implements OnInit, OnDestroy {
     // Only for creating new systems, not updating
     this.apiService.createSystem(systemData).subscribe({
       next: (response) => {
-        console.log('System created successfully:', response);
         this.isCreating = false;
         this.loadSystems(); // Refresh the systems list
         
@@ -362,7 +351,6 @@ export class SystemsComponent implements OnInit, OnDestroy {
         this.focusNameInput();
       },
       error: (error) => {
-        console.error('Error creating system:', error);
         this.isCreating = false;
         // Error snackbar will be shown automatically by API service
       }
@@ -394,13 +382,11 @@ export class SystemsComponent implements OnInit, OnDestroy {
 
     this.apiService.deleteSystem(this.systemToDelete.id).subscribe({
       next: () => {
-        console.log('System deleted successfully');
         this.isDeleting = false;
         this.closeDeleteConfirmModal();
         this.loadSystems();
       },
       error: (error) => {
-        console.error('Error deleting system:', error);
         this.isDeleting = false;
         this.closeDeleteConfirmModal(); // Close the modal on error
         // Don't reload systems - keep existing display

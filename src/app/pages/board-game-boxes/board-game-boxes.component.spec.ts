@@ -164,6 +164,7 @@ describe('BoardGameBoxesComponent', () => {
         baseSetId: null,
         boardGameId: null,
         newBoardGame: { title: '', customFieldValues: [] },
+        selfContainedBoardGame: { title: '', customFieldValues: [] },
         customFieldValues: [
           { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'modified value' }
         ]
@@ -215,6 +216,7 @@ describe('BoardGameBoxesComponent', () => {
         baseSetId: null,
         boardGameId: null,
         newBoardGame: { title: '', customFieldValues: [] },
+        selfContainedBoardGame: { title: '', customFieldValues: [] },
         customFieldValues: customFieldValues
       };
 

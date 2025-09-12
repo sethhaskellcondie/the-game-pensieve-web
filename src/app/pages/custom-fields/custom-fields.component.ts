@@ -115,15 +115,11 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
     
-    console.log('Loading custom fields...');
     
     // Check if there's a saved filter to apply
     if (this.currentFilter) {
-      console.log('Applying saved filter:', this.currentFilter);
       this.apiService.getCustomFieldsByEntity(this.currentFilter).subscribe({
         next: (fields) => {
-          console.log('Filtered custom fields received:', fields);
-          console.log('Number of filtered fields:', fields.length);
           this.customFields = fields;
           this.customFieldsCount = fields.length;
           this.sortedCustomFields = [...fields];
@@ -131,7 +127,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading filtered custom fields:', error);
           this.customFieldsCount = 0;
           this.isLoading = false;
           // Error snackbar will be shown automatically by API service
@@ -141,8 +136,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
       // Load all custom fields if no filter is applied
       this.apiService.getCustomFields().subscribe({
         next: (fields) => {
-          console.log('Custom fields received:', fields);
-          console.log('Number of fields:', fields.length);
           this.customFields = fields;
           this.customFieldsCount = fields.length;
           this.sortedCustomFields = [...fields];
@@ -150,7 +143,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading custom fields:', error);
           this.customFieldsCount = 0;
           this.isLoading = false;
           // Error snackbar will be shown automatically by API service
@@ -187,13 +179,11 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     
     this.apiService.createCustomField(this.newCustomField).subscribe({
       next: (response) => {
-        console.log('Custom field created successfully:', response);
         this.isCreating = false;
         this.closeNewCustomFieldModal();
         this.loadCustomFields();
       },
       error: (error) => {
-        console.error('Error creating custom field:', error);
         this.isCreating = false;
         this.closeNewCustomFieldModal(); // Close the modal on error
         // Error snackbar will be shown automatically by API service
@@ -208,7 +198,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     
     this.apiService.createCustomField(this.newCustomField).subscribe({
       next: (response) => {
-        console.log('Custom field created successfully:', response);
         this.isCreating = false;
         this.loadCustomFields();
         
@@ -222,7 +211,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
         this.focusNameInput();
       },
       error: (error) => {
-        console.error('Error creating custom field:', error);
         this.isCreating = false;
         // Error snackbar will be shown automatically by API service
       }
@@ -278,7 +266,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
 
     this.apiService.updateCustomFieldName(field.id, this.editingFieldName.trim()).subscribe({
       next: (updatedField) => {
-        console.log('Custom field updated successfully:', updatedField);
         // Update the local field
         const index = this.customFields.findIndex(f => f.id === field.id);
         if (index !== -1) {
@@ -289,7 +276,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
         this.applySorting();
       },
       error: (error) => {
-        console.error('Error updating custom field:', error);
         this.errorMessage = `Failed to update custom field: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
         this.cancelEditing();
@@ -314,14 +300,12 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
 
     this.apiService.deleteCustomField(this.fieldToDelete.id).subscribe({
       next: () => {
-        console.log('Custom field deleted successfully');
         this.isDeleting = false;
         this.closeDeleteConfirmModal();
         // Refresh the data from the server
         this.loadCustomFields();
       },
       error: (error) => {
-        console.error('Error deleting custom field:', error);
         this.isDeleting = false;
         this.closeDeleteConfirmModal(); // Close the modal on error
         // Don't reload custom fields - keep existing display
@@ -429,7 +413,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
 
     this.apiService.getCustomFieldsByEntity(this.filterEntityKey).subscribe({
       next: (fields) => {
-        console.log('Filtered custom fields received:', fields);
         this.customFields = fields;
         this.customFieldsCount = fields.length;
         this.sortedCustomFields = [...fields];
@@ -438,7 +421,6 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
         this.closeFilterModal();
       },
       error: (error) => {
-        console.error('Error filtering custom fields:', error);
         this.isFiltering = false;
         this.closeFilterModal(); // Close the modal on error
         // Error snackbar will be shown automatically by API service
@@ -460,20 +442,17 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   private saveFilterToLocalStorage(): void {
     if (this.currentFilter) {
       localStorage.setItem('customFields.filter', this.currentFilter);
-      console.log('Filter saved to localStorage:', this.currentFilter);
     }
   }
 
   private clearFilterFromLocalStorage(): void {
     localStorage.removeItem('customFields.filter');
-    console.log('Filter cleared from localStorage');
   }
 
   private loadSavedFilter(): void {
     const savedFilter = localStorage.getItem('customFields.filter');
     if (savedFilter) {
       this.currentFilter = savedFilter;
-      console.log('Loaded saved filter from localStorage:', savedFilter);
     }
   }
 }

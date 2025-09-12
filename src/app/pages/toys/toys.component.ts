@@ -52,12 +52,9 @@ export class ToysComponent implements OnInit, OnDestroy {
     public filterService: FilterService,
     private settingsService: SettingsService,
     private errorSnackbarService: ErrorSnackbarService
-  ) {
-    console.log('ToysComponent constructor called');
-  }
+  ) {}
 
   ngOnInit(): void {
-    console.log('ToysComponent ngOnInit called');
     
     this.settingsService.getDarkMode$()
       .pipe(takeUntil(this.destroy$))
@@ -91,22 +88,17 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
     
-    console.log('Loading toys...');
-    
     const activeFilters = this.filterService.getActiveFilters('toy');
     const filtersWithDefaults = this.filterService.getFiltersWithDefaults('toy', activeFilters);
     
     this.apiService.getToys(filtersWithDefaults).subscribe({
       next: (toys) => {
-        console.log('Toys received:', toys);
-        console.log('Number of toys:', toys.length);
         this.toys = toys;
         this.toysCount = toys.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading toys:', error);
         this.toysCount = 0;
         this.isLoading = false;
         // Error snackbar will be shown automatically by API service
@@ -118,10 +110,8 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('toy').subscribe({
       next: (fields) => {
         this.availableCustomFields = fields;
-        console.log('Available custom fields for toys:', this.availableCustomFields);
       },
       error: (error) => {
-        console.error('Error loading custom fields for toys:', error);
         this.availableCustomFields = [];
       }
     });
@@ -174,7 +164,6 @@ export class ToysComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(toy: Toy, fieldName: string): string {
@@ -294,13 +283,11 @@ export class ToysComponent implements OnInit, OnDestroy {
       // Update existing toy
       this.apiService.updateToy(this.toyToUpdate.id, toyData).subscribe({
         next: (response) => {
-          console.log('Toy updated successfully:', response);
           this.isCreating = false;
           this.closeNewToyModal();
           this.loadToys(); // Refresh the toys list
         },
         error: (error) => {
-          console.error('Error updating toy:', error);
           this.isCreating = false;
           this.closeNewToyModal(); // Close the modal on error
           // Error snackbar will be shown automatically by API service
@@ -310,13 +297,11 @@ export class ToysComponent implements OnInit, OnDestroy {
       // Create new toy
       this.apiService.createToy(toyData).subscribe({
         next: (response) => {
-          console.log('Toy created successfully:', response);
           this.isCreating = false;
           this.closeNewToyModal();
           this.loadToys(); // Refresh the toys list
         },
         error: (error) => {
-          console.error('Error creating toy:', error);
           this.isCreating = false;
           this.closeNewToyModal(); // Close the modal on error
           // Error snackbar will be shown automatically by API service
@@ -338,7 +323,6 @@ export class ToysComponent implements OnInit, OnDestroy {
     // Only for creating new toys, not updating
     this.apiService.createToy(toyData).subscribe({
       next: (response) => {
-        console.log('Toy created successfully:', response);
         this.isCreating = false;
         this.loadToys(); // Refresh the toys list
         
@@ -353,7 +337,6 @@ export class ToysComponent implements OnInit, OnDestroy {
         this.focusNameInput();
       },
       error: (error) => {
-        console.error('Error creating toy:', error);
         this.isCreating = false;
         // Error snackbar will be shown automatically by API service
       }
@@ -385,13 +368,11 @@ export class ToysComponent implements OnInit, OnDestroy {
 
     this.apiService.deleteToy(this.toyToDelete.id).subscribe({
       next: () => {
-        console.log('Toy deleted successfully');
         this.isDeleting = false;
         this.closeDeleteConfirmModal();
         this.loadToys();
       },
       error: (error) => {
-        console.error('Error deleting toy:', error);
         this.isDeleting = false;
         this.closeDeleteConfirmModal(); // Close the modal on error
         // Don't reload toys - keep existing display

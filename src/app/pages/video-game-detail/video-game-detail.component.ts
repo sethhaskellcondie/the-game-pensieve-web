@@ -76,7 +76,6 @@ export class VideoGameDetailComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error: any) => {
-        console.error('Error loading video game:', error);
         this.errorMessage = `Failed to load video game: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
       }
@@ -89,7 +88,7 @@ export class VideoGameDetailComponent implements OnInit, OnDestroy {
         this.videoGameBoxes = videoGameBoxes;
       },
       error: (error: any) => {
-        console.error('Error loading video game boxes:', error);
+        // Error loading video game boxes
       }
     });
   }
@@ -172,13 +171,11 @@ export class VideoGameDetailComponent implements OnInit, OnDestroy {
     
     this.apiService.updateVideoGame(this.videoGame.id, videoGameData).subscribe({
       next: (response) => {
-        console.log('Video game updated successfully:', response);
         this.isUpdating = false;
         this.closeEditVideoGameModal();
         this.loadVideoGame(this.videoGame!.id); // Refresh the current video game
       },
       error: (error) => {
-        console.error('Error updating video game:', error);
         this.errorMessage = `Failed to update video game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
       }
