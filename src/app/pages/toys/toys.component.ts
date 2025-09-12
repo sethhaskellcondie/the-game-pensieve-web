@@ -148,6 +148,22 @@ export class ToysComponent implements OnInit, OnDestroy {
     }
   }
 
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -184,9 +200,9 @@ export class ToysComponent implements OnInit, OnDestroy {
       return customField.value !== '';
     }
     
-    // For number fields, don't display if no meaningful value exists
+    // For number fields, display if there's any value (including 0)
     if (fieldType === 'number') {
-      return customField.value !== '' && customField.value !== '0';
+      return customField.value !== '';
     }
     
     return false;
@@ -242,7 +258,7 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.newToy = {
       name: toy.name,
       set: toy.set,
-      customFieldValues: [...toy.customFieldValues]
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(toy.customFieldValues)
     };
     
     // Focus the name field after the view updates

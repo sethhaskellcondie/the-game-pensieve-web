@@ -258,8 +258,8 @@ describe('ToysComponent', () => {
           expect(component.shouldDisplayCustomField(toyWithCustomFields, 'Test Number Field')).toBe(true);
         });
 
-        it('should return false for number field with zero value', () => {
-          expect(component.shouldDisplayCustomField(toyWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+        it('should return true for number field with zero value', () => {
+          expect(component.shouldDisplayCustomField(toyWithEmptyCustomFields, 'Test Number Field')).toBe(true);
         });
 
         it('should return false for boolean fields (handled separately)', () => {
@@ -288,6 +288,126 @@ describe('ToysComponent', () => {
         it('should return false for non-existent custom fields', () => {
           expect(component.shouldDisplayBooleanBadge(toyWithNoCustomFields, 'Test Boolean Field')).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('edit toy modal logic', () => {
+    beforeEach(() => {
+      component.availableCustomFields = mockCustomFields;
+      fixture.detectChanges();
+    });
+
+    describe('mergeWithDefaultCustomFieldValues', () => {
+      it('should merge existing custom field values with defaults for missing fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
+      });
+
+      it('should create all default values when no existing values provided', () => {
+        const existingCustomFieldValues: any[] = [];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve all existing values when they match available fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual(existingCustomFieldValues);
+      });
+    });
+
+    describe('openUpdateToyModal', () => {
+      it('should populate modal with toy data and merged custom field values', () => {
+        const toyToUpdate = {
+          key: 'toy1',
+          id: 1,
+          name: 'LEGO Castle',
+          set: 'Medieval Set',
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Existing text' }
+          ]
+        };
+
+        component.openUpdateToyModal(toyToUpdate);
+
+        expect(component.isUpdateMode).toBe(true);
+        expect(component.toyToUpdate).toBe(toyToUpdate);
+        expect(component.showNewToyModal).toBe(true);
+        expect(component.newToy.name).toBe('LEGO Castle');
+        expect(component.newToy.set).toBe('Medieval Set');
+        expect(component.newToy.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should provide default values for all custom fields when toy has no custom field values', () => {
+        const toyToUpdate = {
+          key: 'toy1',
+          id: 1,
+          name: 'LEGO Castle',
+          set: 'Medieval Set',
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        component.openUpdateToyModal(toyToUpdate);
+
+        expect(component.newToy.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve existing custom field values and add defaults for new fields', () => {
+        const toyToUpdate = {
+          key: 'toy1',
+          id: 1,
+          name: 'LEGO Castle',
+          set: 'Medieval Set',
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '25' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'true' }
+          ]
+        };
+
+        component.openUpdateToyModal(toyToUpdate);
+
+        expect(component.newToy.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '25' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
       });
     });
   });
