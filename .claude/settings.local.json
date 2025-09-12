@@ -14,7 +14,8 @@
       "Bash(npx ng test:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "Bash(ng test:*)"
+      "Bash(ng test:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
