@@ -247,7 +247,8 @@
         <!-- Dynamic Custom Fields -->
         <app-dynamic-custom-fields 
           entityKey="videoGameBox" 
-          [(customFieldValues)]="newVideoGameBox.customFieldValues">
+          [customFieldValues]="newVideoGameBox.customFieldValues"
+          (customFieldValuesChange)="onCustomFieldValuesChange($event)">
         </app-dynamic-custom-fields>
 
         <!-- Video Games Section -->

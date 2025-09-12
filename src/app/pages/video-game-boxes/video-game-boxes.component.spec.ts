@@ -65,7 +65,7 @@ describe('VideoGameBoxesComponent', () => {
   ];
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getVideoGameBoxes', 'getCustomFieldsByEntity', 'createVideoGameBox', 'getSystems', 'getVideoGames']);
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getVideoGameBoxes', 'getCustomFieldsByEntity', 'createVideoGameBox', 'updateVideoGameBox', 'getSystems', 'getVideoGames']);
     const filterSpy = jasmine.createSpyObj('FilterService', ['getActiveFilters', 'getFiltersWithDefaults', 'hasActiveFilters', 'saveFiltersForEntity', 'clearFiltersForEntity']);
     const settingsSpy = jasmine.createSpyObj('SettingsService', ['getDarkMode$', 'getMassInputMode$']);
     const errorSpy = jasmine.createSpyObj('ErrorSnackbarService', ['showSuccess']);
@@ -311,8 +311,8 @@ describe('VideoGameBoxesComponent', () => {
           expect(component.shouldDisplayCustomField(boxWithCustomFields, 'Test Number Field')).toBe(true);
         });
 
-        it('should return false for number field with zero value', () => {
-          expect(component.shouldDisplayCustomField(boxWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+        it('should return true for number field with zero value', () => {
+          expect(component.shouldDisplayCustomField(boxWithEmptyCustomFields, 'Test Number Field')).toBe(true);
         });
 
         it('should return false for boolean fields (handled separately)', () => {
@@ -341,6 +341,278 @@ describe('VideoGameBoxesComponent', () => {
         it('should return false for non-existent custom fields', () => {
           expect(component.shouldDisplayBooleanBadge(boxWithNoCustomFields, 'Test Boolean Field')).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('edit video game box modal logic', () => {
+    beforeEach(() => {
+      component.availableCustomFields = mockCustomFields;
+      fixture.detectChanges();
+    });
+
+    describe('mergeWithDefaultCustomFieldValues', () => {
+      it('should merge existing custom field values with defaults for missing fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
+      });
+
+      it('should create all default values when no existing values provided', () => {
+        const existingCustomFieldValues: any[] = [];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve all existing values when they match available fields', () => {
+        const existingCustomFieldValues = [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ];
+
+        const result = component['mergeWithDefaultCustomFieldValues'](existingCustomFieldValues);
+
+        expect(result).toEqual(existingCustomFieldValues);
+      });
+    });
+
+    describe('openUpdateVideoGameBoxModal', () => {
+      it('should populate modal with video game box data and merged custom field values', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Existing text' }
+          ]
+        };
+
+        apiService.getVideoGames.and.returnValue(of(mockVideoGames));
+
+        component.openUpdateVideoGameBoxModal(videoGameBoxToUpdate);
+
+        expect(component.isUpdateMode).toBe(true);
+        expect(component.videoGameBoxToUpdate).toBe(videoGameBoxToUpdate);
+        expect(component.showNewVideoGameBoxModal).toBe(true);
+        expect(component.newVideoGameBox.title).toBe('Call of Duty');
+        expect(component.newVideoGameBox.systemId).toBe(1);
+        expect(component.newVideoGameBox.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Existing text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should provide default values for all custom fields when video game box has no custom field values', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        apiService.getVideoGames.and.returnValue(of(mockVideoGames));
+
+        component.openUpdateVideoGameBoxModal(videoGameBoxToUpdate);
+
+        expect(component.newVideoGameBox.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+        ]);
+      });
+
+      it('should preserve existing custom field values and add defaults for new fields', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '25' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'true' }
+          ]
+        };
+
+        apiService.getVideoGames.and.returnValue(of(mockVideoGames));
+
+        component.openUpdateVideoGameBoxModal(videoGameBoxToUpdate);
+
+        expect(component.newVideoGameBox.customFieldValues).toEqual([
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '25' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+        ]);
+      });
+    });
+
+    describe('onSubmitNewVideoGameBox with edit mode', () => {
+      it('should include default values for number custom fields in PUT request when editing', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Some text' }
+          ]
+        };
+
+        // Set up edit mode
+        component.isUpdateMode = true;
+        component.videoGameBoxToUpdate = videoGameBoxToUpdate;
+        component.newVideoGameBox = {
+          title: 'Updated Call of Duty',
+          systemId: 1,
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Some text' },
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+          ]
+        };
+
+        apiService.updateVideoGameBox.and.returnValue(of(videoGameBoxToUpdate));
+
+        component.onSubmitNewVideoGameBox();
+
+        expect(apiService.updateVideoGameBox).toHaveBeenCalledWith(1, {
+          title: 'Updated Call of Duty',
+          systemId: 1,
+          isPhysical: true,
+          isCollection: false,
+          existingVideoGameIds: [],
+          newVideoGames: [],
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'Some text' },
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '0' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'false' }
+          ]
+        });
+      });
+
+      it('should include modified custom field values in PUT request when editing', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        // Set up edit mode with modified values
+        component.isUpdateMode = true;
+        component.videoGameBoxToUpdate = videoGameBoxToUpdate;
+        component.newVideoGameBox = {
+          title: 'Updated Call of Duty',
+          systemId: 1,
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'User entered text' },
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+          ]
+        };
+
+        apiService.updateVideoGameBox.and.returnValue(of(videoGameBoxToUpdate));
+
+        component.onSubmitNewVideoGameBox();
+
+        expect(apiService.updateVideoGameBox).toHaveBeenCalledWith(1, {
+          title: 'Updated Call of Duty',
+          systemId: 1,
+          isPhysical: true,
+          isCollection: false,
+          existingVideoGameIds: [],
+          newVideoGames: [],
+          customFieldValues: [
+            { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text', value: 'User entered text' },
+            { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number', value: '42' },
+            { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean', value: 'true' }
+          ]
+        });
+      });
+
+      it('should reload video game boxes after successful update', () => {
+        const videoGameBoxToUpdate = {
+          key: 'box1',
+          id: 1,
+          title: 'Call of Duty',
+          system: mockSystems[0],
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          createdAt: '2023-01-01',
+          updatedAt: '2023-01-01',
+          customFieldValues: []
+        };
+
+        // Set up edit mode
+        component.isUpdateMode = true;
+        component.videoGameBoxToUpdate = videoGameBoxToUpdate;
+        component.newVideoGameBox = {
+          title: 'Updated Call of Duty',
+          systemId: 1,
+          isPhysical: true,
+          isCollection: false,
+          videoGames: [],
+          customFieldValues: []
+        };
+
+        apiService.updateVideoGameBox.and.returnValue(of(videoGameBoxToUpdate));
+        spyOn(component, 'loadVideoGameBoxes');
+
+        component.onSubmitNewVideoGameBox();
+
+        expect(component.loadVideoGameBoxes).toHaveBeenCalled();
+        expect(component.showNewVideoGameBoxModal).toBe(false);
       });
     });
   });

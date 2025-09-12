@@ -183,9 +183,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       return customField.value !== '';
     }
     
-    // For number fields, don't display if no meaningful value exists
+    // For number fields, display if there's any value (including 0)
     if (fieldType === 'number') {
-      return customField.value !== '' && customField.value !== '0';
+      return customField.value !== '';
     }
     
     return false;
@@ -246,6 +246,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.videoGameBoxToUpdate = videoGameBox;
     this.showNewVideoGameBoxModal = true;
     
+    console.log('Opening edit modal for video game box:', videoGameBox);
+    console.log('Available custom fields when opening modal:', this.availableCustomFields);
+    
     // Load all video games for the dropdown
     this.apiService.getVideoGames().subscribe({
       next: (videoGames) => {
@@ -260,25 +263,36 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           customFieldValues: []
         }));
         
+        // Ensure we have merged custom field values with all defaults
+        const mergedCustomFieldValues = this.mergeWithDefaultCustomFieldValues(videoGameBox.customFieldValues);
+        
         this.newVideoGameBox = {
           title: videoGameBox.title,
           systemId: videoGameBox.system.id,
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: existingVideoGames,
-          customFieldValues: [...videoGameBox.customFieldValues]
+          customFieldValues: mergedCustomFieldValues
         };
+        
+        console.log('Set newVideoGameBox.customFieldValues to:', this.newVideoGameBox.customFieldValues);
       },
       error: (error) => {
         console.error('Error loading video games:', error);
+        
+        // Ensure we have merged custom field values with all defaults
+        const mergedCustomFieldValues = this.mergeWithDefaultCustomFieldValues(videoGameBox.customFieldValues);
+        
         this.newVideoGameBox = {
           title: videoGameBox.title,
           systemId: videoGameBox.system.id,
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: [],
-          customFieldValues: [...videoGameBox.customFieldValues]
+          customFieldValues: mergedCustomFieldValues
         };
+        
+        console.log('Set newVideoGameBox.customFieldValues to (error case):', this.newVideoGameBox.customFieldValues);
       }
     });
   }
@@ -351,6 +365,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     };
     
     if (this.isUpdateMode && this.videoGameBoxToUpdate) {
+      console.log('Updating video game box with data:', videoGameBoxData);
+      console.log('Custom fields being sent in update:', videoGameBoxData.customFieldValues);
       // Update existing video game box
       this.apiService.updateVideoGameBox(this.videoGameBoxToUpdate.id, videoGameBoxData).subscribe({
         next: (response) => {
@@ -670,6 +686,36 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    console.log('Merging custom field values:');
+    console.log('Available custom fields:', this.availableCustomFields);
+    console.log('Default values generated:', defaultValues);
+    console.log('Existing values:', existingCustomFieldValues);
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    const mergedValues = defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
+    
+    console.log('Merged custom field values result:', mergedValues);
+    return mergedValues;
+  }
+
+  onCustomFieldValuesChange(newValues: any[]): void {
+    console.log('Custom field values changed from dynamic component:', newValues);
+    this.newVideoGameBox.customFieldValues = newValues;
+    console.log('Updated newVideoGameBox.customFieldValues:', this.newVideoGameBox.customFieldValues);
   }
 
   ngOnDestroy(): void {
