@@ -15,7 +15,8 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(ng test:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }
