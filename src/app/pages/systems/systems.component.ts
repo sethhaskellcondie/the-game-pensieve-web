@@ -30,6 +30,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
   
@@ -71,6 +72,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
       });
     
     this.loadSystems();
+    this.loadCustomFields();
   }
 
   ngOnDestroy(): void {
@@ -108,6 +110,40 @@ export class SystemsComponent implements OnInit, OnDestroy {
         // Error snackbar will be shown automatically by API service
       }
     });
+  }
+
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('system').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for systems:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for systems:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
+  createDefaultCustomFieldValues(): any[] {
+    return this.availableCustomFields.map(field => ({
+      customFieldId: field.id,
+      customFieldName: field.name,
+      customFieldType: field.type,
+      value: this.getDefaultValueForType(field.type)
+    }));
+  }
+
+  private getDefaultValueForType(type: string): string {
+    switch (type) {
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'text':
+      default:
+        return '';
+    }
   }
 
   extractCustomFieldNames(): void {
@@ -151,7 +187,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
       name: '',
       generation: null,
       handheld: false,
-      customFieldValues: [] as any[]
+      customFieldValues: this.createDefaultCustomFieldValues()
     };
     
     // Focus the name field after the view updates
@@ -266,8 +302,9 @@ export class SystemsComponent implements OnInit, OnDestroy {
         // Show success toast
         this.errorSnackbarService.showSuccess('System created successfully');
         
-        // Clear the name field but keep other fields
+        // Clear the name field but reset custom field values to defaults
         this.newSystem.name = '';
+        this.newSystem.customFieldValues = this.createDefaultCustomFieldValues();
         
         // Focus the name input
         this.focusNameInput();

@@ -131,7 +131,7 @@ export class FilterService {
           { value: 'greater_than_equal_to', label: 'Greater Than or Equal To' },
           { value: 'less_than_equal_to', label: 'Less Than or Equal To' },
           sortOperator
-        ];
+      ];
       
       case 'boolean':
         return [

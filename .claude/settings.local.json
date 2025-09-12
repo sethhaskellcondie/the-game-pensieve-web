@@ -9,7 +9,8 @@
       "Bash(ng generate service:*)",
       "Bash(mv:*)",
       "Bash(curl:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }
