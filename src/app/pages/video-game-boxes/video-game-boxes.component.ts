@@ -317,6 +317,11 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // For new video game boxes (not updates), require at least one video game
+    if (!this.isUpdateMode && !this.hasAtLeastOneValidVideoGame()) {
+      return;
+    }
+
     // Validate video games if any are added
     for (let i = 0; i < this.newVideoGameBox.videoGames.length; i++) {
       const videoGame = this.newVideoGameBox.videoGames[i];
@@ -400,7 +405,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitAndAddAnother(): void {
-    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null) {
+    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null || !this.hasAtLeastOneValidVideoGame()) {
       return;
     }
 
@@ -655,6 +660,35 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
 
   isCustomFieldBoolean(fieldName: string): boolean {
     return this.getCustomFieldType(fieldName) === 'boolean';
+  }
+
+  hasAtLeastOneValidVideoGame(): boolean {
+    if (this.newVideoGameBox.videoGames.length === 0) {
+      return false;
+    }
+
+    return this.newVideoGameBox.videoGames.some(videoGame => {
+      if (videoGame.type === 'existing') {
+        return !!videoGame.existingVideoGameId;
+      } else if (videoGame.type === 'new') {
+        return !!(videoGame.title && videoGame.title.trim() !== '' && videoGame.systemId);
+      }
+      return false;
+    });
+  }
+
+  isFormCompletelyValid(ngForm: any): boolean {
+    if (!ngForm || !ngForm.valid) {
+      return false;
+    }
+
+    // For new video game boxes, require at least one video game
+    if (!this.isUpdateMode) {
+      return this.hasAtLeastOneValidVideoGame();
+    }
+
+    // For updates, basic form validity is sufficient
+    return true;
   }
 
   openFilterModal(): void {
