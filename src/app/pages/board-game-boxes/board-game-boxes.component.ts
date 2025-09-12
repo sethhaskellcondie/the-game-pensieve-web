@@ -122,15 +122,12 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     
     this.apiService.getBoardGameBoxes(filtersWithDefaults).subscribe({
       next: (boardGameBoxes) => {
-        console.log('Board game boxes received:', boardGameBoxes);
-        console.log('Number of board game boxes:', boardGameBoxes.length);
         this.boardGameBoxes = boardGameBoxes;
         this.boardGameBoxesCount = boardGameBoxes.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading board game boxes:', error);
         this.errorMessage = `Failed to load board game boxes: ${error.message || 'Unknown error'}`;
         this.boardGameBoxesCount = 0;
         this.isLoading = false;
@@ -142,10 +139,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
       next: (fields) => {
         this.availableCustomFields = fields;
-        console.log('Available custom fields for board game boxes:', this.availableCustomFields);
       },
       error: (error) => {
-        console.error('Error loading custom fields for board game boxes:', error);
         this.availableCustomFields = [];
       }
     });
@@ -191,7 +186,6 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(box: BoardGameBox, fieldName: string): string {
@@ -253,7 +247,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         this.boardGamesForDropdown = boardGames;
       },
       error: (error) => {
-        console.error('Error loading board games:', error);
+        // Error loading board games
       }
     });
     
@@ -263,8 +257,6 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     // Only load custom fields for new board games when opening modal (not for self-contained)
     this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
       next: (customFields: any[]) => {
-        console.log('Custom fields for board games:', customFields);
-        
         // Set up custom fields for new board games (create new mode)
         this.newBoardGameBox.newBoardGame.customFieldValues = customFields.map((field: any) => ({
           customFieldId: field.id,
@@ -274,7 +266,6 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         }));
       },
       error: (error: any) => {
-        console.error('Error loading custom fields for board games:', error);
         this.newBoardGameBox.newBoardGame.customFieldValues = [];
       }
     });
@@ -292,12 +283,10 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     return new Promise((resolve, reject) => {
       this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
         next: (customFields: any[]) => {
-          console.log('Loading custom fields for self-contained board game:', customFields);
           const defaultValues = this.createDefaultBoardGameCustomFieldValues(customFields);
           resolve(defaultValues);
         },
         error: (error: any) => {
-          console.error('Error loading custom fields for self-contained board game:', error);
           reject(error);
         }
       });
@@ -380,19 +369,16 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       
       this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
         next: (response) => {
-          console.log('Board game box created successfully:', response);
           this.isCreating = false;
           this.closeNewBoardGameBoxModal();
           this.loadBoardGameBoxes(); // Refresh the board game boxes list
         },
         error: (error) => {
-          console.error('Error creating board game box:', error);
           this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
         }
       });
     } catch (error) {
-      console.error('Error preparing board game for submission:', error);
       this.errorMessage = 'Failed to load custom fields for board game.';
       this.isCreating = false;
     }
@@ -432,7 +418,6 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       
       this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
         next: (response) => {
-          console.log('Board game box created successfully:', response);
           this.isCreating = false;
           this.loadBoardGameBoxes(); // Refresh the board game boxes list
           
@@ -466,13 +451,11 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
           this.focusTitleInput();
         },
         error: (error) => {
-          console.error('Error creating board game box:', error);
           this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
         }
       });
     } catch (error) {
-      console.error('Error preparing board game for submission:', error);
       this.errorMessage = 'Failed to load custom fields for board game.';
       this.isCreating = false;
     }
@@ -520,13 +503,11 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
 
     this.apiService.deleteBoardGameBox(this.boardGameBoxToDelete.id).subscribe({
       next: () => {
-        console.log('Board game box deleted successfully');
         this.isDeleting = false;
         this.closeDeleteConfirmModal();
         this.loadBoardGameBoxes();
       },
       error: (error) => {
-        console.error('Error deleting board game box:', error);
         this.errorMessage = `Failed to delete board game box: ${error.message || 'Unknown error'}`;
         this.isDeleting = false;
       }

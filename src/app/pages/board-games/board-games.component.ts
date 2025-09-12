@@ -71,15 +71,12 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     
     this.apiService.getBoardGames(filtersWithDefaults).subscribe({
       next: (boardGames) => {
-        console.log('Board games received:', boardGames);
-        console.log('Number of board games:', boardGames.length);
         this.boardGames = boardGames;
         this.boardGamesCount = boardGames.length;
         this.extractCustomFieldNames();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading board games:', error);
         this.errorMessage = `Failed to load board games: ${error.message || 'Unknown error'}`;
         this.boardGamesCount = 0;
         this.isLoading = false;
@@ -91,10 +88,8 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
       next: (fields) => {
         this.availableCustomFields = fields;
-        console.log('Available custom fields for board games:', this.availableCustomFields);
       },
       error: (error) => {
-        console.error('Error loading custom fields for board games:', error);
         this.availableCustomFields = [];
       }
     });
@@ -110,7 +105,6 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     });
     
     this.customFieldNames = Array.from(fieldNamesSet).sort();
-    console.log('Custom field names:', this.customFieldNames);
   }
 
   getCustomFieldValue(game: BoardGame, fieldName: string): string {
@@ -240,13 +234,11 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     
     this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
       next: (response) => {
-        console.log('Board game updated successfully:', response);
         this.isUpdating = false;
         this.closeEditBoardGameModal();
         this.loadBoardGames(); // Refresh the board games list
       },
       error: (error) => {
-        console.error('Error updating board game:', error);
         this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
       }

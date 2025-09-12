@@ -330,7 +330,6 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     
     this.apiService.updateVideoGameBox(this.videoGameBox.id, videoGameBoxData).subscribe({
       next: (response) => {
-        console.log('Video game box updated successfully:', response);
         this.isUpdating = false;
         this.closeEditVideoGameBoxModal();
         this.loadVideoGameBox(this.videoGameBox!.id); // Refresh the current video game box

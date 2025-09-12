@@ -76,7 +76,6 @@ export class BoardGameDetailComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error: any) => {
-        console.error('Error loading board game:', error);
         this.errorMessage = `Failed to load board game: ${error.message || 'Unknown error'}`;
         this.isLoading = false;
       }
@@ -89,7 +88,7 @@ export class BoardGameDetailComponent implements OnInit, OnDestroy {
         this.boardGameBoxes = boardGameBoxes;
       },
       error: (error: any) => {
-        console.error('Error loading board game boxes:', error);
+        // Error loading board game boxes
       }
     });
   }
@@ -156,13 +155,11 @@ export class BoardGameDetailComponent implements OnInit, OnDestroy {
     
     this.apiService.updateBoardGame(this.boardGame.id, boardGameData).subscribe({
       next: (response) => {
-        console.log('Board game updated successfully:', response);
         this.isUpdating = false;
         this.closeEditBoardGameModal();
         this.loadBoardGame(this.boardGame!.id); // Refresh the current board game
       },
       error: (error) => {
-        console.error('Error updating board game:', error);
         this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
       }

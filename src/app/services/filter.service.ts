@@ -216,17 +216,14 @@ export class FilterService {
     const key = `entity-filters-${entityType}`;
     if (filters.length > 0) {
       localStorage.setItem(key, JSON.stringify(filters));
-      console.log(`Filters saved for ${entityType}:`, filters);
     } else {
       localStorage.removeItem(key);
-      console.log(`Filters cleared for ${entityType}`);
     }
   }
 
   private clearFiltersFromStorage(entityType: string): void {
     const key = `entity-filters-${entityType}`;
     localStorage.removeItem(key);
-    console.log(`Filters cleared from storage for ${entityType}`);
   }
 
   private loadAllFiltersFromStorage(): void {
@@ -239,7 +236,6 @@ export class FilterService {
       if (saved) {
         try {
           allFilters[entityType] = JSON.parse(saved);
-          console.log(`Loaded saved filters for ${entityType}:`, allFilters[entityType]);
         } catch (error) {
           console.error(`Error loading filters for ${entityType}:`, error);
           localStorage.removeItem(key);

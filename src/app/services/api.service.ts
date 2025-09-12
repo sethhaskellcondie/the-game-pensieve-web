@@ -122,7 +122,6 @@ export class ApiService {
 
   private handleHttpError = (error: any): Observable<never> => {
     // Extract errors from the HTTP error response
-    console.log('HTTP Error:', error);
     this.errorSnackbarService.processApiErrors(error);
     throw error;
   }

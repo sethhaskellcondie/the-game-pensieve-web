@@ -23,10 +23,8 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.settingsService.loadSettings().subscribe({
       next: (settings) => {
-        console.log('Settings loaded:', settings);
       },
       error: (error) => {
-        console.error('Failed to load settings:', error);
       }
     });
 

@@ -300,7 +300,6 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
     
     this.apiService.updateBoardGameBox(this.boardGameBox.id, boardGameBoxData).subscribe({
       next: (response) => {
-        console.log('Board game box updated successfully:', response);
         this.isUpdating = false;
         this.closeEditBoardGameBoxModal();
         this.loadBoardGameBox(this.boardGameBox!.id); // Refresh the current board game box
