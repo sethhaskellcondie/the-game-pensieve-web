@@ -25,6 +25,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   isLoading = false;
   errorMessage = '';
   customFieldNames: string[] = [];
+  availableCustomFields: any[] = [];
   isDarkMode = false;
   
   showDetailBoardGameModal = false;
@@ -46,6 +47,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       });
     
     this.loadBoardGames();
+    this.loadCustomFields();
   }
 
   ngOnDestroy(): void {
@@ -78,6 +80,19 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadCustomFields(): void {
+    this.apiService.getCustomFieldsByEntity('boardGame').subscribe({
+      next: (fields) => {
+        this.availableCustomFields = fields;
+        console.log('Available custom fields for board games:', this.availableCustomFields);
+      },
+      error: (error) => {
+        console.error('Error loading custom fields for board games:', error);
+        this.availableCustomFields = [];
+      }
+    });
+  }
+
   extractCustomFieldNames(): void {
     const fieldNamesSet = new Set<string>();
     
@@ -94,6 +109,66 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   getCustomFieldValue(game: BoardGame, fieldName: string): string {
     const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
     return customField ? customField.value : '';
+  }
+
+  shouldDisplayCustomField(game: BoardGame, fieldName: string): boolean {
+    const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, don't display if no meaningful value exists
+    if (fieldType === 'number') {
+      return customField.value !== '' && customField.value !== '0';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(game: BoardGame, fieldName: string): boolean {
+    const customField = game.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
+  }
+
+  shouldDisplayCustomFieldInModal(field: any): boolean {
+    // For boolean fields, always display the badge if the field exists
+    if (field.customFieldType === 'boolean') {
+      return true;
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (field.customFieldType === 'text') {
+      return field.value !== '';
+    }
+    
+    // For number fields, don't display if no meaningful value exists
+    if (field.customFieldType === 'number') {
+      return field.value !== '' && field.value !== '0';
+    }
+    
+    // Default to displaying if we're unsure about the type
+    return field.value !== '';
+  }
+
+  hasDisplayableCustomFields(boardGame: BoardGame): boolean {
+    return boardGame.customFieldValues.some(field => this.shouldDisplayCustomFieldInModal(field));
   }
 
   navigateToDetail(id: number): void {

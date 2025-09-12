@@ -55,13 +55,13 @@
               <td class="game-title">{{game.title}}</td>
               <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
                 <app-boolean-display 
-                  *ngIf="isCustomFieldBoolean(fieldName); else textValue"
+                  *ngIf="shouldDisplayBooleanBadge(game, fieldName)"
                   [value]="getCustomFieldValue(game, fieldName)"
                   size="small">
                 </app-boolean-display>
-                <ng-template #textValue>
+                <span *ngIf="shouldDisplayCustomField(game, fieldName)">
                   {{getCustomFieldValue(game, fieldName)}}
-                </ng-template>
+                </span>
               </td>
             </tr>
           </tbody>
@@ -82,9 +82,9 @@
       
       <div class="modal-body" *ngIf="selectedBoardGame">
         <!-- Custom Fields -->
-        <div class="custom-fields-inline" *ngIf="selectedBoardGame.customFieldValues.length > 0">
+        <div class="custom-fields-inline" *ngIf="hasDisplayableCustomFields(selectedBoardGame)">
           <div class="detail-grid">
-            <div class="detail-item" *ngFor="let field of selectedBoardGame.customFieldValues">
+            <div class="detail-item" *ngFor="let field of selectedBoardGame.customFieldValues" [hidden]="!shouldDisplayCustomFieldInModal(field)">
               <label>{{field.customFieldName}}:</label>
               <app-boolean-display 
                 *ngIf="field.customFieldType === 'boolean'; else textValue"
