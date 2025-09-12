@@ -164,6 +164,42 @@ export class SystemsComponent implements OnInit, OnDestroy {
     return customField ? customField.value : '';
   }
 
+  shouldDisplayCustomField(system: System, fieldName: string): boolean {
+    const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display anything if no custom field value exists
+    }
+
+    const fieldType = this.getCustomFieldType(fieldName);
+    
+    // For boolean fields, don't display if no value exists
+    if (fieldType === 'boolean') {
+      return false; // We'll handle boolean display separately
+    }
+    
+    // For text fields, only display if there's a non-empty value
+    if (fieldType === 'text') {
+      return customField.value !== '';
+    }
+    
+    // For number fields, don't display if no meaningful value exists
+    if (fieldType === 'number') {
+      return customField.value !== '' && customField.value !== '0';
+    }
+    
+    return false;
+  }
+
+  shouldDisplayBooleanBadge(system: System, fieldName: string): boolean {
+    const customField = system.customFieldValues.find(cfv => cfv.customFieldName === fieldName);
+    if (!customField) {
+      return false; // Don't display badge if no custom field value exists
+    }
+    
+    const fieldType = this.getCustomFieldType(fieldName);
+    return fieldType === 'boolean'; // Only show badge if it's actually a boolean field and has a value
+  }
+
   getCustomFieldType(fieldName: string): string {
     // Check any system that has this field to determine its type
     for (const system of this.systems) {

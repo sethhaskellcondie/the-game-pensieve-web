@@ -204,5 +204,97 @@ describe('SystemsComponent', () => {
         customFieldValues: customFieldValues
       });
     });
+
+    describe('custom field display logic', () => {
+      const systemWithCustomFields = {
+        key: 'system1',
+        id: 1,
+        name: 'Test System',
+        generation: 8,
+        handheld: false,
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+        customFieldValues: [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: 'Some text' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '42' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'true' }
+        ]
+      };
+
+      const systemWithEmptyCustomFields = {
+        key: 'system2',
+        id: 2,
+        name: 'Empty System',
+        generation: 8,
+        handheld: false,
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+        customFieldValues: [
+          { customFieldId: 1, customFieldName: 'Test Text Field', customFieldType: 'text' as const, value: '' },
+          { customFieldId: 2, customFieldName: 'Test Number Field', customFieldType: 'number' as const, value: '0' },
+          { customFieldId: 3, customFieldName: 'Test Boolean Field', customFieldType: 'boolean' as const, value: 'false' }
+        ]
+      };
+
+      const systemWithNoCustomFields = {
+        key: 'system3',
+        id: 3,
+        name: 'No Fields System',
+        generation: 8,
+        handheld: false,
+        createdAt: '2023-01-01',
+        updatedAt: '2023-01-01',
+        customFieldValues: []
+      };
+
+      beforeEach(() => {
+        component.systems = [systemWithCustomFields, systemWithEmptyCustomFields, systemWithNoCustomFields];
+      });
+
+      describe('shouldDisplayCustomField', () => {
+        it('should return true for text field with non-empty value', () => {
+          expect(component.shouldDisplayCustomField(systemWithCustomFields, 'Test Text Field')).toBe(true);
+        });
+
+        it('should return false for text field with empty value', () => {
+          expect(component.shouldDisplayCustomField(systemWithEmptyCustomFields, 'Test Text Field')).toBe(false);
+        });
+
+        it('should return true for number field with non-zero value', () => {
+          expect(component.shouldDisplayCustomField(systemWithCustomFields, 'Test Number Field')).toBe(true);
+        });
+
+        it('should return false for number field with zero value', () => {
+          expect(component.shouldDisplayCustomField(systemWithEmptyCustomFields, 'Test Number Field')).toBe(false);
+        });
+
+        it('should return false for boolean fields (handled separately)', () => {
+          expect(component.shouldDisplayCustomField(systemWithCustomFields, 'Test Boolean Field')).toBe(false);
+          expect(component.shouldDisplayCustomField(systemWithEmptyCustomFields, 'Test Boolean Field')).toBe(false);
+        });
+
+        it('should return false for non-existent custom fields', () => {
+          expect(component.shouldDisplayCustomField(systemWithNoCustomFields, 'Test Text Field')).toBe(false);
+          expect(component.shouldDisplayCustomField(systemWithNoCustomFields, 'Test Number Field')).toBe(false);
+          expect(component.shouldDisplayCustomField(systemWithNoCustomFields, 'Test Boolean Field')).toBe(false);
+        });
+      });
+
+      describe('shouldDisplayBooleanBadge', () => {
+        it('should return true for boolean field with value', () => {
+          expect(component.shouldDisplayBooleanBadge(systemWithCustomFields, 'Test Boolean Field')).toBe(true);
+          expect(component.shouldDisplayBooleanBadge(systemWithEmptyCustomFields, 'Test Boolean Field')).toBe(true);
+        });
+
+        it('should return false for non-boolean fields', () => {
+          expect(component.shouldDisplayBooleanBadge(systemWithCustomFields, 'Test Text Field')).toBe(false);
+          expect(component.shouldDisplayBooleanBadge(systemWithCustomFields, 'Test Number Field')).toBe(false);
+        });
+
+        it('should return false for non-existent custom fields', () => {
+          expect(component.shouldDisplayBooleanBadge(systemWithNoCustomFields, 'Test Boolean Field')).toBe(false);
+        });
+      });
+    });
   });
 });
