@@ -5,6 +5,13 @@
       <button type="button" class="new-button" (click)="openNewToyModal()">
         New
       </button>
+      <button 
+        *ngIf="isMassEditMode && hasSelectedToys()" 
+        type="button" 
+        class="mass-edit-button" 
+        (click)="startMassEdit()">
+        Mass Edit ({{selectedToys.size}})
+      </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
@@ -46,6 +53,14 @@
         <table class="toys-table">
           <thead>
             <tr>
+              <th *ngIf="isMassEditMode" class="edit-column-header">
+                <input 
+                  type="checkbox" 
+                  [checked]="isAllToysSelected()"
+                  [indeterminate]="isSomeToysSelected()"
+                  (change)="toggleAllToys()"
+                  class="edit-checkbox select-all-checkbox">
+              </th>
               <th>Name</th>
               <th>Set</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
@@ -54,6 +69,13 @@
           </thead>
           <tbody>
             <tr *ngFor="let toy of toys" class="table-row">
+              <td *ngIf="isMassEditMode" class="edit-checkbox-cell" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isToySelected(toy.id)"
+                  (change)="toggleToySelection(toy.id)"
+                  class="edit-checkbox">
+              </td>
               <td class="toy-name" (click)="openUpdateToyModal(toy)">
                 {{toy.name}}
               </td>
