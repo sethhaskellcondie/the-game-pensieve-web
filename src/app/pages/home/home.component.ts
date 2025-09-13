@@ -97,9 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   onDeleteGoal(goal: Goal): void {
     this.goalService.deleteGoal(goal.id).subscribe({
       next: (success) => {
-        if (success) {
-          console.log('Goal deleted successfully');
-        }
+        // Goal deleted successfully
       },
       error: (error) => {
         console.error('Error deleting goal:', error);
@@ -141,9 +139,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   onDeleteShortcut(shortcut: FilterShortcut): void {
     this.filterShortcutService.deleteShortcut(shortcut.id).subscribe({
       next: (success) => {
-        if (success) {
-          console.log('Shortcut deleted successfully');
-        }
+        // Shortcut deleted successfully
       },
       error: (error) => {
         console.error('Error deleting shortcut:', error);
