@@ -53,6 +53,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   massEditQueue: Toy[] = [];
   isMassEditing = false;
   lastClickedToyIndex: number = -1;
+  massEditOriginalTotal = 0;
 
   constructor(
     private apiService: ApiService, 
@@ -495,6 +496,7 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.massEditQueue = [];
     this.isMassEditing = false;
     this.lastClickedToyIndex = -1;
+    this.massEditOriginalTotal = 0;
   }
 
   startMassEdit(): void {
@@ -502,6 +504,7 @@ export class ToysComponent implements OnInit, OnDestroy {
     
     // Build the queue of toys to edit
     this.massEditQueue = this.toys.filter(toy => this.selectedToys.has(toy.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
     this.isMassEditing = true;
     
     // Start editing the first toy
@@ -525,6 +528,17 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.closeNewToyModal(); // Close the modal
     this.loadToys(); // Refresh the list
     this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 
 }
