@@ -2,6 +2,13 @@
   <div class="header-section">
     <h1>Board Games (Game View)</h1>
     <div class="header-buttons">
+      <button 
+        *ngIf="isMassEditMode && hasSelectedBoardGames()" 
+        type="button" 
+        class="mass-edit-button" 
+        (click)="startMassEdit()">
+        Mass Edit ({{selectedBoardGames.size}})
+      </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
@@ -46,14 +53,29 @@
         <table class="board-games-table">
           <thead>
             <tr>
+              <th *ngIf="isMassEditMode" class="edit-column-header">
+                <input 
+                  type="checkbox" 
+                  [checked]="isAllBoardGamesSelected()"
+                  [indeterminate]="isSomeBoardGamesSelected()"
+                  (change)="toggleAllBoardGames()"
+                  class="edit-checkbox select-all-checkbox">
+              </th>
               <th>Title</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of boardGames" class="table-row" (click)="navigateToDetail(game.id)">
-              <td class="game-title">{{game.title}}</td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+            <tr *ngFor="let game of boardGames" class="table-row">
+              <td *ngIf="isMassEditMode" class="edit-checkbox-cell" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isBoardGameSelected(game.id)"
+                  (click)="toggleBoardGameSelection(game.id, $event)"
+                  class="edit-checkbox">
+              </td>
+              <td class="game-title" (click)="openEditBoardGameModal(game)">{{game.title}}</td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openEditBoardGameModal(game)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(game, fieldName)"
                   [value]="getCustomFieldValue(game, fieldName)"
@@ -98,6 +120,54 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Edit Board Game Modal -->
+  <div *ngIf="showEditBoardGameModal" class="modal-overlay" (click)="closeEditBoardGameModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Board Game</h2>
+        <button type="button" class="close-button" (click)="closeEditBoardGameModal()">×</button>
+      </div>
+      
+      <form (ngSubmit)="onSubmitEditBoardGame()" #boardGameForm="ngForm" class="modal-form">
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <app-selectable-text-input
+            #titleField
+            id="title"
+            name="title"
+            [(ngModel)]="editBoardGame.title"
+            #titleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
+            placeholder="">
+          </app-selectable-text-input>
+          <div *ngIf="titleNgModel.invalid && titleNgModel.touched" class="error-text">
+            Title is required
+          </div>
+        </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields 
+          entityKey="boardGame" 
+          sectionTitle=""
+          [(customFieldValues)]="editBoardGame.customFieldValues">
+        </app-dynamic-custom-fields>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditBoardGameModal()">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="create-button" 
+            [disabled]="!boardGameForm.form.valid || isUpdating">
+            {{isUpdating ? 'Updating...' : 'Update'}}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
