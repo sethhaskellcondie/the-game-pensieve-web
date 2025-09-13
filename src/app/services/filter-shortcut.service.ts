@@ -9,6 +9,7 @@ export interface FilterShortcut {
   description?: string;
   targetPage: string;
   filters: FilterRequestDto[];
+  goalId?: string; // Optional reference to parent goal
   createdAt: string;
 }
 
@@ -70,6 +71,36 @@ export class FilterShortcutService {
 
   getShortcuts(): FilterShortcut[] {
     return this.shortcutsSubject.value;
+  }
+
+  getShortcutsByGoal(goalId: string): FilterShortcut[] {
+    return this.shortcutsSubject.value.filter(shortcut => shortcut.goalId === goalId);
+  }
+
+  getUncategorizedShortcuts(): FilterShortcut[] {
+    return this.shortcutsSubject.value.filter(shortcut => !shortcut.goalId);
+  }
+
+  assignShortcutToGoal(shortcutId: string, goalId: string | null): Observable<boolean> {
+    const currentShortcuts = this.shortcutsSubject.value;
+    const updatedShortcuts = currentShortcuts.map(shortcut => 
+      shortcut.id === shortcutId ? { ...shortcut, goalId: goalId || undefined } : shortcut
+    );
+    return this.saveShortcuts(updatedShortcuts);
+  }
+
+  reassignShortcutsFromGoal(oldGoalId: string, newGoalId: string | null): Observable<boolean> {
+    const currentShortcuts = this.shortcutsSubject.value;
+    const updatedShortcuts = currentShortcuts.map(shortcut => 
+      shortcut.goalId === oldGoalId ? { ...shortcut, goalId: newGoalId || undefined } : shortcut
+    );
+    return this.saveShortcuts(updatedShortcuts);
+  }
+
+  deleteShortcutsByGoal(goalId: string): Observable<boolean> {
+    const currentShortcuts = this.shortcutsSubject.value;
+    const updatedShortcuts = currentShortcuts.filter(shortcut => shortcut.goalId !== goalId);
+    return this.saveShortcuts(updatedShortcuts);
   }
 
   private generateId(): string {

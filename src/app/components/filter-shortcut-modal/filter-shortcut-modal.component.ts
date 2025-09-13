@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { FilterShortcutService, FilterShortcut } from '../../services/filter-shortcut.service';
 import { FilterService, FilterRequestDto, FilterSpecification } from '../../services/filter.service';
+import { GoalService, Goal } from '../../services/goal.service';
 import { SelectableTextInputComponent } from '../selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
 import { FilterCriteriaComponent } from '../filter-criteria/filter-criteria.component';
@@ -20,6 +21,7 @@ import { SettingsService } from '../../services/settings.service';
 export class FilterShortcutModalComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   @Input() shortcut: FilterShortcut | null = null;
+  @Input() preSelectedGoalId: string | null = null; // For creating shortcuts in specific goals
   @Output() closeModal = new EventEmitter<void>();
   @ViewChild('nameField', { static: false }) nameField: any;
   
@@ -27,6 +29,7 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
     name: '',
     description: '',
     targetPage: '',
+    goalId: null as string | null,
     filters: [] as FilterRequestDto[]
   };
   
@@ -36,6 +39,8 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
   filterSpecErrorMessage = '';
   hasLoadedFilterSpec = false;
   isDarkMode = false;
+  goals: Goal[] = [];
+  availableGoals: DropdownOption[] = [];
   availablePages: DropdownOption[] = [
     { value: '/video-games', label: 'Video Games' },
     { value: '/video-game-boxes', label: 'Video Game Boxes' },
@@ -48,6 +53,7 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
   constructor(
     private filterShortcutService: FilterShortcutService,
     private filterService: FilterService,
+    private goalService: GoalService,
     private settingsService: SettingsService
   ) {}
 
@@ -58,11 +64,20 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
         this.isDarkMode = darkMode;
       });
 
+    // Load goals
+    this.goalService.goals$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(goals => {
+        this.goals = goals;
+        this.updateAvailableGoals();
+      });
+
     if (this.shortcut) {
       this.formData = {
         name: this.shortcut.name,
         description: this.shortcut.description || '',
         targetPage: this.shortcut.targetPage,
+        goalId: this.shortcut.goalId || null,
         filters: [...this.shortcut.filters]
       };
       
@@ -70,6 +85,9 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
       if (this.shortcut.targetPage) {
         this.loadFilterSpecification();
       }
+    } else if (this.preSelectedGoalId) {
+      // If creating a new shortcut for a specific goal
+      this.formData.goalId = this.preSelectedGoalId;
     }
     
     setTimeout(() => {
@@ -83,7 +101,16 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
+  updateAvailableGoals(): void {
+    this.availableGoals = [
+      { value: '', label: 'No Goal (Uncategorized)' },
+      ...this.goals.map(goal => ({
+        value: goal.id,
+        label: goal.name
+      }))
+    ];
+  }
 
   onSubmit(): void {
     if (this.isSubmitting || !this.formData.name.trim()) {
@@ -96,7 +123,8 @@ export class FilterShortcutModalComponent implements OnInit, OnDestroy {
       name: this.formData.name.trim(),
       description: this.formData.description.trim() || undefined,
       targetPage: this.formData.targetPage,
-      filters: this.formData.filters
+      filters: this.formData.filters,
+      goalId: this.formData.goalId || undefined
     };
     
     const operation = this.shortcut

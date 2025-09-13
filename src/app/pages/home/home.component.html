@@ -1,68 +1,89 @@
 <div class="home-container" [class.dark-mode]="isDarkMode">
 
-  <!-- Shortcuts Section -->
-  <div class="shortcuts-section">
-    <div class="section-header">
-      <h2>Shortcuts</h2>
-      <button type="button" class="create-button" (click)="openCreateModal()">
-        New
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Goals & Shortcuts</h1>
+    <div class="header-actions">
+      <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
+        + Shortcut
+      </button>
+      <button type="button" class="create-button primary" (click)="onCreateGoal()">
+        + Goal
       </button>
     </div>
+  </div>
 
-    <!-- No shortcuts message -->
-    <div *ngIf="shortcuts.length === 0" class="no-shortcuts">
-      <p>No shortcuts created yet. Create your first shortcut with the "New" button.</p>
-    </div>
+  <!-- Goals Section -->
+  <div class="goals-section" *ngIf="goals.length > 0">
+    <app-goal-section
+      *ngFor="let goal of goals"
+      [goal]="goal"
+      [shortcuts]="getShortcutsForGoal(goal.id)"
+      [isDarkMode]="isDarkMode"
+      [isExpanded]="isGoalExpanded(goal.id)"
+      (editGoal)="onEditGoal($event)"
+      (deleteGoal)="onDeleteGoal($event)"
+      (addShortcut)="onAddShortcutToGoal($event)"
+      (editShortcut)="onEditShortcut($event)"
+      (deleteShortcut)="onDeleteShortcut($event)"
+      (toggleExpanded)="onToggleGoalExpansion(goal.id)">
+    </app-goal-section>
+  </div>
 
-    <!-- Shortcuts Grid -->
-    <div *ngIf="shortcuts.length > 0" class="shortcuts-grid">
-      <div class="shortcut-card clickable" 
-           *ngFor="let shortcut of shortcuts" 
-           (click)="onShortcutClick(shortcut)">
-        <div class="shortcut-header">
-          <h3>{{shortcut.name}}</h3>
-          <div class="shortcut-actions">
-            <button type="button" 
-                    class="edit-button" 
-                    (click)="editShortcut(shortcut, $event)"
-                    title="Edit shortcut"
-                    [innerHTML]="iconService.getIcon('pencil')">
-            </button>
-            <button type="button" 
-                    class="delete-button" 
-                    (click)="deleteShortcut(shortcut, $event)"
-                    title="Delete shortcut">
-              ×
-            </button>
-          </div>
-        </div>
-        <div class="shortcut-description" *ngIf="shortcut.description">
-          <p>{{shortcut.description}}</p>
-        </div>
-        <div class="shortcut-info">
-          <div class="shortcut-target">
-            <span class="info-label">Entity:</span>
-            <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
-          </div>
-          <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
-            <span class="info-label">Filters:</span>
-            <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
-          </div>
-        </div>
+  <!-- Uncategorized Shortcuts Section -->
+  <div class="uncategorized-section" *ngIf="uncategorizedShortcuts.length > 0">
+    <app-goal-section
+      [goal]="{id: 'uncategorized', name: 'Uncategorized Shortcuts', description: 'Shortcuts not assigned to any goal', completed: false, createdAt: ''}"
+      [shortcuts]="uncategorizedShortcuts"
+      [isDarkMode]="isDarkMode"
+      [isExpanded]="true"
+      (editShortcut)="onEditShortcut($event)"
+      (deleteShortcut)="onDeleteShortcut($event)">
+    </app-goal-section>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="goals.length === 0 && shortcuts.length === 0">
+    <div class="empty-content">
+      <h2>Welcome to your Goals & Shortcuts dashboard!</h2>
+      <p>Create your first goal to organize your shortcuts, or create a standalone shortcut.</p>
+      <div class="empty-actions">
+        <button type="button" class="create-button primary" (click)="onCreateGoal()">
+          Create Your First Goal
+        </button>
+        <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
+          Or Create a Shortcut
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Modals -->
+  
+  <!-- Create Goal Modal -->
+  <app-goal-modal 
+    *ngIf="showCreateGoalModal"
+    (closeModal)="onCloseGoalModal()">
+  </app-goal-modal>
+
+  <!-- Edit Goal Modal -->
+  <app-goal-modal 
+    *ngIf="showEditGoalModal"
+    [goal]="editingGoal"
+    (closeModal)="onCloseGoalModal()">
+  </app-goal-modal>
+
   <!-- Create Shortcut Modal -->
   <app-filter-shortcut-modal 
-    *ngIf="showCreateModal"
-    (closeModal)="closeCreateModal()">
+    *ngIf="showCreateShortcutModal"
+    [preSelectedGoalId]="preSelectedGoalId"
+    (closeModal)="onCloseShortcutModal()">
   </app-filter-shortcut-modal>
 
   <!-- Edit Shortcut Modal -->
   <app-filter-shortcut-modal 
-    *ngIf="showEditModal"
+    *ngIf="showEditShortcutModal"
     [shortcut]="editingShortcut"
-    (closeModal)="closeEditModal()">
+    (closeModal)="onCloseShortcutModal()">
   </app-filter-shortcut-modal>
 </div>

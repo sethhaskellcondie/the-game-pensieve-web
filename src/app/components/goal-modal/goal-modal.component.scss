@@ -1,0 +1,328 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  
+  h2 {
+    color: #333;
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    color: #333;
+    background-color: #f0f0f0;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 6px;
+    color: #555;
+    font-weight: 500;
+    font-size: 0.9rem;
+    
+    &:not(.checkbox-label) {
+      margin-bottom: 6px;
+    }
+  }
+  
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    
+    &:focus {
+      outline: none;
+      border-color: #0370ec;
+    }
+    
+    &.error {
+      border-color: #dc3545;
+    }
+    
+    &:disabled {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    
+    &::placeholder {
+      color: #999;
+    }
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  
+  input[type="checkbox"] {
+    display: none;
+  }
+  
+  .checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    
+    &::after {
+      content: '✓';
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+  }
+  
+  input[type="checkbox"]:checked + .checkbox-custom {
+    background-color: #0370ec;
+    border-color: #0370ec;
+    
+    &::after {
+      opacity: 1;
+    }
+  }
+  
+  &:hover .checkbox-custom {
+    border-color: #0370ec;
+  }
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancel-button {
+  background-color: transparent;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: #f8f9fa;
+    border-color: #999;
+    color: #333;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.submit-button {
+  background-color: #0370ec;
+  color: white;
+  border: 2px solid #0370ec;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  
+  &:hover:not(:disabled) {
+    background-color: #025bb5;
+    border-color: #025bb5;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* Dark Mode Styles */
+.modal-overlay.dark-mode {
+  .modal-content {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+  }
+  
+  .modal-header {
+    border-bottom-color: #444;
+    
+    h2 {
+      color: #e0e0e0;
+    }
+  }
+  
+  .close-button {
+    color: #b0b0b0;
+    
+    &:hover:not(:disabled) {
+      color: #e0e0e0;
+      background-color: #444;
+    }
+  }
+  
+  .form-group {
+    label {
+      color: #b0b0b0;
+      
+      &.checkbox-label {
+        color: #e0e0e0;
+      }
+    }
+    
+    input[type="text"],
+    textarea {
+      background-color: #333;
+      border-color: #555;
+      color: #e0e0e0;
+      
+      &:focus {
+        border-color: #5ba7f7;
+      }
+      
+      &.error {
+        border-color: #e74c3c;
+      }
+      
+      &:disabled {
+        background-color: #1a1a1a;
+      }
+      
+      &::placeholder {
+        color: #777;
+      }
+    }
+    
+    .checkbox-custom {
+      border-color: #555;
+    }
+    
+    input[type="checkbox"]:checked + .checkbox-custom {
+      background-color: #5ba7f7;
+      border-color: #5ba7f7;
+    }
+    
+    .checkbox-label:hover .checkbox-custom {
+      border-color: #5ba7f7;
+    }
+  }
+  
+  .error-message {
+    color: #e74c3c;
+  }
+  
+  .modal-footer {
+    border-top-color: #444;
+  }
+  
+  .cancel-button {
+    color: #b0b0b0;
+    border-color: #555;
+    
+    &:hover:not(:disabled) {
+      background-color: #333;
+      border-color: #777;
+      color: #e0e0e0;
+    }
+  }
+  
+  .submit-button {
+    background-color: #5ba7f7;
+    border-color: #5ba7f7;
+    
+    &:hover:not(:disabled) {
+      background-color: #4a96e6;
+      border-color: #4a96e6;
+    }
+  }
+}
