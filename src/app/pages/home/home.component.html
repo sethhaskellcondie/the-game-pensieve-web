@@ -30,16 +30,48 @@
     </app-goal-section>
   </div>
 
-  <!-- Uncategorized Shortcuts Section -->
-  <div class="uncategorized-section" *ngIf="uncategorizedShortcuts.length > 0">
-    <app-goal-section
-      [goal]="{id: 'uncategorized', name: 'Uncategorized Shortcuts', description: 'Shortcuts not assigned to any goal', completed: false, createdAt: ''}"
-      [shortcuts]="uncategorizedShortcuts"
-      [isDarkMode]="isDarkMode"
-      [isExpanded]="true"
-      (editShortcut)="onEditShortcut($event)"
-      (deleteShortcut)="onDeleteShortcut($event)">
-    </app-goal-section>
+  <!-- More Shortcuts Section -->
+  <div class="more-shortcuts-section" *ngIf="uncategorizedShortcuts.length > 0">
+    <div class="section-header">
+      <h2>More Shortcuts</h2>
+    </div>
+    
+    <div class="shortcuts-grid">
+      <div class="shortcut-card clickable" 
+           *ngFor="let shortcut of uncategorizedShortcuts" 
+           (click)="onShortcutClick(shortcut)">
+        <div class="shortcut-header">
+          <h3>{{shortcut.name}}</h3>
+          <div class="shortcut-actions">
+            <button type="button" 
+                    class="edit-button" 
+                    (click)="onEditShortcut(shortcut); $event.stopPropagation()"
+                    title="Edit shortcut"
+                    [innerHTML]="iconService.getIcon('pencil')">
+            </button>
+            <button type="button" 
+                    class="delete-button" 
+                    (click)="onDeleteShortcut(shortcut); $event.stopPropagation()"
+                    title="Delete shortcut">
+              ×
+            </button>
+          </div>
+        </div>
+        <div class="shortcut-description" *ngIf="shortcut.description">
+          <p>{{shortcut.description}}</p>
+        </div>
+        <div class="shortcut-info">
+          <div class="shortcut-target">
+            <span class="info-label">Entity:</span>
+            <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
+          </div>
+          <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
+            <span class="info-label">Filters:</span>
+            <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Empty State -->

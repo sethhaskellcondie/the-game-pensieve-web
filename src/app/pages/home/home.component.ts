@@ -151,6 +151,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  onShortcutClick(shortcut: FilterShortcut): void {
+    const entityType = this.getEntityTypeFromPage(shortcut.targetPage);
+    
+    this.filterService.clearFiltersForEntity(entityType);
+    if (shortcut.filters.length > 0) {
+      this.filterService.saveFiltersForEntity(entityType, shortcut.filters);
+    }
+    
+    this.router.navigate([shortcut.targetPage]);
+  }
+
   // Helper methods
   getShortcutsForGoal(goalId: string): FilterShortcut[] {
     if (!Array.isArray(this.shortcuts)) {

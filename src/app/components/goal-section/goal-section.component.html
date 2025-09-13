@@ -25,14 +25,6 @@
         <div *ngIf="goal.description" class="goal-description">
           {{goal.description}}
         </div>
-        <div class="goal-progress" *ngIf="shortcuts.length > 0">
-          <span class="progress-text">
-            {{completedShortcutsCount}} / {{shortcuts.length}} shortcuts
-          </span>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="progressPercentage"></div>
-          </div>
-        </div>
       </div>
     </div>
     

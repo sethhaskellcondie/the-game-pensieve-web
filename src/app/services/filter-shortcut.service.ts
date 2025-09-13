@@ -28,8 +28,10 @@ export class FilterShortcutService {
 
   loadShortcuts(): void {
     this.metadataService.getMetadata<FilterShortcut[]>(this.SHORTCUTS_KEY).subscribe({
-      next: (shortcuts) => {
-        this.shortcutsSubject.next(shortcuts || []);
+      next: (data) => {
+        // Ensure we have an array, metadata service might return an object or null
+        const shortcuts = Array.isArray(data) ? data : [];
+        this.shortcutsSubject.next(shortcuts);
       },
       error: (error) => {
         console.error('Error loading filter shortcuts:', error);
@@ -44,7 +46,7 @@ export class FilterShortcutService {
   }
 
   createShortcut(shortcut: Omit<FilterShortcut, 'id' | 'createdAt'>): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const newShortcut: FilterShortcut = {
       ...shortcut,
       id: this.generateId(),
@@ -56,7 +58,7 @@ export class FilterShortcutService {
   }
 
   updateShortcut(id: string, updates: Partial<Omit<FilterShortcut, 'id' | 'createdAt'>>): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const updatedShortcuts = currentShortcuts.map(shortcut => 
       shortcut.id === id ? { ...shortcut, ...updates } : shortcut
     );
@@ -64,25 +66,25 @@ export class FilterShortcutService {
   }
 
   deleteShortcut(id: string): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const updatedShortcuts = currentShortcuts.filter(shortcut => shortcut.id !== id);
     return this.saveShortcuts(updatedShortcuts);
   }
 
   getShortcuts(): FilterShortcut[] {
-    return this.shortcutsSubject.value;
+    return this.shortcutsSubject.value || [];
   }
 
   getShortcutsByGoal(goalId: string): FilterShortcut[] {
-    return this.shortcutsSubject.value.filter(shortcut => shortcut.goalId === goalId);
+    return (this.shortcutsSubject.value || []).filter(shortcut => shortcut.goalId === goalId);
   }
 
   getUncategorizedShortcuts(): FilterShortcut[] {
-    return this.shortcutsSubject.value.filter(shortcut => !shortcut.goalId);
+    return (this.shortcutsSubject.value || []).filter(shortcut => !shortcut.goalId);
   }
 
   assignShortcutToGoal(shortcutId: string, goalId: string | null): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const updatedShortcuts = currentShortcuts.map(shortcut => 
       shortcut.id === shortcutId ? { ...shortcut, goalId: goalId || undefined } : shortcut
     );
@@ -90,7 +92,7 @@ export class FilterShortcutService {
   }
 
   reassignShortcutsFromGoal(oldGoalId: string, newGoalId: string | null): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const updatedShortcuts = currentShortcuts.map(shortcut => 
       shortcut.goalId === oldGoalId ? { ...shortcut, goalId: newGoalId || undefined } : shortcut
     );
@@ -98,7 +100,7 @@ export class FilterShortcutService {
   }
 
   deleteShortcutsByGoal(goalId: string): Observable<boolean> {
-    const currentShortcuts = this.shortcutsSubject.value;
+    const currentShortcuts = this.shortcutsSubject.value || [];
     const updatedShortcuts = currentShortcuts.filter(shortcut => shortcut.goalId !== goalId);
     return this.saveShortcuts(updatedShortcuts);
   }

@@ -132,15 +132,4 @@ export class GoalSectionComponent implements OnInit, OnDestroy {
     return pageMap[page] || 'videoGameBox';
   }
 
-  get progressPercentage(): number {
-    if (this.shortcuts.length === 0) return 0;
-    // For this implementation, we'll consider shortcuts as "completed" when their goal is completed
-    // or we could add a completed field to shortcuts in the future
-    return this.goal.completed ? 100 : 0;
-  }
-
-  get completedShortcutsCount(): number {
-    // For now, consider all shortcuts completed if goal is completed
-    return this.goal.completed ? this.shortcuts.length : 0;
-  }
 }
