@@ -34,6 +34,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
+  isMassEditMode = false;
   
   showNewBoardGameBoxModal = false;
   isCreating = false;
@@ -76,6 +77,14 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   isDeleting = false;
   showFilterModal = false;
 
+  // Mass Edit Mode properties
+  selectedBoardGameBoxes: Set<number> = new Set();
+  massEditQueue: BoardGameBox[] = [];
+  isMassEditing = false;
+  lastClickedBoardGameBoxIndex: number = -1;
+  isUpdateMode = false;
+  boardGameBoxToUpdate: BoardGameBox | null = null;
+
   constructor(
     private apiService: ApiService, 
     private router: Router, 
@@ -95,6 +104,15 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(massInputMode => {
         this.isMassInputMode = massInputMode;
+      });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
       });
     
     this.loadBoardGameBoxes();
@@ -235,6 +253,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   openNewBoardGameBoxModal(): void {
+    this.isUpdateMode = false;
+    this.boardGameBoxToUpdate = null;
     this.showNewBoardGameBoxModal = true;
     this.boardGameSelectionMode = 'self-contained';
     
@@ -278,6 +298,72 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  openUpdateBoardGameBoxModal(boardGameBox: BoardGameBox): void {
+    this.isUpdateMode = true;
+    this.boardGameBoxToUpdate = boardGameBox;
+    this.showNewBoardGameBoxModal = true;
+    
+    // Determine board game selection mode based on existing data
+    if (boardGameBox.boardGame) {
+      this.boardGameSelectionMode = 'existing';
+    } else {
+      this.boardGameSelectionMode = 'self-contained';
+    }
+    
+    // Load board game boxes for the base set dropdown
+    this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
+    
+    // Load existing board games for the dropdown
+    this.apiService.getBoardGames().subscribe({
+      next: (boardGames) => {
+        this.boardGamesForDropdown = boardGames;
+      },
+      error: (error) => {
+        // Error loading board games
+      }
+    });
+    
+    // Populate form with existing data
+    this.newBoardGameBox = {
+      title: boardGameBox.title,
+      isExpansion: boardGameBox.isExpansion,
+      isStandAlone: boardGameBox.isStandAlone,
+      baseSetId: boardGameBox.baseSetId ? boardGameBox.baseSetId.toString() : null,
+      boardGameId: boardGameBox.boardGame ? boardGameBox.boardGame.id.toString() : null,
+      newBoardGame: {
+        title: '',
+        customFieldValues: []
+      },
+      selfContainedBoardGame: {
+        title: '',
+        customFieldValues: []
+      },
+      customFieldValues: this.mergeWithDefaultCustomFieldValues(boardGameBox.customFieldValues)
+    };
+    
+    // Focus the title field after the view updates
+    setTimeout(() => {
+      if (this.titleField && this.titleField.focus) {
+        this.titleField.focus();
+      }
+    }, 0);
+  }
+
+  private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
+    const defaultValues = this.createDefaultCustomFieldValues();
+    
+    // Create a map of existing values for quick lookup
+    const existingValuesMap = new Map();
+    existingCustomFieldValues.forEach(existingValue => {
+      existingValuesMap.set(existingValue.customFieldId, existingValue);
+    });
+    
+    // Merge defaults with existing values, preferring existing values when they exist
+    return defaultValues.map(defaultValue => {
+      const existingValue = existingValuesMap.get(defaultValue.customFieldId);
+      return existingValue || defaultValue;
+    });
+  }
 
   private loadSelfContainedCustomFields(): Promise<any[]> {
     return new Promise((resolve, reject) => {
@@ -316,6 +402,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
 
   closeNewBoardGameBoxModal(): void {
     this.showNewBoardGameBoxModal = false;
+    this.isUpdateMode = false;
+    this.boardGameBoxToUpdate = null;
     this.boardGameSelectionMode = 'self-contained';
     this.newBoardGameBox = {
       title: '',
@@ -367,17 +455,41 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         customFieldValues: this.newBoardGameBox.customFieldValues
       };
       
-      this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
-        next: (response) => {
-          this.isCreating = false;
-          this.closeNewBoardGameBoxModal();
-          this.loadBoardGameBoxes(); // Refresh the board game boxes list
-        },
-        error: (error) => {
-          this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
-          this.isCreating = false;
-        }
-      });
+      if (this.isUpdateMode && this.boardGameBoxToUpdate) {
+        // Update existing board game box
+        this.apiService.updateBoardGameBox(this.boardGameBoxToUpdate.id, boardGameBoxData).subscribe({
+          next: (response) => {
+            this.isCreating = false;
+            
+            if (this.isMassEditing) {
+              // If in mass edit mode, move to the next board game box instead of closing
+              this.editNextBoardGameBoxInQueue();
+            } else {
+              // Normal update flow
+              this.closeNewBoardGameBoxModal();
+              this.loadBoardGameBoxes(); // Refresh the board game boxes list
+            }
+          },
+          error: (error) => {
+            this.errorMessage = `Failed to update board game box: ${error.message || 'Unknown error'}`;
+            this.isCreating = false;
+            this.closeNewBoardGameBoxModal(); // Close the modal on error
+          }
+        });
+      } else {
+        // Create new board game box
+        this.apiService.createBoardGameBox(boardGameBoxData).subscribe({
+          next: (response) => {
+            this.isCreating = false;
+            this.closeNewBoardGameBoxModal();
+            this.loadBoardGameBoxes(); // Refresh the board game boxes list
+          },
+          error: (error) => {
+            this.errorMessage = `Failed to create board game box: ${error.message || 'Unknown error'}`;
+            this.isCreating = false;
+          }
+        });
+      }
     } catch (error) {
       this.errorMessage = 'Failed to load custom fields for board game.';
       this.isCreating = false;
@@ -558,5 +670,105 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  // Mass Edit Mode Methods
+  toggleBoardGameBoxSelection(boardGameBoxId: number, event?: MouseEvent): void {
+    const currentBoardGameBoxIndex = this.boardGameBoxes.findIndex(box => box.id === boardGameBoxId);
+    
+    if (event?.shiftKey && this.lastClickedBoardGameBoxIndex >= 0 && currentBoardGameBoxIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentBoardGameBoxIndex, boardGameBoxId);
+    } else {
+      // Normal single selection
+      if (this.selectedBoardGameBoxes.has(boardGameBoxId)) {
+        this.selectedBoardGameBoxes.delete(boardGameBoxId);
+      } else {
+        this.selectedBoardGameBoxes.add(boardGameBoxId);
+      }
+    }
+    
+    this.lastClickedBoardGameBoxIndex = currentBoardGameBoxIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedBoardGameBoxId: number): void {
+    const startIndex = Math.min(this.lastClickedBoardGameBoxIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedBoardGameBoxIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedBoardGameBoxes.has(clickedBoardGameBoxId);
+    
+    // Apply the same state to all board game boxes in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const boardGameBox = this.boardGameBoxes[i];
+      if (targetState) {
+        this.selectedBoardGameBoxes.add(boardGameBox.id);
+      } else {
+        this.selectedBoardGameBoxes.delete(boardGameBox.id);
+      }
+    }
+  }
+
+  isBoardGameBoxSelected(boardGameBoxId: number): boolean {
+    return this.selectedBoardGameBoxes.has(boardGameBoxId);
+  }
+
+  hasSelectedBoardGameBoxes(): boolean {
+    return this.selectedBoardGameBoxes.size > 0;
+  }
+
+  isAllBoardGameBoxesSelected(): boolean {
+    return this.boardGameBoxes.length > 0 && this.selectedBoardGameBoxes.size === this.boardGameBoxes.length;
+  }
+
+  isSomeBoardGameBoxesSelected(): boolean {
+    return this.selectedBoardGameBoxes.size > 0 && this.selectedBoardGameBoxes.size < this.boardGameBoxes.length;
+  }
+
+  toggleAllBoardGameBoxes(): void {
+    if (this.isAllBoardGameBoxesSelected()) {
+      // Unselect all
+      this.selectedBoardGameBoxes.clear();
+    } else {
+      // Select all
+      this.boardGameBoxes.forEach(box => this.selectedBoardGameBoxes.add(box.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedBoardGameBoxes.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedBoardGameBoxIndex = -1;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedBoardGameBoxes.size === 0) return;
+    
+    // Build the queue of board game boxes to edit
+    this.massEditQueue = this.boardGameBoxes.filter(box => this.selectedBoardGameBoxes.has(box.id));
+    this.isMassEditing = true;
+    
+    // Start editing the first board game box
+    this.editNextBoardGameBoxInQueue();
+  }
+
+  private editNextBoardGameBoxInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All board game boxes have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const boardGameBoxToEdit = this.massEditQueue.shift()!;
+    this.openUpdateBoardGameBoxModal(boardGameBoxToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeNewBoardGameBoxModal(); // Close the modal
+    this.loadBoardGameBoxes(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
   }
 }
