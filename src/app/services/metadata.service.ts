@@ -20,7 +20,14 @@ export class MetadataService {
             return null;
           }
         }),
-        catchError(() => of(null))
+        catchError(() => {
+          // 404 means metadata doesn't exist, create it with empty object
+          return this.apiService.createMetadata({ key, value: '{}' })
+            .pipe(
+              map(() => ({} as T)),
+              catchError(() => of(null))
+            );
+        })
       );
   }
 
