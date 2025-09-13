@@ -57,6 +57,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   massEditQueue: System[] = [];
   isMassEditing = false;
   lastClickedSystemIndex: number = -1;
+  massEditOriginalTotal = 0;
 
   constructor(
     private apiService: ApiService, 
@@ -517,6 +518,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.massEditQueue = [];
     this.isMassEditing = false;
     this.lastClickedSystemIndex = -1;
+    this.massEditOriginalTotal = 0;
   }
 
   startMassEdit(): void {
@@ -524,6 +526,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
     
     // Build the queue of systems to edit
     this.massEditQueue = this.systems.filter(system => this.selectedSystems.has(system.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
     this.isMassEditing = true;
     
     // Start editing the first system
@@ -547,6 +550,17 @@ export class SystemsComponent implements OnInit, OnDestroy {
     this.closeNewSystemModal(); // Close the modal
     this.loadSystems(); // Refresh the list
     this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 
 }
