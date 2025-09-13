@@ -36,7 +36,10 @@ describe('GoalModalComponent', () => {
     mockGoalService = TestBed.inject(GoalService) as jasmine.SpyObj<GoalService>;
     mockSettingsService = TestBed.inject(SettingsService) as jasmine.SpyObj<SettingsService>;
 
+    // Setup default return values
     mockSettingsService.getDarkMode$.and.returnValue(of(false));
+    mockGoalService.createGoal.and.returnValue(of(true));
+    mockGoalService.updateGoal.and.returnValue(of(true));
   });
 
   it('should create', () => {
@@ -209,9 +212,9 @@ describe('GoalModalComponent', () => {
       fixture.detectChanges();
     });
 
-    it('should display "New Goal" title when creating', () => {
+    it('should display "Create New Goal" title when creating', () => {
       const titleElement = fixture.nativeElement.querySelector('h2');
-      expect(titleElement.textContent).toBe('New Goal');
+      expect(titleElement.textContent).toBe('Create New Goal');
     });
 
     it('should display "Edit Goal" title when editing', () => {
@@ -223,12 +226,18 @@ describe('GoalModalComponent', () => {
     });
 
     it('should have form fields bound to formData', () => {
-      const nameInput = fixture.nativeElement.querySelector('input[name="name"]');
-      const descriptionTextarea = fixture.nativeElement.querySelector('textarea[name="description"]');
-      const completedCheckbox = fixture.nativeElement.querySelector('input[name="completed"]');
+      const nameInput = fixture.nativeElement.querySelector('input[name="goalName"]');
+      const descriptionTextarea = fixture.nativeElement.querySelector('textarea[name="goalDescription"]');
       
       expect(nameInput).toBeTruthy();
       expect(descriptionTextarea).toBeTruthy();
+    });
+
+    it('should show completed checkbox when editing existing goal', () => {
+      component.goal = mockGoal;
+      fixture.detectChanges();
+      
+      const completedCheckbox = fixture.nativeElement.querySelector('input[name="goalCompleted"]');
       expect(completedCheckbox).toBeTruthy();
     });
 

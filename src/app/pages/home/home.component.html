@@ -4,6 +4,13 @@
   <div class="page-header">
     <h1>Goals & Shortcuts</h1>
     <div class="header-actions">
+      <button type="button" 
+              class="toggle-button" 
+              [class.active]="showCounts"
+              (click)="onToggleDisplayCounts()"
+              [disabled]="loadingCounts">
+        {{showCounts ? 'Show Details' : 'Display Counts'}}
+      </button>
       <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
         + Shortcut
       </button>
@@ -21,6 +28,9 @@
       [shortcuts]="getShortcutsForGoal(goal.id)"
       [isDarkMode]="isDarkMode"
       [isExpanded]="isGoalExpanded(goal.id)"
+      [showCounts]="showCounts"
+      [shortcutCounts]="shortcutCounts"
+      [loadingCounts]="loadingCounts"
       (editGoal)="onEditGoal($event)"
       (deleteGoal)="onDeleteGoal($event)"
       (addShortcut)="onAddShortcutToGoal($event)"
@@ -38,11 +48,12 @@
     
     <div class="shortcuts-grid">
       <div class="shortcut-card clickable" 
+           [class.count-view]="showCounts"
            *ngFor="let shortcut of uncategorizedShortcuts" 
            (click)="onShortcutClick(shortcut)">
         <div class="shortcut-header">
           <h3>{{shortcut.name}}</h3>
-          <div class="shortcut-actions">
+          <div class="shortcut-actions" *ngIf="!showCounts">
             <button type="button" 
                     class="edit-button" 
                     (click)="onEditShortcut(shortcut); $event.stopPropagation()"
@@ -57,10 +68,12 @@
             </button>
           </div>
         </div>
-        <div class="shortcut-description" *ngIf="shortcut.description">
+        <div class="shortcut-description" *ngIf="shortcut.description && !showCounts">
           <p>{{shortcut.description}}</p>
         </div>
-        <div class="shortcut-info">
+        
+        <!-- Details View -->
+        <div class="shortcut-info" *ngIf="!showCounts">
           <div class="shortcut-target">
             <span class="info-label">Entity:</span>
             <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
@@ -68,6 +81,21 @@
           <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
             <span class="info-label">Filters:</span>
             <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
+          </div>
+        </div>
+        
+        <!-- Count View -->
+        <div class="shortcut-count-info" *ngIf="showCounts">
+          <div class="count-display">
+            <div class="count-number" *ngIf="!loadingCounts">
+              {{getShortcutCount(shortcut.id)}}
+            </div>
+            <div class="count-loading" *ngIf="loadingCounts">
+              <span class="loading-spinner">⟳</span>
+            </div>
+            <div class="count-label">
+              {{getPageDisplayName(shortcut.targetPage)}}
+            </div>
           </div>
         </div>
       </div>

@@ -8,7 +8,7 @@ describe('MetadataService', () => {
   let apiService: jasmine.SpyObj<ApiService>;
 
   beforeEach(() => {
-    const apiServiceSpy = jasmine.createSpyObj('ApiService', ['getMetadata', 'createMetadata']);
+    const apiServiceSpy = jasmine.createSpyObj('ApiService', ['getMetadata', 'createMetadata', 'updateMetadata']);
 
     TestBed.configureTestingModule({
       providers: [

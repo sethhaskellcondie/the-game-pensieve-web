@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { FilterShortcutModalComponent } from './filter-shortcut-modal.component';
 import { FilterShortcutService, FilterShortcut } from '../../services/filter-shortcut.service';
 import { FilterService, FilterRequestDto, FilterSpecification } from '../../services/filter.service';
+import { GoalService, Goal } from '../../services/goal.service';
 import { SettingsService } from '../../services/settings.service';
 import { SelectableTextInputComponent } from '../selectable-text-input/selectable-text-input.component';
 import { FilterableDropdownComponent } from '../filterable-dropdown/filterable-dropdown.component';
@@ -16,6 +17,7 @@ describe('FilterShortcutModalComponent', () => {
   let fixture: ComponentFixture<FilterShortcutModalComponent>;
   let mockFilterShortcutService: jasmine.SpyObj<FilterShortcutService>;
   let mockFilterService: jasmine.SpyObj<FilterService>;
+  let mockGoalService: jasmine.SpyObj<GoalService>;
   let mockSettingsService: jasmine.SpyObj<SettingsService>;
 
   const mockFilterSpecification: FilterSpecification = {
@@ -50,6 +52,22 @@ describe('FilterShortcutModalComponent', () => {
     createdAt: '2023-01-01T00:00:00.000Z'
   };
 
+  const mockGoals: Goal[] = [
+    {
+      id: 'goal1',
+      name: 'Test Goal 1',
+      description: 'First test goal',
+      completed: false,
+      createdAt: '2023-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'goal2',
+      name: 'Test Goal 2',
+      completed: true,
+      createdAt: '2023-01-02T00:00:00.000Z'
+    }
+  ];
+
   beforeEach(async () => {
     const filterShortcutServiceSpy = jasmine.createSpyObj('FilterShortcutService', [
       'createShortcut',
@@ -58,6 +76,9 @@ describe('FilterShortcutModalComponent', () => {
     const filterServiceSpy = jasmine.createSpyObj('FilterService', [
       'getFiltersForEntity'
     ]);
+    const goalServiceSpy = jasmine.createSpyObj('GoalService', ['toggleGoalCompletion'], {
+      goals$: of(mockGoals)
+    });
     const settingsServiceSpy = jasmine.createSpyObj('SettingsService', ['getDarkMode$']);
 
     await TestBed.configureTestingModule({
@@ -72,6 +93,7 @@ describe('FilterShortcutModalComponent', () => {
       providers: [
         { provide: FilterShortcutService, useValue: filterShortcutServiceSpy },
         { provide: FilterService, useValue: filterServiceSpy },
+        { provide: GoalService, useValue: goalServiceSpy },
         { provide: SettingsService, useValue: settingsServiceSpy }
       ]
     }).compileComponents();
@@ -80,6 +102,7 @@ describe('FilterShortcutModalComponent', () => {
     component = fixture.componentInstance;
     mockFilterShortcutService = TestBed.inject(FilterShortcutService) as jasmine.SpyObj<FilterShortcutService>;
     mockFilterService = TestBed.inject(FilterService) as jasmine.SpyObj<FilterService>;
+    mockGoalService = TestBed.inject(GoalService) as jasmine.SpyObj<GoalService>;
     mockSettingsService = TestBed.inject(SettingsService) as jasmine.SpyObj<SettingsService>;
 
     // Setup default mocks
@@ -666,7 +689,8 @@ describe('FilterShortcutModalComponent', () => {
         name: 'New Test Shortcut',
         description: 'New test description',
         targetPage: '/video-games',
-        filters: mockFilterRequests
+        filters: mockFilterRequests,
+        goalId: undefined
       });
 
       // Verify modal closes on success
@@ -693,7 +717,8 @@ describe('FilterShortcutModalComponent', () => {
           name: 'Updated Shortcut',
           description: 'Updated description',
           targetPage: '/video-game-boxes',
-          filters: mockFilterRequests
+          filters: mockFilterRequests,
+          goalId: undefined
         }
       );
 

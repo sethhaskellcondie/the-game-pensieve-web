@@ -7,6 +7,7 @@ import { FilterShortcutService, FilterShortcut } from '../../services/filter-sho
 import { FilterService } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 import { IconService } from '../../services/icon.service';
+import { ApiService } from '../../services/api.service';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
@@ -17,6 +18,7 @@ describe('HomeComponent', () => {
   let mockSettingsService: jasmine.SpyObj<SettingsService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockIconService: jasmine.SpyObj<IconService>;
+  let mockApiService: jasmine.SpyObj<ApiService>;
 
   const mockGoals: Goal[] = [
     {
@@ -67,6 +69,9 @@ describe('HomeComponent', () => {
     const settingsServiceSpy = jasmine.createSpyObj('SettingsService', ['getDarkMode$']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const iconServiceSpy = jasmine.createSpyObj('IconService', ['getIcon']);
+    const apiServiceSpy = jasmine.createSpyObj('ApiService', [
+      'getVideoGames', 'getVideoGameBoxes', 'getBoardGames', 'getBoardGameBoxes', 'getSystems', 'getToys'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
@@ -76,7 +81,8 @@ describe('HomeComponent', () => {
         { provide: FilterService, useValue: filterServiceSpy },
         { provide: SettingsService, useValue: settingsServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: IconService, useValue: iconServiceSpy }
+        { provide: IconService, useValue: iconServiceSpy },
+        { provide: ApiService, useValue: apiServiceSpy }
       ]
     }).compileComponents();
 
@@ -89,6 +95,7 @@ describe('HomeComponent', () => {
     mockSettingsService = TestBed.inject(SettingsService) as jasmine.SpyObj<SettingsService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockIconService = TestBed.inject(IconService) as jasmine.SpyObj<IconService>;
+    mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
     // Setup default return values
     mockSettingsService.getDarkMode$.and.returnValue(of(false));
@@ -415,6 +422,259 @@ describe('HomeComponent', () => {
       
       const container = fixture.nativeElement.querySelector('.home-container');
       expect(container).toHaveClass('dark-mode');
+    });
+  });
+
+  describe('Display Counts functionality', () => {
+    beforeEach(() => {
+      component.shortcuts = mockShortcuts;
+      component.uncategorizedShortcuts = [mockShortcuts[1]];
+      fixture.detectChanges();
+    });
+
+    describe('onToggleDisplayCounts', () => {
+      it('should toggle showCounts state', () => {
+        expect(component.showCounts).toBe(false);
+        
+        component.onToggleDisplayCounts();
+        expect(component.showCounts).toBe(true);
+        
+        component.onToggleDisplayCounts();
+        expect(component.showCounts).toBe(false);
+      });
+
+      it('should trigger count loading when toggling to counts view for first time', () => {
+        spyOn(component, 'loadShortcutCounts' as any);
+        
+        component.onToggleDisplayCounts();
+        
+        expect(component.showCounts).toBe(true);
+        expect((component as any).loadShortcutCounts).toHaveBeenCalled();
+      });
+
+      it('should not trigger count loading when counts already exist', () => {
+        component.shortcutCounts.set('shortcut1', 5);
+        spyOn(component, 'loadShortcutCounts' as any);
+        
+        component.onToggleDisplayCounts();
+        
+        expect((component as any).loadShortcutCounts).not.toHaveBeenCalled();
+      });
+
+      it('should not trigger count loading when toggling back to details view', () => {
+        component.showCounts = true;
+        spyOn(component, 'loadShortcutCounts' as any);
+        
+        component.onToggleDisplayCounts();
+        
+        expect(component.showCounts).toBe(false);
+        expect((component as any).loadShortcutCounts).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('count loading and API integration', () => {
+      it('should set loading state during count fetching', () => {
+        mockApiService.getVideoGames.and.returnValue(of([{ id: 1 }, { id: 2 }] as any));
+        
+        (component as any).loadShortcutCounts();
+        
+        expect(component.loadingCounts).toBe(true);
+      });
+
+      it('should clear loading state after all counts are fetched', async () => {
+        mockApiService.getVideoGames.and.returnValue(of([{ id: 1 }, { id: 2 }] as any));
+        mockApiService.getBoardGames.and.returnValue(of([{ id: 1 }] as any));
+        
+        (component as any).loadShortcutCounts();
+        
+        // Wait for async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
+        expect(component.loadingCounts).toBe(false);
+      });
+
+      it('should handle API errors gracefully', async () => {
+        mockApiService.getVideoGames.and.returnValue(throwError(() => new Error('API Error')));
+        mockApiService.getBoardGames.and.returnValue(of([{ id: 1 }] as any));
+        
+        (component as any).loadShortcutCounts();
+        
+        // Wait for async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
+        expect(component.shortcutCounts.get('shortcut1')).toBe(0);
+        expect(component.shortcutCounts.get('shortcut2')).toBe(1);
+        expect(component.loadingCounts).toBe(false);
+      });
+
+      it('should call correct API methods based on target page', async () => {
+        const shortcutVideoGames = { ...mockShortcuts[0], targetPage: '/video-games' };
+        const shortcutBoardGames = { ...mockShortcuts[1], targetPage: '/board-games' };
+        const shortcutSystems = { ...mockShortcuts[0], id: 'shortcut3', targetPage: '/systems' };
+        
+        component.shortcuts = [shortcutVideoGames, shortcutBoardGames, shortcutSystems];
+        
+        mockApiService.getVideoGames.and.returnValue(of([{ id: 1 }, { id: 2 }] as any));
+        mockApiService.getBoardGames.and.returnValue(of([{ id: 1 }] as any));
+        mockApiService.getSystems.and.returnValue(of([{ id: 1 }, { id: 2 }, { id: 3 }] as any));
+        
+        (component as any).loadShortcutCounts();
+        
+        // Wait for async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
+        expect(mockApiService.getVideoGames).toHaveBeenCalledWith(shortcutVideoGames.filters);
+        expect(mockApiService.getBoardGames).toHaveBeenCalledWith(shortcutBoardGames.filters);
+        expect(mockApiService.getSystems).toHaveBeenCalledWith(shortcutSystems.filters);
+        
+        expect(component.shortcutCounts.get(shortcutVideoGames.id)).toBe(2);
+        expect(component.shortcutCounts.get(shortcutBoardGames.id)).toBe(1);
+        expect(component.shortcutCounts.get(shortcutSystems.id)).toBe(3);
+      });
+
+      it('should handle all supported target pages', async () => {
+        const shortcuts = [
+          { id: 'vg', targetPage: '/video-games', filters: [] },
+          { id: 'vgb', targetPage: '/video-game-boxes', filters: [] },
+          { id: 'bg', targetPage: '/board-games', filters: [] },
+          { id: 'bgb', targetPage: '/board-game-boxes', filters: [] },
+          { id: 's', targetPage: '/systems', filters: [] },
+          { id: 't', targetPage: '/toys', filters: [] },
+          { id: 'unknown', targetPage: '/unknown', filters: [] }
+        ];
+        
+        component.shortcuts = shortcuts as any;
+        
+        mockApiService.getVideoGames.and.returnValue(of([1, 2] as any));
+        mockApiService.getVideoGameBoxes.and.returnValue(of([1] as any));
+        mockApiService.getBoardGames.and.returnValue(of([1, 2, 3] as any));
+        mockApiService.getBoardGameBoxes.and.returnValue(of([1, 2, 3, 4] as any));
+        mockApiService.getSystems.and.returnValue(of([1, 2, 3, 4, 5] as any));
+        mockApiService.getToys.and.returnValue(of([1, 2, 3, 4, 5, 6] as any));
+        
+        (component as any).loadShortcutCounts();
+        
+        // Wait for async operations to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
+        expect(component.shortcutCounts.get('vg')).toBe(2);
+        expect(component.shortcutCounts.get('vgb')).toBe(1);
+        expect(component.shortcutCounts.get('bg')).toBe(3);
+        expect(component.shortcutCounts.get('bgb')).toBe(4);
+        expect(component.shortcutCounts.get('s')).toBe(5);
+        expect(component.shortcutCounts.get('t')).toBe(6);
+        expect(component.shortcutCounts.get('unknown')).toBe(0);
+      });
+    });
+
+    describe('getShortcutCount', () => {
+      it('should return count from shortcutCounts map', () => {
+        component.shortcutCounts.set('shortcut1', 5);
+        component.shortcutCounts.set('shortcut2', 0);
+        
+        expect(component.getShortcutCount('shortcut1')).toBe(5);
+        expect(component.getShortcutCount('shortcut2')).toBe(0);
+      });
+
+      it('should return 0 for shortcuts not in map', () => {
+        expect(component.getShortcutCount('nonexistent')).toBe(0);
+      });
+    });
+
+    describe('template integration', () => {
+      it('should show Display Counts button when showCounts is false', () => {
+        component.showCounts = false;
+        fixture.detectChanges();
+        
+        const toggleButton = fixture.nativeElement.querySelector('.toggle-button');
+        expect(toggleButton).toBeTruthy();
+        expect(toggleButton.textContent.trim()).toBe('Display Counts');
+        expect(toggleButton).not.toHaveClass('active');
+      });
+
+      it('should show Show Details button when showCounts is true', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const toggleButton = fixture.nativeElement.querySelector('.toggle-button');
+        expect(toggleButton.textContent.trim()).toBe('Show Details');
+        expect(toggleButton).toHaveClass('active');
+      });
+
+      it('should disable toggle button when loading counts', () => {
+        component.loadingCounts = true;
+        fixture.detectChanges();
+        
+        const toggleButton = fixture.nativeElement.querySelector('.toggle-button');
+        expect(toggleButton.disabled).toBe(true);
+      });
+
+      it('should call onToggleDisplayCounts when toggle button is clicked', () => {
+        spyOn(component, 'onToggleDisplayCounts');
+        
+        const toggleButton = fixture.nativeElement.querySelector('.toggle-button');
+        toggleButton.click();
+        
+        expect(component.onToggleDisplayCounts).toHaveBeenCalled();
+      });
+
+      it('should show count view for shortcuts when showCounts is true', () => {
+        component.showCounts = true;
+        component.shortcutCounts.set('shortcut2', 5);
+        fixture.detectChanges();
+        
+        const shortcutCards = fixture.nativeElement.querySelectorAll('.shortcut-card');
+        const countViewCard = Array.from(shortcutCards).find((card: any) => 
+          card.classList.contains('count-view')
+        );
+        
+        expect(countViewCard).toBeTruthy();
+      });
+
+      it('should show loading spinner when loadingCounts is true', () => {
+        component.showCounts = true;
+        component.loadingCounts = true;
+        fixture.detectChanges();
+        
+        const loadingSpinner = fixture.nativeElement.querySelector('.loading-spinner');
+        expect(loadingSpinner).toBeTruthy();
+      });
+
+      it('should display count numbers when counts are loaded', () => {
+        // Set up all component state first
+        component.showCounts = true;
+        component.loadingCounts = false;
+        component.uncategorizedShortcuts = [mockShortcuts[1]]; // shortcut2
+        component.shortcutCounts.clear(); // Clear any existing entries
+        component.shortcutCounts.set('shortcut2', 42);
+        
+        // Trigger change detection after all state is set
+        fixture.detectChanges();
+        
+        // Find the specific count number in the context of the uncategorized shortcuts
+        const moreShortcutsSection = fixture.nativeElement.querySelector('.more-shortcuts-section');
+        expect(moreShortcutsSection).toBeTruthy();
+        
+        const countNumber = moreShortcutsSection.querySelector('.count-number');
+        expect(countNumber).toBeTruthy();
+        expect(countNumber.textContent.trim()).toBe('42');
+      });
+
+      it('should hide shortcut actions in count view', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const shortcutActions = fixture.nativeElement.querySelector('.shortcut-actions');
+        expect(shortcutActions).toBeFalsy();
+      });
+
+      it('should hide shortcut description in count view', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const shortcutDescription = fixture.nativeElement.querySelector('.shortcut-description');
+        expect(shortcutDescription).toBeFalsy();
+      });
     });
   });
 });

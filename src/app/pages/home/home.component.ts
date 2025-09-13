@@ -8,6 +8,7 @@ import { GoalService, Goal } from '../../services/goal.service';
 import { FilterService } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
 import { IconService } from '../../services/icon.service';
+import { ApiService } from '../../services/api.service';
 import { FilterShortcutModalComponent } from '../../components/filter-shortcut-modal/filter-shortcut-modal.component';
 import { GoalModalComponent } from '../../components/goal-modal/goal-modal.component';
 import { GoalSectionComponent } from '../../components/goal-section/goal-section.component';
@@ -28,6 +29,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   expandedGoals: Set<string> = new Set();
   isDarkMode = false;
   
+  // Display mode for shortcuts
+  showCounts = false;
+  shortcutCounts: Map<string, number> = new Map();
+  loadingCounts = false;
+  
   // Modal states
   showCreateShortcutModal = false;
   showEditShortcutModal = false;
@@ -45,7 +51,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private filterService: FilterService,
     private router: Router,
     private settingsService: SettingsService,
-    public iconService: IconService
+    public iconService: IconService,
+    private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -151,7 +158,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const entityType = this.getEntityTypeFromPage(shortcut.targetPage);
     
     this.filterService.clearFiltersForEntity(entityType);
-    if (shortcut.filters.length > 0) {
+    if (shortcut.filters && shortcut.filters.length > 0) {
       this.filterService.saveFiltersForEntity(entityType, shortcut.filters);
     }
     
@@ -200,5 +207,104 @@ export class HomeComponent implements OnInit, OnDestroy {
       '/toys': 'toy'
     };
     return pageMap[page] || 'videoGameBox';
+  }
+
+  // Display mode methods
+  onToggleDisplayCounts(): void {
+    this.showCounts = !this.showCounts;
+    if (this.showCounts && this.shortcutCounts.size === 0) {
+      this.loadShortcutCounts();
+    }
+  }
+
+  private loadShortcutCounts(): void {
+    this.loadingCounts = true;
+    const allShortcuts = [...this.shortcuts];
+    
+    if (allShortcuts.length === 0) {
+      this.loadingCounts = false;
+      return;
+    }
+
+    let completedRequests = 0;
+    const totalRequests = allShortcuts.length;
+
+    allShortcuts.forEach(shortcut => {
+      this.getShortcutCountFromAPI(shortcut).then(count => {
+        this.shortcutCounts.set(shortcut.id, count);
+        completedRequests++;
+        
+        if (completedRequests === totalRequests) {
+          this.loadingCounts = false;
+        }
+      }).catch(() => {
+        this.shortcutCounts.set(shortcut.id, 0);
+        completedRequests++;
+        
+        if (completedRequests === totalRequests) {
+          this.loadingCounts = false;
+        }
+      });
+    });
+  }
+
+  private async getShortcutCountFromAPI(shortcut: FilterShortcut): Promise<number> {
+    return new Promise((resolve) => {
+      const targetPage = shortcut.targetPage;
+      const filters = shortcut.filters || [];
+
+      switch (targetPage) {
+        case '/video-games':
+          this.apiService.getVideoGames(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        case '/video-game-boxes':
+          this.apiService.getVideoGameBoxes(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        case '/board-games':
+          this.apiService.getBoardGames(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        case '/board-game-boxes':
+          this.apiService.getBoardGameBoxes(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        case '/systems':
+          this.apiService.getSystems(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        case '/toys':
+          this.apiService.getToys(filters).subscribe({
+            next: (results) => resolve(results?.length || 0),
+            error: () => resolve(0)
+          });
+          break;
+        default:
+          resolve(0);
+          break;
+      }
+    });
+  }
+
+  getShortcutCount(shortcutId: string): number {
+    return this.shortcutCounts.get(shortcutId) || 0;
+  }
+
+  onShortcutCountClick(shortcut: FilterShortcut): void {
+    if (this.showCounts) {
+      // When in count mode, navigate to search results
+      this.onShortcutClick(shortcut);
+    }
   }
 }

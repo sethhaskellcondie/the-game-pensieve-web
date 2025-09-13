@@ -37,6 +37,9 @@ describe('FilterShortcutService', () => {
 
   beforeEach(() => {
     const spy = jasmine.createSpyObj('MetadataService', ['getMetadata', 'setMetadata']);
+    // Configure default return value before service is created
+    spy.getMetadata.and.returnValue(of([]));
+    spy.setMetadata.and.returnValue(of(true));
 
     TestBed.configureTestingModule({
       providers: [
@@ -56,6 +59,7 @@ describe('FilterShortcutService', () => {
   describe('loadShortcuts', () => {
     it('should load shortcuts from metadata service', () => {
       mockMetadataService.getMetadata.and.returnValue(of(mockShortcuts));
+      service.loadShortcuts();
       
       service.shortcuts$.subscribe(shortcuts => {
         expect(shortcuts).toEqual(mockShortcuts);
@@ -64,6 +68,7 @@ describe('FilterShortcutService', () => {
 
     it('should handle null data from metadata service', () => {
       mockMetadataService.getMetadata.and.returnValue(of(null));
+      service.loadShortcuts();
       
       service.shortcuts$.subscribe(shortcuts => {
         expect(shortcuts).toEqual([]);
@@ -72,6 +77,7 @@ describe('FilterShortcutService', () => {
 
     it('should handle object data instead of array from metadata service', () => {
       mockMetadataService.getMetadata.and.returnValue(of({} as any));
+      service.loadShortcuts();
       
       service.shortcuts$.subscribe(shortcuts => {
         expect(shortcuts).toEqual([]);
@@ -80,6 +86,7 @@ describe('FilterShortcutService', () => {
 
     it('should handle errors from metadata service', () => {
       mockMetadataService.getMetadata.and.returnValue(throwError(() => new Error('Load failed')));
+      service.loadShortcuts();
       
       service.shortcuts$.subscribe(shortcuts => {
         expect(shortcuts).toEqual([]);
@@ -128,50 +135,43 @@ describe('FilterShortcutService', () => {
   describe('goal-related methods', () => {
     beforeEach(() => {
       mockMetadataService.getMetadata.and.returnValue(of(mockShortcuts));
+      service.loadShortcuts();
     });
 
     describe('getShortcutsByGoal', () => {
       it('should return shortcuts for specified goal', () => {
-        setTimeout(() => {
-          const goalShortcuts = service.getShortcutsByGoal('goal1');
-          expect(goalShortcuts.length).toBe(2);
-          expect(goalShortcuts.every(s => s.goalId === 'goal1')).toBe(true);
-        }, 0);
+        const goalShortcuts = service.getShortcutsByGoal('goal1');
+        expect(goalShortcuts.length).toBe(2);
+        expect(goalShortcuts.every(s => s.goalId === 'goal1')).toBe(true);
       });
 
       it('should return empty array for non-existent goal', () => {
-        setTimeout(() => {
-          const goalShortcuts = service.getShortcutsByGoal('nonexistent');
-          expect(goalShortcuts).toEqual([]);
-        }, 0);
+        const goalShortcuts = service.getShortcutsByGoal('nonexistent');
+        expect(goalShortcuts).toEqual([]);
       });
 
       it('should handle null shortcuts array', () => {
         mockMetadataService.getMetadata.and.returnValue(of(null));
+        service.loadShortcuts();
         
-        setTimeout(() => {
-          const goalShortcuts = service.getShortcutsByGoal('goal1');
-          expect(goalShortcuts).toEqual([]);
-        }, 0);
+        const goalShortcuts = service.getShortcutsByGoal('goal1');
+        expect(goalShortcuts).toEqual([]);
       });
     });
 
     describe('getUncategorizedShortcuts', () => {
       it('should return shortcuts without goalId', () => {
-        setTimeout(() => {
-          const uncategorized = service.getUncategorizedShortcuts();
-          expect(uncategorized.length).toBe(1);
-          expect(uncategorized[0].id).toBe('shortcut2');
-        }, 0);
+        const uncategorized = service.getUncategorizedShortcuts();
+        expect(uncategorized.length).toBe(1);
+        expect(uncategorized[0].id).toBe('shortcut2');
       });
 
       it('should handle null shortcuts array', () => {
         mockMetadataService.getMetadata.and.returnValue(of(null));
+        service.loadShortcuts();
         
-        setTimeout(() => {
-          const uncategorized = service.getUncategorizedShortcuts();
-          expect(uncategorized).toEqual([]);
-        }, 0);
+        const uncategorized = service.getUncategorizedShortcuts();
+        expect(uncategorized).toEqual([]);
       });
     });
 
@@ -256,6 +256,7 @@ describe('FilterShortcutService', () => {
   describe('updateShortcut', () => {
     beforeEach(() => {
       mockMetadataService.getMetadata.and.returnValue(of(mockShortcuts));
+      service.loadShortcuts();
     });
 
     it('should update existing shortcut', () => {
@@ -274,6 +275,7 @@ describe('FilterShortcutService', () => {
   describe('deleteShortcut', () => {
     beforeEach(() => {
       mockMetadataService.getMetadata.and.returnValue(of(mockShortcuts));
+      service.loadShortcuts();
     });
 
     it('should delete shortcut', () => {

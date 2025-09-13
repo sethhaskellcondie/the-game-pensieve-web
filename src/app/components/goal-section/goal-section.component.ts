@@ -23,6 +23,9 @@ export class GoalSectionComponent implements OnInit, OnDestroy {
   @Input() shortcuts: FilterShortcut[] = [];
   @Input() isDarkMode = false;
   @Input() isExpanded = true;
+  @Input() showCounts = false;
+  @Input() shortcutCounts: Map<string, number> = new Map();
+  @Input() loadingCounts = false;
   
   @Output() editGoal = new EventEmitter<Goal>();
   @Output() deleteGoal = new EventEmitter<Goal>();
@@ -65,7 +68,7 @@ export class GoalSectionComponent implements OnInit, OnDestroy {
     const entityType = this.getEntityTypeFromPage(shortcut.targetPage);
     
     this.filterService.clearFiltersForEntity(entityType);
-    if (shortcut.filters.length > 0) {
+    if (shortcut.filters && shortcut.filters.length > 0) {
       this.filterService.saveFiltersForEntity(entityType, shortcut.filters);
     }
     
@@ -118,6 +121,10 @@ export class GoalSectionComponent implements OnInit, OnDestroy {
       '/toys': 'Toys'
     };
     return pageDisplayMap[page] || page;
+  }
+
+  getShortcutCount(shortcutId: string): number {
+    return this.shortcutCounts.get(shortcutId) || 0;
   }
 
   private getEntityTypeFromPage(page: string): string {

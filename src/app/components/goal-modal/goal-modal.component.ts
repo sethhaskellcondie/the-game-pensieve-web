@@ -78,7 +78,7 @@ export class GoalModalComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (!this.validateForm()) {
+    if (!this.validateForm() || this.isSubmitting) {
       return;
     }
 

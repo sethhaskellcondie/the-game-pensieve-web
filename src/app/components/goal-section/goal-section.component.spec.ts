@@ -46,7 +46,7 @@ describe('GoalSectionComponent', () => {
 
   beforeEach(async () => {
     const goalServiceSpy = jasmine.createSpyObj('GoalService', ['toggleGoalCompletion']);
-    const filterShortcutServiceSpy = jasmine.createSpyObj('FilterShortcutService', []);
+    const filterShortcutServiceSpy = jasmine.createSpyObj('FilterShortcutService', ['shortcuts$']);
     const filterServiceSpy = jasmine.createSpyObj('FilterService', ['clearFiltersForEntity', 'saveFiltersForEntity']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const iconServiceSpy = jasmine.createSpyObj('IconService', ['getIcon']);
@@ -78,6 +78,7 @@ describe('GoalSectionComponent', () => {
     component.isExpanded = true;
 
     mockIconService.getIcon.and.returnValue('<svg>test</svg>');
+    mockGoalService.toggleGoalCompletion.and.returnValue(of(true));
   });
 
   it('should create', () => {
@@ -290,6 +291,145 @@ describe('GoalSectionComponent', () => {
       expect(window.confirm).toHaveBeenCalledWith(
         'Are you sure you want to delete "Test Goal"?'
       );
+    });
+  });
+
+  describe('count display functionality', () => {
+    beforeEach(() => {
+      component.showCounts = false;
+      component.shortcutCounts = new Map();
+      component.loadingCounts = false;
+      fixture.detectChanges();
+    });
+
+    describe('getShortcutCount', () => {
+      it('should return count from shortcutCounts map', () => {
+        component.shortcutCounts.set('shortcut1', 5);
+        component.shortcutCounts.set('shortcut2', 0);
+        
+        expect(component.getShortcutCount('shortcut1')).toBe(5);
+        expect(component.getShortcutCount('shortcut2')).toBe(0);
+      });
+
+      it('should return 0 for shortcuts not in map', () => {
+        expect(component.getShortcutCount('nonexistent')).toBe(0);
+      });
+    });
+
+    describe('template integration with count view', () => {
+      it('should show count view for shortcuts when showCounts is true', () => {
+        component.showCounts = true;
+        component.shortcutCounts.set('shortcut1', 5);
+        fixture.detectChanges();
+        
+        const shortcutCards = fixture.nativeElement.querySelectorAll('.shortcut-card');
+        const countViewCard = Array.from(shortcutCards).find((card: any) => 
+          card.classList.contains('count-view')
+        );
+        
+        expect(countViewCard).toBeTruthy();
+      });
+
+      it('should hide shortcut actions in count view', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const shortcutActions = fixture.nativeElement.querySelector('.shortcut-actions');
+        expect(shortcutActions).toBeFalsy();
+      });
+
+      it('should hide shortcut description in count view', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const shortcutDescription = fixture.nativeElement.querySelector('.shortcut-description');
+        expect(shortcutDescription).toBeFalsy();
+      });
+
+      it('should show loading spinner when loadingCounts is true', () => {
+        component.showCounts = true;
+        component.loadingCounts = true;
+        fixture.detectChanges();
+        
+        const loadingSpinner = fixture.nativeElement.querySelector('.loading-spinner');
+        expect(loadingSpinner).toBeTruthy();
+      });
+
+      it('should display count numbers when counts are loaded', () => {
+        component.showCounts = true;
+        component.loadingCounts = false;
+        component.shortcutCounts.set('shortcut1', 25);
+        fixture.detectChanges();
+        
+        const countNumber = fixture.nativeElement.querySelector('.count-number');
+        expect(countNumber).toBeTruthy();
+        expect(countNumber.textContent.trim()).toBe('25');
+      });
+
+      it('should show count label with page display name', () => {
+        component.showCounts = true;
+        component.loadingCounts = false;
+        component.shortcutCounts.set('shortcut1', 10);
+        fixture.detectChanges();
+        
+        const countLabel = fixture.nativeElement.querySelector('.count-label');
+        expect(countLabel).toBeTruthy();
+        expect(countLabel.textContent.trim().toLowerCase()).toBe('video games'.toLowerCase());
+      });
+
+      it('should show shortcut info in details view', () => {
+        component.showCounts = false;
+        fixture.detectChanges();
+        
+        const shortcutInfo = fixture.nativeElement.querySelector('.shortcut-info');
+        const shortcutCountInfo = fixture.nativeElement.querySelector('.shortcut-count-info');
+        
+        expect(shortcutInfo).toBeTruthy();
+        expect(shortcutCountInfo).toBeFalsy();
+      });
+
+      it('should show shortcut count info in count view', () => {
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        const shortcutInfo = fixture.nativeElement.querySelector('.shortcut-info');
+        const shortcutCountInfo = fixture.nativeElement.querySelector('.shortcut-count-info');
+        
+        expect(shortcutInfo).toBeFalsy();
+        expect(shortcutCountInfo).toBeTruthy();
+      });
+
+      it('should maintain shortcut card clickability in both views', () => {
+        // Test details view
+        component.showCounts = false;
+        fixture.detectChanges();
+        
+        let shortcutCard = fixture.nativeElement.querySelector('.shortcut-card');
+        expect(shortcutCard).toHaveClass('clickable');
+        
+        // Test count view
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        shortcutCard = fixture.nativeElement.querySelector('.shortcut-card');
+        expect(shortcutCard).toHaveClass('clickable');
+      });
+
+      it('should apply count-view class only when showCounts is true', () => {
+        // Details view
+        component.showCounts = false;
+        fixture.detectChanges();
+        
+        let shortcutCard = fixture.nativeElement.querySelector('.shortcut-card');
+        expect(shortcutCard).not.toHaveClass('count-view');
+        
+        // Count view
+        component.showCounts = true;
+        fixture.detectChanges();
+        
+        shortcutCard = fixture.nativeElement.querySelector('.shortcut-card');
+        expect(shortcutCard).toHaveClass('count-view');
+      });
     });
   });
 });

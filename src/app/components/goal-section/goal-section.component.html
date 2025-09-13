@@ -63,11 +63,12 @@
     <!-- Shortcuts Grid -->
     <div *ngIf="shortcuts.length > 0" class="shortcuts-grid">
       <div class="shortcut-card clickable" 
+           [class.count-view]="showCounts"
            *ngFor="let shortcut of shortcuts" 
            (click)="onShortcutClick(shortcut)">
         <div class="shortcut-header">
           <h3>{{shortcut.name}}</h3>
-          <div class="shortcut-actions">
+          <div class="shortcut-actions" *ngIf="!showCounts">
             <button type="button" 
                     class="edit-button" 
                     (click)="onEditShortcut(shortcut, $event)"
@@ -82,10 +83,12 @@
             </button>
           </div>
         </div>
-        <div class="shortcut-description" *ngIf="shortcut.description">
+        <div class="shortcut-description" *ngIf="shortcut.description && !showCounts">
           <p>{{shortcut.description}}</p>
         </div>
-        <div class="shortcut-info">
+        
+        <!-- Details View -->
+        <div class="shortcut-info" *ngIf="!showCounts">
           <div class="shortcut-target">
             <span class="info-label">Entity:</span>
             <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
@@ -93,6 +96,21 @@
           <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
             <span class="info-label">Filters:</span>
             <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
+          </div>
+        </div>
+        
+        <!-- Count View -->
+        <div class="shortcut-count-info" *ngIf="showCounts">
+          <div class="count-display">
+            <div class="count-number" *ngIf="!loadingCounts">
+              {{getShortcutCount(shortcut.id)}}
+            </div>
+            <div class="count-loading" *ngIf="loadingCounts">
+              <span class="loading-spinner">⟳</span>
+            </div>
+            <div class="count-label">
+              {{getPageDisplayName(shortcut.targetPage)}}
+            </div>
           </div>
         </div>
       </div>
