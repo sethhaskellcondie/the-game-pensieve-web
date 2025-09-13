@@ -119,7 +119,7 @@
   <div *ngIf="showNewBoardGameBoxModal" class="modal-overlay" (click)="closeNewBoardGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? 'Update Board Game Box' : 'New Board Game Box'}}</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Board Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Board Game Box') : 'New Board Game Box'}}</h2>
         <button type="button" class="close-button" (click)="closeNewBoardGameBoxModal()">×</button>
       </div>
       
