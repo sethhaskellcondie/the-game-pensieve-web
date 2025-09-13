@@ -165,7 +165,7 @@
   <div *ngIf="showEditVideoGameModal" class="modal-overlay" (click)="closeEditVideoGameModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Update Video Game</h2>
+        <h2>{{isMassEditing ? 'Update Video Game (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Video Game'}}</h2>
         <div class="modal-header-actions">
           <button type="button" class="details-button" (click)="openDetailFromEdit()">
             Details

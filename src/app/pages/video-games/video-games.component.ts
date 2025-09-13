@@ -53,6 +53,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   massEditQueue: VideoGame[] = [];
   isMassEditing = false;
   lastClickedVideoGameIndex: number = -1;
+  massEditOriginalTotal = 0;
 
   constructor(
     private apiService: ApiService, 
@@ -456,6 +457,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.massEditQueue = [];
     this.isMassEditing = false;
     this.lastClickedVideoGameIndex = -1;
+    this.massEditOriginalTotal = 0;
   }
 
   startMassEdit(): void {
@@ -463,6 +465,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     
     // Build the queue of video games to edit
     this.massEditQueue = this.videoGames.filter(game => this.selectedVideoGames.has(game.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
     this.isMassEditing = true;
     
     // Start editing the first video game
@@ -486,6 +489,17 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.closeEditVideoGameModal(); // Close the modal
     this.loadVideoGames(); // Refresh the list
     this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 
   ngOnDestroy(): void {
