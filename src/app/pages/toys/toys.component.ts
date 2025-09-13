@@ -30,6 +30,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
+  isMassEditMode = false;
   
   showNewToyModal = false;
   isCreating = false;
@@ -46,6 +47,13 @@ export class ToysComponent implements OnInit, OnDestroy {
   isDeleting = false;
 
   showFilterModal = false;
+
+  // Mass Edit Mode properties
+  selectedToys: Set<number> = new Set();
+  massEditQueue: Toy[] = [];
+  isMassEditing = false;
+  lastClickedToyIndex: number = -1;
+  massEditOriginalTotal = 0;
 
   constructor(
     private apiService: ApiService, 
@@ -66,6 +74,15 @@ export class ToysComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(massInputMode => {
         this.isMassInputMode = massInputMode;
+      });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
       });
     
     this.loadToys();
@@ -284,8 +301,15 @@ export class ToysComponent implements OnInit, OnDestroy {
       this.apiService.updateToy(this.toyToUpdate.id, toyData).subscribe({
         next: (response) => {
           this.isCreating = false;
-          this.closeNewToyModal();
-          this.loadToys(); // Refresh the toys list
+          
+          if (this.isMassEditing) {
+            // If in mass edit mode, move to the next toy instead of closing
+            this.editNextToyInQueue();
+          } else {
+            // Normal update flow
+            this.closeNewToyModal();
+            this.loadToys(); // Refresh the toys list
+          }
         },
         error: (error) => {
           this.isCreating = false;
@@ -402,6 +426,119 @@ export class ToysComponent implements OnInit, OnDestroy {
 
   getActiveFilterDisplayText(): string {
     return this.filterService.getFilterDisplayText('toy');
+  }
+
+  // Mass Edit Mode Methods
+  toggleToySelection(toyId: number, event?: MouseEvent): void {
+    const currentToyIndex = this.toys.findIndex(toy => toy.id === toyId);
+    
+    if (event?.shiftKey && this.lastClickedToyIndex >= 0 && currentToyIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentToyIndex, toyId);
+    } else {
+      // Normal single selection
+      if (this.selectedToys.has(toyId)) {
+        this.selectedToys.delete(toyId);
+      } else {
+        this.selectedToys.add(toyId);
+      }
+    }
+    
+    this.lastClickedToyIndex = currentToyIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedToyId: number): void {
+    const startIndex = Math.min(this.lastClickedToyIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedToyIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedToys.has(clickedToyId);
+    
+    // Apply the same state to all toys in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const toy = this.toys[i];
+      if (targetState) {
+        this.selectedToys.add(toy.id);
+      } else {
+        this.selectedToys.delete(toy.id);
+      }
+    }
+  }
+
+  isToySelected(toyId: number): boolean {
+    return this.selectedToys.has(toyId);
+  }
+
+  hasSelectedToys(): boolean {
+    return this.selectedToys.size > 0;
+  }
+
+  isAllToysSelected(): boolean {
+    return this.toys.length > 0 && this.selectedToys.size === this.toys.length;
+  }
+
+  isSomeToysSelected(): boolean {
+    return this.selectedToys.size > 0 && this.selectedToys.size < this.toys.length;
+  }
+
+  toggleAllToys(): void {
+    if (this.isAllToysSelected()) {
+      // Unselect all
+      this.selectedToys.clear();
+    } else {
+      // Select all
+      this.toys.forEach(toy => this.selectedToys.add(toy.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedToys.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedToyIndex = -1;
+    this.massEditOriginalTotal = 0;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedToys.size === 0) return;
+    
+    // Build the queue of toys to edit
+    this.massEditQueue = this.toys.filter(toy => this.selectedToys.has(toy.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
+    this.isMassEditing = true;
+    
+    // Start editing the first toy
+    this.editNextToyInQueue();
+  }
+
+  private editNextToyInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All toys have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const toyToEdit = this.massEditQueue.shift()!;
+    this.openUpdateToyModal(toyToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeNewToyModal(); // Close the modal
+    this.loadToys(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 
 }

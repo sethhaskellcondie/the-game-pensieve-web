@@ -5,6 +5,13 @@
       <button type="button" class="new-button" (click)="openNewBoardGameBoxModal()">
         New
       </button>
+      <button 
+        *ngIf="isMassEditMode && hasSelectedBoardGameBoxes()" 
+        type="button" 
+        class="mass-edit-button" 
+        (click)="startMassEdit()">
+        Mass Edit ({{selectedBoardGameBoxes.size}})
+      </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
@@ -49,6 +56,14 @@
         <table class="board-games-table">
           <thead>
             <tr>
+              <th *ngIf="isMassEditMode" class="edit-column-header">
+                <input 
+                  type="checkbox" 
+                  [checked]="isAllBoardGameBoxesSelected()"
+                  [indeterminate]="isSomeBoardGameBoxesSelected()"
+                  (change)="toggleAllBoardGameBoxes()"
+                  class="edit-checkbox select-all-checkbox">
+              </th>
               <th>Title</th>
               <th>Expansion</th>
               <th>Standalone</th>
@@ -58,14 +73,21 @@
           </thead>
           <tbody>
             <tr *ngFor="let box of boardGameBoxes" class="table-row">
-              <td class="game-title" (click)="navigateToDetail(box.id)">{{box.title}}</td>
-              <td class="game-expansion" (click)="navigateToDetail(box.id)">
+              <td *ngIf="isMassEditMode" class="edit-checkbox-cell" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isBoardGameBoxSelected(box.id)"
+                  (click)="toggleBoardGameBoxSelection(box.id, $event)"
+                  class="edit-checkbox">
+              </td>
+              <td class="game-title" (click)="openUpdateBoardGameBoxModal(box)">{{box.title}}</td>
+              <td class="game-expansion" (click)="openUpdateBoardGameBoxModal(box)">
                 <app-boolean-display [value]="box.isExpansion" size="small"></app-boolean-display>
               </td>
-              <td class="game-standalone" (click)="navigateToDetail(box.id)">
+              <td class="game-standalone" (click)="openUpdateBoardGameBoxModal(box)">
                 <app-boolean-display [value]="box.isStandAlone" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToDetail(box.id)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateBoardGameBoxModal(box)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(box, fieldName)"
                   [value]="getCustomFieldValue(box, fieldName)"
@@ -97,7 +119,7 @@
   <div *ngIf="showNewBoardGameBoxModal" class="modal-overlay" (click)="closeNewBoardGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>New Board Game Box</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Board Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Board Game Box') : 'New Board Game Box'}}</h2>
         <button type="button" class="close-button" (click)="closeNewBoardGameBoxModal()">×</button>
       </div>
       
@@ -234,14 +256,14 @@
             Cancel
           </button>
           <button 
-            *ngIf="!isMassInputMode"
+            *ngIf="isUpdateMode || !isMassInputMode"
             type="submit" 
             class="create-button" 
             [disabled]="!boardGameBoxForm.form.valid || isCreating">
-            {{isCreating ? 'Creating...' : 'Create'}}
+            {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
           </button>
           <button 
-            *ngIf="isMassInputMode"
+            *ngIf="!isUpdateMode && isMassInputMode"
             type="button" 
             class="create-and-add-button" 
             [disabled]="!boardGameBoxForm.form.valid || isCreating"

@@ -2,6 +2,13 @@
   <div class="header-section">
     <h1>Video Games (Game View)</h1>
     <div class="header-buttons">
+      <button 
+        *ngIf="isMassEditMode && hasSelectedVideoGames()" 
+        type="button" 
+        class="mass-edit-button" 
+        (click)="startMassEdit()">
+        Mass Edit ({{selectedVideoGames.size}})
+      </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
@@ -46,16 +53,31 @@
         <table class="video-games-table">
           <thead>
             <tr>
+              <th *ngIf="isMassEditMode" class="edit-column-header">
+                <input 
+                  type="checkbox" 
+                  [checked]="isAllVideoGamesSelected()"
+                  [indeterminate]="isSomeVideoGamesSelected()"
+                  (change)="toggleAllVideoGames()"
+                  class="edit-checkbox select-all-checkbox">
+              </th>
               <th>Title</th>
               <th>System</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let game of videoGames" class="table-row" (click)="navigateToDetail(game.id)">
-              <td class="game-title">{{game.title}}</td>
-              <td class="game-system">{{game.system.name}}</td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value">
+            <tr *ngFor="let game of videoGames" class="table-row">
+              <td *ngIf="isMassEditMode" class="edit-checkbox-cell" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isVideoGameSelected(game.id)"
+                  (click)="toggleVideoGameSelection(game.id, $event)"
+                  class="edit-checkbox">
+              </td>
+              <td class="game-title" (click)="openEditVideoGameModal(game)">{{game.title}}</td>
+              <td class="game-system" (click)="openEditVideoGameModal(game)">{{game.system.name}}</td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openEditVideoGameModal(game)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(game, fieldName)"
                   [value]="getCustomFieldValue(game, fieldName)"
@@ -143,7 +165,7 @@
   <div *ngIf="showEditVideoGameModal" class="modal-overlay" (click)="closeEditVideoGameModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Update Video Game</h2>
+        <h2>{{isMassEditing ? 'Update Video Game (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Video Game'}}</h2>
         <div class="modal-header-actions">
           <button type="button" class="details-button" (click)="openDetailFromEdit()">
             Details
@@ -155,17 +177,17 @@
       <form (ngSubmit)="onSubmitEditVideoGame()" #videoGameForm="ngForm" class="modal-form">
         <div class="form-group">
           <label for="title">Title *</label>
-          <input 
-            type="text" 
-            id="title" 
-            name="title" 
+          <app-selectable-text-input
+            #titleField
+            id="title"
+            name="title"
             [(ngModel)]="editVideoGame.title"
-            #titleField="ngModel"
-            required
-            minlength="1"
-            class="form-input"
+            #titleNgModel="ngModel"
+            [required]="true"
+            [minlength]="1"
             placeholder="">
-          <div *ngIf="titleField.invalid && titleField.touched" class="error-text">
+          </app-selectable-text-input>
+          <div *ngIf="titleNgModel.invalid && titleNgModel.touched" class="error-text">
             Title is required
           </div>
         </div>

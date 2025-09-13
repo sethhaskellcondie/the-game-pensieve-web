@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,19 +7,22 @@ import { takeUntil } from 'rxjs/operators';
 import { ApiService, VideoGame, System, VideoGameBox, CustomField } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-video-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './video-games.component.html',
   styleUrl: './video-games.component.scss'
 })
 export class VideoGamesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  @ViewChild('titleField', { static: false }) titleField: any;
   videoGames: VideoGame[] = [];
   videoGamesCount = 0;
   systems: System[] = [];
@@ -29,6 +32,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   errorMessage = '';
   customFieldNames: string[] = [];
   isDarkMode = false;
+  isMassEditMode = false;
   
   showDetailVideoGameModal = false;
   showEditVideoGameModal = false;
@@ -44,11 +48,19 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
 
   showFilterModal = false;
 
+  // Mass Edit Mode properties
+  selectedVideoGames: Set<number> = new Set();
+  massEditQueue: VideoGame[] = [];
+  isMassEditing = false;
+  lastClickedVideoGameIndex: number = -1;
+  massEditOriginalTotal = 0;
+
   constructor(
     private apiService: ApiService, 
     private router: Router, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -57,11 +69,27 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
       });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
+      });
     
     this.loadVideoGames();
     this.loadSystems();
     this.loadVideoGameBoxes();
     this.loadCustomFields();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showEditVideoGameModal) {
+      this.closeEditVideoGameModal();
+    }
   }
 
   loadVideoGames(): void {
@@ -210,12 +238,20 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.apiService.updateVideoGame(this.videoGameToUpdate.id, videoGameData).subscribe({
       next: (response) => {
         this.isUpdating = false;
-        this.closeEditVideoGameModal();
-        this.loadVideoGames(); // Refresh the video games list
+        
+        if (this.isMassEditing) {
+          // If in mass edit mode, move to the next video game instead of closing
+          this.editNextVideoGameInQueue();
+        } else {
+          // Normal update flow
+          this.closeEditVideoGameModal();
+          this.loadVideoGames(); // Refresh the video games list
+        }
       },
       error: (error) => {
         this.errorMessage = `Failed to update video game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
+        this.closeEditVideoGameModal(); // Close the modal on error
       }
     });
   }
@@ -351,6 +387,119 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  // Mass Edit Mode Methods
+  toggleVideoGameSelection(videoGameId: number, event?: MouseEvent): void {
+    const currentVideoGameIndex = this.videoGames.findIndex(game => game.id === videoGameId);
+    
+    if (event?.shiftKey && this.lastClickedVideoGameIndex >= 0 && currentVideoGameIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentVideoGameIndex, videoGameId);
+    } else {
+      // Normal single selection
+      if (this.selectedVideoGames.has(videoGameId)) {
+        this.selectedVideoGames.delete(videoGameId);
+      } else {
+        this.selectedVideoGames.add(videoGameId);
+      }
+    }
+    
+    this.lastClickedVideoGameIndex = currentVideoGameIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedVideoGameId: number): void {
+    const startIndex = Math.min(this.lastClickedVideoGameIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedVideoGameIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedVideoGames.has(clickedVideoGameId);
+    
+    // Apply the same state to all video games in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const videoGame = this.videoGames[i];
+      if (targetState) {
+        this.selectedVideoGames.add(videoGame.id);
+      } else {
+        this.selectedVideoGames.delete(videoGame.id);
+      }
+    }
+  }
+
+  isVideoGameSelected(videoGameId: number): boolean {
+    return this.selectedVideoGames.has(videoGameId);
+  }
+
+  hasSelectedVideoGames(): boolean {
+    return this.selectedVideoGames.size > 0;
+  }
+
+  isAllVideoGamesSelected(): boolean {
+    return this.videoGames.length > 0 && this.selectedVideoGames.size === this.videoGames.length;
+  }
+
+  isSomeVideoGamesSelected(): boolean {
+    return this.selectedVideoGames.size > 0 && this.selectedVideoGames.size < this.videoGames.length;
+  }
+
+  toggleAllVideoGames(): void {
+    if (this.isAllVideoGamesSelected()) {
+      // Unselect all
+      this.selectedVideoGames.clear();
+    } else {
+      // Select all
+      this.videoGames.forEach(game => this.selectedVideoGames.add(game.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedVideoGames.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedVideoGameIndex = -1;
+    this.massEditOriginalTotal = 0;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedVideoGames.size === 0) return;
+    
+    // Build the queue of video games to edit
+    this.massEditQueue = this.videoGames.filter(game => this.selectedVideoGames.has(game.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
+    this.isMassEditing = true;
+    
+    // Start editing the first video game
+    this.editNextVideoGameInQueue();
+  }
+
+  private editNextVideoGameInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All video games have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const videoGameToEdit = this.massEditQueue.shift()!;
+    this.openEditVideoGameModal(videoGameToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeEditVideoGameModal(); // Close the modal
+    this.loadVideoGames(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 
   ngOnDestroy(): void {

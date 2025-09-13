@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,19 +7,22 @@ import { takeUntil } from 'rxjs/operators';
 import { ApiService, BoardGame } from '../../services/api.service';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 
 @Component({
   selector: 'app-board-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './board-games.component.html',
   styleUrl: './board-games.component.scss'
 })
 export class BoardGamesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  @ViewChild('titleField', { static: false }) titleField: any;
   boardGames: BoardGame[] = [];
   boardGamesCount = 0;
   isLoading = false;
@@ -27,6 +30,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   customFieldNames: string[] = [];
   availableCustomFields: any[] = [];
   isDarkMode = false;
+  isMassEditMode = false;
   
   showDetailBoardGameModal = false;
   showEditBoardGameModal = false;
@@ -39,11 +43,19 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   };
   showFilterModal = false;
 
+  // Mass Edit Mode properties
+  selectedBoardGames: Set<number> = new Set();
+  massEditQueue: BoardGame[] = [];
+  isMassEditing = false;
+  lastClickedBoardGameIndex: number = -1;
+  massEditOriginalTotal = 0;
+
   constructor(
     private apiService: ApiService, 
     private router: Router, 
     public filterService: FilterService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private errorSnackbarService: ErrorSnackbarService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +63,15 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(darkMode => {
         this.isDarkMode = darkMode;
+      });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
       });
     
     this.loadBoardGames();
@@ -60,6 +81,13 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showEditBoardGameModal) {
+      this.closeEditBoardGameModal();
+    }
   }
 
   loadBoardGames(): void {
@@ -235,12 +263,20 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     this.apiService.updateBoardGame(this.boardGameToUpdate.id, boardGameData).subscribe({
       next: (response) => {
         this.isUpdating = false;
-        this.closeEditBoardGameModal();
-        this.loadBoardGames(); // Refresh the board games list
+        
+        if (this.isMassEditing) {
+          // If in mass edit mode, move to the next board game instead of closing
+          this.editNextBoardGameInQueue();
+        } else {
+          // Normal update flow
+          this.closeEditBoardGameModal();
+          this.loadBoardGames(); // Refresh the board games list
+        }
       },
       error: (error) => {
         this.errorMessage = `Failed to update board game: ${error.message || 'Unknown error'}`;
         this.isUpdating = false;
+        this.closeEditBoardGameModal(); // Close the modal on error
       }
     });
   }
@@ -331,5 +367,118 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
       const existingValue = existingValuesMap.get(defaultValue.customFieldId);
       return existingValue || defaultValue;
     });
+  }
+
+  // Mass Edit Mode Methods
+  toggleBoardGameSelection(boardGameId: number, event?: MouseEvent): void {
+    const currentBoardGameIndex = this.boardGames.findIndex(game => game.id === boardGameId);
+    
+    if (event?.shiftKey && this.lastClickedBoardGameIndex >= 0 && currentBoardGameIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentBoardGameIndex, boardGameId);
+    } else {
+      // Normal single selection
+      if (this.selectedBoardGames.has(boardGameId)) {
+        this.selectedBoardGames.delete(boardGameId);
+      } else {
+        this.selectedBoardGames.add(boardGameId);
+      }
+    }
+    
+    this.lastClickedBoardGameIndex = currentBoardGameIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedBoardGameId: number): void {
+    const startIndex = Math.min(this.lastClickedBoardGameIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedBoardGameIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedBoardGames.has(clickedBoardGameId);
+    
+    // Apply the same state to all board games in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const boardGame = this.boardGames[i];
+      if (targetState) {
+        this.selectedBoardGames.add(boardGame.id);
+      } else {
+        this.selectedBoardGames.delete(boardGame.id);
+      }
+    }
+  }
+
+  isBoardGameSelected(boardGameId: number): boolean {
+    return this.selectedBoardGames.has(boardGameId);
+  }
+
+  hasSelectedBoardGames(): boolean {
+    return this.selectedBoardGames.size > 0;
+  }
+
+  isAllBoardGamesSelected(): boolean {
+    return this.boardGames.length > 0 && this.selectedBoardGames.size === this.boardGames.length;
+  }
+
+  isSomeBoardGamesSelected(): boolean {
+    return this.selectedBoardGames.size > 0 && this.selectedBoardGames.size < this.boardGames.length;
+  }
+
+  toggleAllBoardGames(): void {
+    if (this.isAllBoardGamesSelected()) {
+      // Unselect all
+      this.selectedBoardGames.clear();
+    } else {
+      // Select all
+      this.boardGames.forEach(game => this.selectedBoardGames.add(game.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedBoardGames.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedBoardGameIndex = -1;
+    this.massEditOriginalTotal = 0;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedBoardGames.size === 0) return;
+    
+    // Build the queue of board games to edit
+    this.massEditQueue = this.boardGames.filter(game => this.selectedBoardGames.has(game.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
+    this.isMassEditing = true;
+    
+    // Start editing the first board game
+    this.editNextBoardGameInQueue();
+  }
+
+  private editNextBoardGameInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All board games have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const boardGameToEdit = this.massEditQueue.shift()!;
+    this.openEditBoardGameModal(boardGameToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeEditBoardGameModal(); // Close the modal
+    this.loadBoardGames(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 }

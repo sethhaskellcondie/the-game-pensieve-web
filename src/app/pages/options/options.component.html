@@ -20,6 +20,15 @@
           (change)="onMassInputModeToggle($any($event.target).checked)"
           class="toggle-input">
       </div>
+      <div class="toggle-container">
+        <label for="massEditModeToggle" class="toggle-label">Mass Edit Mode</label>
+        <input 
+          type="checkbox" 
+          id="massEditModeToggle"
+          [checked]="isMassEditMode"
+          (change)="onMassEditModeToggle($any($event.target).checked)"
+          class="toggle-input">
+      </div>
     </div>
   </div>
 
