@@ -8,6 +8,7 @@ import { ApiService, VideoGameBox, System, VideoGame } from '../../services/api.
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
+import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
@@ -16,7 +17,7 @@ import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 @Component({
   selector: 'app-video-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, EntityFilterModalComponent],
   templateUrl: './video-game-boxes.component.html',
   styleUrl: './video-game-boxes.component.scss'
 })
@@ -33,6 +34,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
+  isMassEditMode = false;
   
   showDetailVideoGameBoxModal = false;
   showNewVideoGameBoxModal = false;
@@ -62,6 +64,12 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   isDeleting = false;
   showFilterModal = false;
 
+  // Mass Edit Mode properties
+  selectedVideoGameBoxes: Set<number> = new Set();
+  massEditQueue: VideoGameBox[] = [];
+  isMassEditing = false;
+  lastClickedVideoGameBoxIndex: number = -1;
+
   constructor(
     private apiService: ApiService, 
     private router: Router, 
@@ -81,6 +89,15 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(massInputMode => {
         this.isMassInputMode = massInputMode;
+      });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
       });
     
     this.loadVideoGameBoxes();
@@ -368,12 +385,20 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       this.apiService.updateVideoGameBox(this.videoGameBoxToUpdate.id, videoGameBoxData).subscribe({
         next: (response) => {
           this.isCreating = false;
-          this.closeNewVideoGameBoxModal();
-          this.loadVideoGameBoxes(); // Refresh the video game boxes list
+          
+          if (this.isMassEditing) {
+            // If in mass edit mode, move to the next video game box instead of closing
+            this.editNextVideoGameBoxInQueue();
+          } else {
+            // Normal update flow
+            this.closeNewVideoGameBoxModal();
+            this.loadVideoGameBoxes(); // Refresh the video game boxes list
+          }
         },
         error: (error) => {
           this.errorMessage = `Failed to update video game box: ${error.message || 'Unknown error'}`;
           this.isCreating = false;
+          this.closeNewVideoGameBoxModal(); // Close the modal on error
         }
       });
     } else {
@@ -733,5 +758,105 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // Mass Edit Mode Methods
+  toggleVideoGameBoxSelection(videoGameBoxId: number, event?: MouseEvent): void {
+    const currentVideoGameBoxIndex = this.videoGameBoxes.findIndex(box => box.id === videoGameBoxId);
+    
+    if (event?.shiftKey && this.lastClickedVideoGameBoxIndex >= 0 && currentVideoGameBoxIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentVideoGameBoxIndex, videoGameBoxId);
+    } else {
+      // Normal single selection
+      if (this.selectedVideoGameBoxes.has(videoGameBoxId)) {
+        this.selectedVideoGameBoxes.delete(videoGameBoxId);
+      } else {
+        this.selectedVideoGameBoxes.add(videoGameBoxId);
+      }
+    }
+    
+    this.lastClickedVideoGameBoxIndex = currentVideoGameBoxIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedVideoGameBoxId: number): void {
+    const startIndex = Math.min(this.lastClickedVideoGameBoxIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedVideoGameBoxIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedVideoGameBoxes.has(clickedVideoGameBoxId);
+    
+    // Apply the same state to all video game boxes in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const videoGameBox = this.videoGameBoxes[i];
+      if (targetState) {
+        this.selectedVideoGameBoxes.add(videoGameBox.id);
+      } else {
+        this.selectedVideoGameBoxes.delete(videoGameBox.id);
+      }
+    }
+  }
+
+  isVideoGameBoxSelected(videoGameBoxId: number): boolean {
+    return this.selectedVideoGameBoxes.has(videoGameBoxId);
+  }
+
+  hasSelectedVideoGameBoxes(): boolean {
+    return this.selectedVideoGameBoxes.size > 0;
+  }
+
+  isAllVideoGameBoxesSelected(): boolean {
+    return this.videoGameBoxes.length > 0 && this.selectedVideoGameBoxes.size === this.videoGameBoxes.length;
+  }
+
+  isSomeVideoGameBoxesSelected(): boolean {
+    return this.selectedVideoGameBoxes.size > 0 && this.selectedVideoGameBoxes.size < this.videoGameBoxes.length;
+  }
+
+  toggleAllVideoGameBoxes(): void {
+    if (this.isAllVideoGameBoxesSelected()) {
+      // Unselect all
+      this.selectedVideoGameBoxes.clear();
+    } else {
+      // Select all
+      this.videoGameBoxes.forEach(box => this.selectedVideoGameBoxes.add(box.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedVideoGameBoxes.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedVideoGameBoxIndex = -1;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedVideoGameBoxes.size === 0) return;
+    
+    // Build the queue of video game boxes to edit
+    this.massEditQueue = this.videoGameBoxes.filter(box => this.selectedVideoGameBoxes.has(box.id));
+    this.isMassEditing = true;
+    
+    // Start editing the first video game box
+    this.editNextVideoGameBoxInQueue();
+  }
+
+  private editNextVideoGameBoxInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All video game boxes have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const videoGameBoxToEdit = this.massEditQueue.shift()!;
+    this.openUpdateVideoGameBoxModal(videoGameBoxToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeNewVideoGameBoxModal(); // Close the modal
+    this.loadVideoGameBoxes(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
   }
 }
