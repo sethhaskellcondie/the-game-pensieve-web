@@ -52,6 +52,7 @@ export class ToysComponent implements OnInit, OnDestroy {
   selectedToys: Set<number> = new Set();
   massEditQueue: Toy[] = [];
   isMassEditing = false;
+  lastClickedToyIndex: number = -1;
 
   constructor(
     private apiService: ApiService, 
@@ -427,11 +428,39 @@ export class ToysComponent implements OnInit, OnDestroy {
   }
 
   // Mass Edit Mode Methods
-  toggleToySelection(toyId: number): void {
-    if (this.selectedToys.has(toyId)) {
-      this.selectedToys.delete(toyId);
+  toggleToySelection(toyId: number, event?: MouseEvent): void {
+    const currentToyIndex = this.toys.findIndex(toy => toy.id === toyId);
+    
+    if (event?.shiftKey && this.lastClickedToyIndex >= 0 && currentToyIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentToyIndex, toyId);
     } else {
-      this.selectedToys.add(toyId);
+      // Normal single selection
+      if (this.selectedToys.has(toyId)) {
+        this.selectedToys.delete(toyId);
+      } else {
+        this.selectedToys.add(toyId);
+      }
+    }
+    
+    this.lastClickedToyIndex = currentToyIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedToyId: number): void {
+    const startIndex = Math.min(this.lastClickedToyIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedToyIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedToys.has(clickedToyId);
+    
+    // Apply the same state to all toys in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const toy = this.toys[i];
+      if (targetState) {
+        this.selectedToys.add(toy.id);
+      } else {
+        this.selectedToys.delete(toy.id);
+      }
     }
   }
 
@@ -465,6 +494,7 @@ export class ToysComponent implements OnInit, OnDestroy {
     this.selectedToys.clear();
     this.massEditQueue = [];
     this.isMassEditing = false;
+    this.lastClickedToyIndex = -1;
   }
 
   startMassEdit(): void {

@@ -73,7 +73,7 @@
                 <input 
                   type="checkbox" 
                   [checked]="isToySelected(toy.id)"
-                  (change)="toggleToySelection(toy.id)"
+                  (click)="toggleToySelection(toy.id, $event)"
                   class="edit-checkbox">
               </td>
               <td class="toy-name" (click)="openUpdateToyModal(toy)">
