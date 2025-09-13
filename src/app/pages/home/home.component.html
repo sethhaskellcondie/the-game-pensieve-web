@@ -1,45 +1,79 @@
 <div class="home-container" [class.dark-mode]="isDarkMode">
 
-  <!-- Shortcuts Section -->
-  <div class="shortcuts-section">
-    <div class="section-header">
-      <h2>Shortcuts</h2>
-      <button type="button" class="create-button" (click)="openCreateModal()">
-        New
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Goals & Shortcuts</h1>
+    <div class="header-actions">
+      <button type="button" 
+              class="toggle-button" 
+              [class.active]="showCounts"
+              (click)="onToggleDisplayCounts()"
+              [disabled]="loadingCounts">
+        {{showCounts ? 'Show Details' : 'Display Counts'}}
+      </button>
+      <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
+        + Shortcut
+      </button>
+      <button type="button" class="create-button primary" (click)="onCreateGoal()">
+        + Goal
       </button>
     </div>
+  </div>
 
-    <!-- No shortcuts message -->
-    <div *ngIf="shortcuts.length === 0" class="no-shortcuts">
-      <p>No shortcuts created yet. Create your first shortcut with the "New" button.</p>
+  <!-- Goals Section -->
+  <div class="goals-section" *ngIf="goals.length > 0">
+    <app-goal-section
+      *ngFor="let goal of goals"
+      [goal]="goal"
+      [shortcuts]="getShortcutsForGoal(goal.id)"
+      [isDarkMode]="isDarkMode"
+      [isExpanded]="isGoalExpanded(goal.id)"
+      [showCounts]="showCounts"
+      [shortcutCounts]="shortcutCounts"
+      [loadingCounts]="loadingCounts"
+      (editGoal)="onEditGoal($event)"
+      (deleteGoal)="onDeleteGoal($event)"
+      (addShortcut)="onAddShortcutToGoal($event)"
+      (editShortcut)="onEditShortcut($event)"
+      (deleteShortcut)="onDeleteShortcut($event)"
+      (toggleExpanded)="onToggleGoalExpansion(goal.id)">
+    </app-goal-section>
+  </div>
+
+  <!-- More Shortcuts Section -->
+  <div class="more-shortcuts-section" *ngIf="uncategorizedShortcuts.length > 0">
+    <div class="section-header">
+      <h2>More Shortcuts</h2>
     </div>
-
-    <!-- Shortcuts Grid -->
-    <div *ngIf="shortcuts.length > 0" class="shortcuts-grid">
+    
+    <div class="shortcuts-grid">
       <div class="shortcut-card clickable" 
-           *ngFor="let shortcut of shortcuts" 
+           [class.count-view]="showCounts"
+           *ngFor="let shortcut of uncategorizedShortcuts" 
            (click)="onShortcutClick(shortcut)">
         <div class="shortcut-header">
           <h3>{{shortcut.name}}</h3>
-          <div class="shortcut-actions">
+          <div class="shortcut-actions" *ngIf="!showCounts">
             <button type="button" 
                     class="edit-button" 
-                    (click)="editShortcut(shortcut, $event)"
+                    (click)="onEditShortcut(shortcut); $event.stopPropagation()"
                     title="Edit shortcut"
                     [innerHTML]="iconService.getIcon('pencil')">
             </button>
             <button type="button" 
                     class="delete-button" 
-                    (click)="deleteShortcut(shortcut, $event)"
+                    (click)="onDeleteShortcut(shortcut); $event.stopPropagation()"
                     title="Delete shortcut">
               ×
             </button>
           </div>
         </div>
-        <div class="shortcut-description" *ngIf="shortcut.description">
+        <div class="shortcut-description" *ngIf="shortcut.description && !showCounts">
           <p>{{shortcut.description}}</p>
         </div>
-        <div class="shortcut-info">
+        
+        <!-- Details View -->
+        <div class="shortcut-info" *ngIf="!showCounts">
           <div class="shortcut-target">
             <span class="info-label">Entity:</span>
             <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
@@ -49,20 +83,67 @@
             <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
           </div>
         </div>
+        
+        <!-- Count View -->
+        <div class="shortcut-count-info" *ngIf="showCounts">
+          <div class="count-display">
+            <div class="count-number" *ngIf="!loadingCounts">
+              {{getShortcutCount(shortcut.id)}}
+            </div>
+            <div class="count-loading" *ngIf="loadingCounts">
+              <span class="loading-spinner">⟳</span>
+            </div>
+            <div class="count-label">
+              {{getPageDisplayName(shortcut.targetPage)}}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="goals.length === 0 && shortcuts.length === 0">
+    <div class="empty-content">
+      <h2>Welcome to your Goals & Shortcuts dashboard!</h2>
+      <p>Create your first goal to organize your shortcuts, or create a standalone shortcut.</p>
+      <div class="empty-actions">
+        <button type="button" class="create-button primary" (click)="onCreateGoal()">
+          Create Your First Goal
+        </button>
+        <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
+          Or Create a Shortcut
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  
+  <!-- Create Goal Modal -->
+  <app-goal-modal 
+    *ngIf="showCreateGoalModal"
+    (closeModal)="onCloseGoalModal()">
+  </app-goal-modal>
+
+  <!-- Edit Goal Modal -->
+  <app-goal-modal 
+    *ngIf="showEditGoalModal"
+    [goal]="editingGoal"
+    (closeModal)="onCloseGoalModal()">
+  </app-goal-modal>
+
   <!-- Create Shortcut Modal -->
   <app-filter-shortcut-modal 
-    *ngIf="showCreateModal"
-    (closeModal)="closeCreateModal()">
+    *ngIf="showCreateShortcutModal"
+    [preSelectedGoalId]="preSelectedGoalId"
+    (closeModal)="onCloseShortcutModal()">
   </app-filter-shortcut-modal>
 
   <!-- Edit Shortcut Modal -->
   <app-filter-shortcut-modal 
-    *ngIf="showEditModal"
+    *ngIf="showEditShortcutModal"
     [shortcut]="editingShortcut"
-    (closeModal)="closeEditModal()">
+    (closeModal)="onCloseShortcutModal()">
   </app-filter-shortcut-modal>
 </div>

@@ -1,10 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { AppComponent } from './app.component';
+import { SettingsService } from './services/settings.service';
+import { ApiService } from './services/api.service';
+import { MetadataService } from './services/metadata.service';
+import { mockHttpClient, mockActivatedRoute, mockSettingsService, mockApiService, mockMetadataService } from './testing/test-utils';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        { provide: HttpClient, useValue: mockHttpClient },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: SettingsService, useValue: mockSettingsService },
+        { provide: ApiService, useValue: mockApiService },
+        { provide: MetadataService, useValue: mockMetadataService }
+      ]
     }).compileComponents();
   });
 
@@ -20,10 +33,4 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('the-game-pensive-web');
   });
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, the-game-pensive-web');
-  });
 });

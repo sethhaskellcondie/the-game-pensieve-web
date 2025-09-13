@@ -1,0 +1,119 @@
+<div class="goal-section" [class.dark-mode]="isDarkMode" [class.completed]="goal.completed">
+  <!-- Goal Header -->
+  <div class="goal-header" (click)="onToggleExpanded()">
+    <div class="goal-header-left">
+      <!-- Expand/Collapse Button -->
+      <button type="button" class="expand-button" title="Toggle section">
+        <span class="expand-icon" [class.expanded]="isExpanded">▶</span>
+      </button>
+      
+      <!-- Goal Completion Checkbox -->
+      <label class="goal-checkbox-label" (click)="$event.stopPropagation()">
+        <input
+          type="checkbox"
+          [checked]="goal.completed"
+          (change)="onToggleGoalCompletion()"
+        />
+        <span class="checkbox-custom"></span>
+      </label>
+      
+      <!-- Goal Title and Progress -->
+      <div class="goal-info">
+        <h2 class="goal-title" [class.completed]="goal.completed">
+          {{goal.name}}
+        </h2>
+        <div *ngIf="goal.description" class="goal-description">
+          {{goal.description}}
+        </div>
+      </div>
+    </div>
+    
+    <div class="goal-actions" (click)="$event.stopPropagation()">
+      <button 
+        type="button" 
+        class="action-button add-button" 
+        (click)="onAddShortcut()"
+        title="Add shortcut to this goal">
+        + Shortcut
+      </button>
+      <button 
+        type="button" 
+        class="action-button edit-button" 
+        (click)="onEditGoal()"
+        title="Edit goal"
+        [innerHTML]="iconService.getIcon('pencil')">
+      </button>
+      <button 
+        type="button" 
+        class="action-button delete-button" 
+        (click)="onDeleteGoal()"
+        title="Delete goal">
+        ×
+      </button>
+    </div>
+  </div>
+  
+  <!-- Shortcuts Grid (Collapsible) -->
+  <div class="goal-content" *ngIf="isExpanded">
+    <!-- Empty State -->
+    <div *ngIf="shortcuts.length === 0" class="no-shortcuts">
+      <p>No shortcuts in this goal yet. Click "+ Shortcut" to add one.</p>
+    </div>
+    
+    <!-- Shortcuts Grid -->
+    <div *ngIf="shortcuts.length > 0" class="shortcuts-grid">
+      <div class="shortcut-card clickable" 
+           [class.count-view]="showCounts"
+           *ngFor="let shortcut of shortcuts" 
+           (click)="onShortcutClick(shortcut)">
+        <div class="shortcut-header">
+          <h3>{{shortcut.name}}</h3>
+          <div class="shortcut-actions" *ngIf="!showCounts">
+            <button type="button" 
+                    class="edit-button" 
+                    (click)="onEditShortcut(shortcut, $event)"
+                    title="Edit shortcut"
+                    [innerHTML]="iconService.getIcon('pencil')">
+            </button>
+            <button type="button" 
+                    class="delete-button" 
+                    (click)="onDeleteShortcut(shortcut, $event)"
+                    title="Delete shortcut">
+              ×
+            </button>
+          </div>
+        </div>
+        <div class="shortcut-description" *ngIf="shortcut.description && !showCounts">
+          <p>{{shortcut.description}}</p>
+        </div>
+        
+        <!-- Details View -->
+        <div class="shortcut-info" *ngIf="!showCounts">
+          <div class="shortcut-target">
+            <span class="info-label">Entity:</span>
+            <span class="info-value">{{getPageDisplayName(shortcut.targetPage)}}</span>
+          </div>
+          <div class="shortcut-filters" *ngIf="shortcut.filters.length > 0">
+            <span class="info-label">Filters:</span>
+            <span class="info-value">{{shortcut.filters.length}} filter(s)</span>
+          </div>
+        </div>
+        
+        <!-- Count View -->
+        <div class="shortcut-count-info" *ngIf="showCounts">
+          <div class="count-display">
+            <div class="count-number" *ngIf="!loadingCounts">
+              {{getShortcutCount(shortcut.id)}}
+            </div>
+            <div class="count-loading" *ngIf="loadingCounts">
+              <span class="loading-spinner">⟳</span>
+            </div>
+            <div class="count-label">
+              {{getPageDisplayName(shortcut.targetPage)}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

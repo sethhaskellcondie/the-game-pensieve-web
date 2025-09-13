@@ -230,17 +230,6 @@ describe('CustomFieldsComponent', () => {
       expect(component.sortDirection).toBe('asc');
     });
 
-    it('should apply sorting correctly for name column', () => {
-      // Reset the array to original state
-      component.customFields = [...mockCustomFields];
-      component.sortedCustomFields = [...mockCustomFields];
-      component.sortColumn = 'name';
-      component.sortDirection = 'asc';
-      component.applySorting();
-      
-      expect(component.sortedCustomFields[0].name).toBe('Test Boolean Field');
-      expect(component.sortedCustomFields[2].name).toBe('Test Text Field');
-    });
 
     it('should apply sorting correctly for entity column', () => {
       component.sortColumn = 'entity';

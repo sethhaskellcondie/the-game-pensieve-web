@@ -466,7 +466,14 @@ export class ApiService {
     return this.http.get<{data: Metadata, errors: any}>(`${this.baseUrl}/metadata/${key}`)
       .pipe(
         map(response => this.handleApiResponse(response)),
-        catchError(this.handleHttpError)
+        catchError((error: any) => {
+          // For metadata 404s, don't show snackbar since we handle this gracefully
+          if (error.status === 404) {
+            throw error; // Just throw without processing through snackbar service
+          }
+          // For other errors, use normal error handling
+          return this.handleHttpError(error);
+        })
       );
   }
 

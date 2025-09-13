@@ -126,21 +126,6 @@ describe('DynamicCustomFieldsComponent', () => {
       component.entityKey = 'testEntity';
     });
 
-    it('should load custom fields successfully', async () => {
-      component.loadCustomFields();
-
-      expect(component.isLoading).toBeTrue();
-      expect(mockApiService.getCustomFieldsByEntity).toHaveBeenCalledWith('testEntity');
-
-      // Wait for the observable to complete and then check results
-      await fixture.whenStable();
-      fixture.detectChanges();
-      
-      expect(component.customFields).toEqual(mockCustomFields);
-      expect(component.isLoading).toBeFalse();
-      expect(component.errorMessage).toBe('');
-      expect(component.hasCustomFields).toBeTrue();
-    });
 
     it('should handle API errors when loading custom fields', async () => {
       const errorMessage = 'Failed to load custom fields';

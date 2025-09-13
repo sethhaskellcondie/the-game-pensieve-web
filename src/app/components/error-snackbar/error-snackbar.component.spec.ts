@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ErrorSnackbarComponent } from './error-snackbar.component';
+import { ErrorSnackbarService } from '../../services/error-snackbar.service';
+import { mockErrorSnackbarService } from '../../testing/test-utils';
 
 describe('ErrorSnackbarComponent', () => {
   let component: ErrorSnackbarComponent;
@@ -8,7 +10,10 @@ describe('ErrorSnackbarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ErrorSnackbarComponent]
+      imports: [ErrorSnackbarComponent],
+      providers: [
+        { provide: ErrorSnackbarService, useValue: mockErrorSnackbarService }
+      ]
     })
     .compileComponents();
     

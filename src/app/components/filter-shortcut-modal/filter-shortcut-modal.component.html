@@ -34,6 +34,17 @@
       </div>
 
       <div class="form-group">
+        <label for="goalId">Goal</label>
+        <app-filterable-dropdown
+          id="goalId"
+          name="goalId"
+          [(ngModel)]="formData.goalId"
+          [options]="availableGoals"
+          placeholder="Select a goal (optional)">
+        </app-filterable-dropdown>
+      </div>
+
+      <div class="form-group">
         <label for="targetPage">Entity *</label>
         <app-filterable-dropdown
           id="targetPage"
