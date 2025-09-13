@@ -284,6 +284,7 @@ describe('FilterShortcutModalComponent', () => {
         name: 'Test Shortcut',
         description: 'Test description',
         targetPage: '/video-game-boxes',
+        goalId: null,
         filters: mockFilterRequests
       };
     });
@@ -653,6 +654,7 @@ describe('FilterShortcutModalComponent', () => {
         name: 'New Test Shortcut',
         description: 'New test description',
         targetPage: '/video-games',
+        goalId: null,
         filters: mockFilterRequests
       };
 
