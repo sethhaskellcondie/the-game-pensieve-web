@@ -48,6 +48,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   massEditQueue: BoardGame[] = [];
   isMassEditing = false;
   lastClickedBoardGameIndex: number = -1;
+  massEditOriginalTotal = 0;
 
   constructor(
     private apiService: ApiService, 
@@ -436,6 +437,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     this.massEditQueue = [];
     this.isMassEditing = false;
     this.lastClickedBoardGameIndex = -1;
+    this.massEditOriginalTotal = 0;
   }
 
   startMassEdit(): void {
@@ -443,6 +445,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     
     // Build the queue of board games to edit
     this.massEditQueue = this.boardGames.filter(game => this.selectedBoardGames.has(game.id));
+    this.massEditOriginalTotal = this.massEditQueue.length;
     this.isMassEditing = true;
     
     // Start editing the first board game
@@ -466,5 +469,16 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     this.closeEditBoardGameModal(); // Close the modal
     this.loadBoardGames(); // Refresh the list
     this.errorSnackbarService.showSuccess('Mass edit completed successfully');
+  }
+
+  getMassEditProgress(): { current: number; total: number } {
+    if (!this.isMassEditing) {
+      return { current: 0, total: 0 };
+    }
+    
+    const remaining = this.massEditQueue.length;
+    const current = this.massEditOriginalTotal - remaining;
+    
+    return { current, total: this.massEditOriginalTotal };
   }
 }

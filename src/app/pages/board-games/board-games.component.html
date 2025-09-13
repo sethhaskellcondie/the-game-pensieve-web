@@ -127,7 +127,7 @@
   <div *ngIf="showEditBoardGameModal" class="modal-overlay" (click)="closeEditBoardGameModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Edit Board Game</h2>
+        <h2>{{isMassEditing ? 'Edit Board Game (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Edit Board Game'}}</h2>
         <button type="button" class="close-button" (click)="closeEditBoardGameModal()">×</button>
       </div>
       
