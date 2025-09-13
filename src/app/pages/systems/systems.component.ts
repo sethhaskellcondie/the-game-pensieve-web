@@ -33,6 +33,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   availableCustomFields: any[] = [];
   isDarkMode = false;
   isMassInputMode = false;
+  isMassEditMode = false;
   
   showNewSystemModal = false;
   isCreating = false;
@@ -50,6 +51,12 @@ export class SystemsComponent implements OnInit, OnDestroy {
   isDeleting = false;
 
   showFilterModal = false;
+
+  // Mass Edit Mode properties
+  selectedSystems: Set<number> = new Set();
+  massEditQueue: System[] = [];
+  isMassEditing = false;
+  lastClickedSystemIndex: number = -1;
 
   constructor(
     private apiService: ApiService, 
@@ -69,6 +76,15 @@ export class SystemsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(massInputMode => {
         this.isMassInputMode = massInputMode;
+      });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+        if (!massEditMode) {
+          this.clearMassEditSelection();
+        }
       });
     
     this.loadSystems();
@@ -294,8 +310,15 @@ export class SystemsComponent implements OnInit, OnDestroy {
       this.apiService.updateSystem(this.systemToUpdate.id, systemData).subscribe({
         next: (response) => {
           this.isCreating = false;
-          this.closeNewSystemModal();
-          this.loadSystems(); // Refresh the systems list
+          
+          if (this.isMassEditing) {
+            // If in mass edit mode, move to the next system instead of closing
+            this.editNextSystemInQueue();
+          } else {
+            // Normal update flow
+            this.closeNewSystemModal();
+            this.loadSystems(); // Refresh the systems list
+          }
         },
         error: (error) => {
           this.isCreating = false;
@@ -424,6 +447,106 @@ export class SystemsComponent implements OnInit, OnDestroy {
     }
     
     return `${activeFilters.length} active filters`;
+  }
+
+  // Mass Edit Mode Methods
+  toggleSystemSelection(systemId: number, event?: MouseEvent): void {
+    const currentSystemIndex = this.systems.findIndex(system => system.id === systemId);
+    
+    if (event?.shiftKey && this.lastClickedSystemIndex >= 0 && currentSystemIndex >= 0) {
+      // Shift+click range selection
+      this.handleRangeSelection(currentSystemIndex, systemId);
+    } else {
+      // Normal single selection
+      if (this.selectedSystems.has(systemId)) {
+        this.selectedSystems.delete(systemId);
+      } else {
+        this.selectedSystems.add(systemId);
+      }
+    }
+    
+    this.lastClickedSystemIndex = currentSystemIndex;
+  }
+
+  private handleRangeSelection(currentIndex: number, clickedSystemId: number): void {
+    const startIndex = Math.min(this.lastClickedSystemIndex, currentIndex);
+    const endIndex = Math.max(this.lastClickedSystemIndex, currentIndex);
+    
+    // Determine the state to apply to the range (based on the clicked checkbox state)
+    const targetState = !this.selectedSystems.has(clickedSystemId);
+    
+    // Apply the same state to all systems in the range
+    for (let i = startIndex; i <= endIndex; i++) {
+      const system = this.systems[i];
+      if (targetState) {
+        this.selectedSystems.add(system.id);
+      } else {
+        this.selectedSystems.delete(system.id);
+      }
+    }
+  }
+
+  isSystemSelected(systemId: number): boolean {
+    return this.selectedSystems.has(systemId);
+  }
+
+  hasSelectedSystems(): boolean {
+    return this.selectedSystems.size > 0;
+  }
+
+  isAllSystemsSelected(): boolean {
+    return this.systems.length > 0 && this.selectedSystems.size === this.systems.length;
+  }
+
+  isSomeSystemsSelected(): boolean {
+    return this.selectedSystems.size > 0 && this.selectedSystems.size < this.systems.length;
+  }
+
+  toggleAllSystems(): void {
+    if (this.isAllSystemsSelected()) {
+      // Unselect all
+      this.selectedSystems.clear();
+    } else {
+      // Select all
+      this.systems.forEach(system => this.selectedSystems.add(system.id));
+    }
+  }
+
+  public clearMassEditSelection(): void {
+    this.selectedSystems.clear();
+    this.massEditQueue = [];
+    this.isMassEditing = false;
+    this.lastClickedSystemIndex = -1;
+  }
+
+  startMassEdit(): void {
+    if (this.selectedSystems.size === 0) return;
+    
+    // Build the queue of systems to edit
+    this.massEditQueue = this.systems.filter(system => this.selectedSystems.has(system.id));
+    this.isMassEditing = true;
+    
+    // Start editing the first system
+    this.editNextSystemInQueue();
+  }
+
+  private editNextSystemInQueue(): void {
+    if (this.massEditQueue.length === 0) {
+      // All systems have been edited, clean up
+      this.completeMassEdit();
+      return;
+    }
+    
+    const systemToEdit = this.massEditQueue.shift()!;
+    this.openUpdateSystemModal(systemToEdit);
+  }
+
+  private completeMassEdit(): void {
+    this.isMassEditing = false;
+    this.clearMassEditSelection();
+    this.closeNewSystemModal(); // Close the modal
+    this.loadSystems(); // Refresh the list
+    this.errorSnackbarService.showSuccess('Mass edit completed successfully');
   }
 
 }

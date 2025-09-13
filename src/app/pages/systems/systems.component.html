@@ -5,6 +5,13 @@
       <button type="button" class="new-button" (click)="openNewSystemModal()">
         New
       </button>
+      <button 
+        *ngIf="isMassEditMode && hasSelectedSystems()" 
+        type="button" 
+        class="mass-edit-button" 
+        (click)="startMassEdit()">
+        Mass Edit ({{selectedSystems.size}})
+      </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
@@ -46,6 +53,14 @@
         <table class="systems-table">
           <thead>
             <tr>
+              <th *ngIf="isMassEditMode" class="edit-column-header">
+                <input 
+                  type="checkbox" 
+                  [checked]="isAllSystemsSelected()"
+                  [indeterminate]="isSomeSystemsSelected()"
+                  (change)="toggleAllSystems()"
+                  class="edit-checkbox select-all-checkbox">
+              </th>
               <th>Name</th>
               <th>Generation</th>
               <th>Handheld</th>
@@ -55,6 +70,13 @@
           </thead>
           <tbody>
             <tr *ngFor="let system of systems" class="table-row">
+              <td *ngIf="isMassEditMode" class="edit-checkbox-cell" (click)="$event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  [checked]="isSystemSelected(system.id)"
+                  (click)="toggleSystemSelection(system.id, $event)"
+                  class="edit-checkbox">
+              </td>
               <td class="system-name" (click)="openUpdateSystemModal(system)">
                 {{system.name}}
               </td>
