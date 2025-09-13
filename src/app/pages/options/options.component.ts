@@ -40,6 +40,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
 
   isDarkMode = false;
   isMassInputMode = false;
+  isMassEditMode = false;
 
   entityTypes = [
     { key: 'videoGame', label: 'Video Games' },
@@ -72,6 +73,12 @@ export class OptionsComponent implements OnInit, OnDestroy {
       .subscribe(massInputMode => {
         this.isMassInputMode = massInputMode;
       });
+
+    this.settingsService.getMassEditMode$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(massEditMode => {
+        this.isMassEditMode = massEditMode;
+      });
   }
 
   ngOnDestroy(): void {
@@ -85,6 +92,10 @@ export class OptionsComponent implements OnInit, OnDestroy {
 
   onMassInputModeToggle(enabled: boolean): void {
     this.settingsService.updateMassInputMode(enabled);
+  }
+
+  onMassEditModeToggle(enabled: boolean): void {
+    this.settingsService.updateMassEditMode(enabled);
   }
 
   checkHeartbeat(): void {
