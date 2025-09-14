@@ -6,8 +6,8 @@ The goal is to create a sleek modern web interface for a program to manage a col
 The color scheme is based around blue (#0370ec) and grey (#9e9e9e) but can include other colors.
 
 Documentation of the API can be found in these two files
-backend.postman_collection.json
-backend_openapi_documentation.yaml
+api.openapi.yaml
+api.postman_collection.json
 
 ## Common Development Commands
 
