@@ -10,11 +10,25 @@
         <span class="nav-text">Video Games</span>
       </a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item board-games-nav">
       <a routerLink="/board-game-boxes" routerLinkActive="active" class="nav-link">
         <span class="nav-icon" [innerHTML]="getIconHtml('square-3-stack-3d')"></span>
         <span class="nav-text">Board Games</span>
       </a>
+      <ul class="sub-nav">
+        <li class="sub-nav-item">
+          <a routerLink="/board-game-boxes" routerLinkActive="active" class="sub-nav-link">
+            <span class="sub-nav-icon" [innerHTML]="getIconHtml('archive-box')"></span>
+            <span class="sub-nav-text">Shelf</span>
+          </a>
+        </li>
+        <li class="sub-nav-item">
+          <a routerLink="/board-games" routerLinkActive="active" class="sub-nav-link">
+            <span class="sub-nav-icon" [innerHTML]="getIconHtml('list-view')"></span>
+            <span class="sub-nav-text">List</span>
+          </a>
+        </li>
+      </ul>
     </li>
     <li class="nav-item">
       <a routerLink="/systems" routerLinkActive="active" class="nav-link">
