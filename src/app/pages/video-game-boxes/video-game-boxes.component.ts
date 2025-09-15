@@ -474,13 +474,20 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.isCreating = false;
         this.loadVideoGameBoxes();
-        
+
+        // Refresh the video games dropdown list for the next input
+        this.apiService.getVideoGames().subscribe({
+          next: (videoGames) => {
+            this.allVideoGames = videoGames;
+          }
+        });
+
         this.errorSnackbarService.showSuccess('Video Game Box created successfully');
-        
+
         // Clear the title field but reset custom field values to defaults
         this.newVideoGameBox.title = '';
         this.newVideoGameBox.customFieldValues = this.createDefaultCustomFieldValues();
-        
+
         this.focusTitleInput();
       },
       error: (error) => {

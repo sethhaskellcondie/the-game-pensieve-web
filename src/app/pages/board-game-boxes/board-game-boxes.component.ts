@@ -541,7 +541,21 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isCreating = false;
           this.loadBoardGameBoxes(); // Refresh the board game boxes list
-          
+
+          // Refresh the board games dropdown list for the next input
+          this.apiService.getBoardGames().subscribe({
+            next: (boardGames) => {
+              this.boardGamesForDropdown = boardGames;
+            }
+          });
+
+          // Refresh the board game boxes dropdown list for the base set selection
+          this.apiService.getBoardGameBoxes().subscribe({
+            next: (boardGameBoxes) => {
+              this.boardGameBoxesForDropdown = boardGameBoxes;
+            }
+          });
+
           // Show success toast
           this.errorSnackbarService.showSuccess('Board Game Box created successfully');
           
