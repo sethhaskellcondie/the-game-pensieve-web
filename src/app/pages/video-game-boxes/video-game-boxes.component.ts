@@ -733,15 +733,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('videoGameBox');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('videoGameBox');
   }
 
   private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
