@@ -1214,4 +1214,59 @@
       color: #888;
     }
   }
+
+  // Video games section dark mode
+  .video-games-section {
+    background-color: #1a1a1a;
+    border-color: #555;
+
+    > label {
+      color: #64b5f6;
+    }
+
+    .add-game-button {
+      background-color: #64b5f6;
+      color: #1a1a1a;
+
+      &:hover {
+        background-color: #42a5f5;
+      }
+    }
+
+    .game-collapsed {
+      background-color: #2d2d2d;
+      border-color: #555;
+
+      &:hover {
+        border-color: #64b5f6;
+        box-shadow: 0 2px 4px rgba(100, 181, 246, 0.2);
+      }
+
+      .collapsed-content {
+        .game-title {
+          color: #e0e0e0;
+        }
+
+        .game-type-badge {
+          &.badge-existing {
+            color: #64b5f6;
+            background-color: rgba(100, 181, 246, 0.2);
+          }
+
+          &.badge-new {
+            color: #81c784;
+            background-color: rgba(129, 199, 132, 0.2);
+          }
+        }
+      }
+    }
+
+    .remove-button {
+      color: #b0b0b0;
+
+      &:hover {
+        color: #ff6b6b;
+      }
+    }
+  }
 }
