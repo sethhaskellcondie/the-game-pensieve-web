@@ -129,6 +129,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewBoardGameBoxModal) {
       this.closeNewBoardGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
     }
   }
 
