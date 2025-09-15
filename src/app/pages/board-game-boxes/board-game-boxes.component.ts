@@ -131,6 +131,8 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
       this.closeNewBoardGameBoxModal();
     } else if (this.showDeleteConfirmModal) {
       this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 

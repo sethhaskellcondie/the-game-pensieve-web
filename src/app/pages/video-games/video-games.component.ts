@@ -89,6 +89,10 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditVideoGameModal) {
       this.closeEditVideoGameModal();
+    } else if (this.showDetailVideoGameModal) {
+      this.closeDetailVideoGameModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 

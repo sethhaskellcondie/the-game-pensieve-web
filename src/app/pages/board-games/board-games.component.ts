@@ -87,6 +87,10 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditBoardGameModal) {
       this.closeEditBoardGameModal();
+    } else if (this.showDetailBoardGameModal) {
+      this.closeDetailBoardGameModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
