@@ -89,7 +89,8 @@
   color: inherit;
 }
 
-// Board Games sub-navigation
+// Video Games and Board Games sub-navigation
+.video-games-nav,
 .board-games-nav {
   position: relative;
 }
@@ -106,6 +107,7 @@
   border-left: 3px solid transparent;
 }
 
+.video-games-nav:hover .sub-nav,
 .board-games-nav:hover .sub-nav {
   max-height: 120px; // Enough for 2 items
   opacity: 1;

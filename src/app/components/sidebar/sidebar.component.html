@@ -4,11 +4,25 @@
     <img class="logo-icon" *ngIf="!isDarkMode" src="assets/blue_pensieve.svg" alt="Pensieve Logo">
   </div>
   <ul class="nav-list">
-    <li class="nav-item">
-      <a routerLink="/video-game-boxes" routerLinkActive="active" class="nav-link">
+    <li class="nav-item video-games-nav">
+      <a routerLink="/video-game-boxes" class="nav-link" [class.active]="isVideoGameRouteActive()">
         <span class="nav-icon" [innerHTML]="getIconHtml('computer-desktop')"></span>
         <span class="nav-text">Video Games</span>
       </a>
+      <ul class="sub-nav">
+        <li class="sub-nav-item">
+          <a routerLink="/video-game-boxes" routerLinkActive="active" class="sub-nav-link">
+            <span class="sub-nav-icon" [innerHTML]="getIconHtml('archive-box')"></span>
+            <span class="sub-nav-text">Shelf</span>
+          </a>
+        </li>
+        <li class="sub-nav-item">
+          <a routerLink="/video-games" routerLinkActive="active" class="sub-nav-link">
+            <span class="sub-nav-icon" [innerHTML]="getIconHtml('list-view')"></span>
+            <span class="sub-nav-text">List</span>
+          </a>
+        </li>
+      </ul>
     </li>
     <li class="nav-item board-games-nav">
       <a routerLink="/board-game-boxes" class="nav-link" [class.active]="isBoardGameRouteActive()">

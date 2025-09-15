@@ -49,4 +49,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const url = this.router.url;
     return url.startsWith('/board-game') || url.startsWith('/board-game-box');
   }
+
+  isVideoGameRouteActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/video-game') || url.startsWith('/video-game-box');
+  }
 }
