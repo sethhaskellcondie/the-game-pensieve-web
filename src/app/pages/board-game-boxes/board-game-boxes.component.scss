@@ -444,15 +444,15 @@
   }
 }
 
-.create-button {
+.create-button, .create-and-add-button {
   background-color: #28a745;
   color: white;
-  
+
   &:hover:not(:disabled) {
     background-color: #218838;
     transform: translateY(-1px);
   }
-  
+
   &:disabled {
     background-color: #9e9e9e;
     cursor: not-allowed;
@@ -1035,7 +1035,7 @@
     }
   }
 
-  .create-button {
+  .create-button, .create-and-add-button {
     background-color: #81c784;
     color: #1a1a1a;
 

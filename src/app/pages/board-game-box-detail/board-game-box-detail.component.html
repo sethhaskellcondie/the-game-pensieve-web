@@ -7,6 +7,9 @@
         <button type="button" class="edit-button" (click)="editBoardGameBox()">
           Edit
         </button>
+        <button type="button" class="delete-button" (click)="confirmDeleteBoardGameBox()">
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -193,6 +196,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p *ngIf="boardGameBox">Are you sure you want to delete <strong>{{boardGameBox.title}}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-button" (click)="deleteBoardGameBox()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

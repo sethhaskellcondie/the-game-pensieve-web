@@ -30,6 +30,9 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   
   showEditVideoGameBoxModal = false;
   isUpdating = false;
+
+  showDeleteConfirmModal = false;
+  isDeleting = false;
   editVideoGameBoxData = {
     title: '',
     systemId: null as number | null,
@@ -84,6 +87,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditVideoGameBoxModal) {
       this.closeEditVideoGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
     }
   }
 
@@ -425,5 +430,33 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   cancelVideoGameEdit(index: number): void {
     this.editingVideoGameIndex = null;
+  }
+
+  confirmDeleteVideoGameBox(): void {
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+  }
+
+  deleteVideoGameBox(): void {
+    if (!this.videoGameBox || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteVideoGameBox(this.videoGameBox.id).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        // Navigate back to the video game boxes list after successful deletion
+        this.router.navigate(['/video-game-boxes']);
+      },
+      error: (error) => {
+        this.errorMessage = `Failed to delete video game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+      }
+    });
   }
 }

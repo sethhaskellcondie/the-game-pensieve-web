@@ -32,6 +32,9 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
   
   showEditBoardGameBoxModal = false;
   isUpdating = false;
+
+  showDeleteConfirmModal = false;
+  isDeleting = false;
   boardGameBoxesForDropdown: BoardGameBox[] = [];
   boardGamesForDropdown: BoardGame[] = [];
   
@@ -95,6 +98,8 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditBoardGameBoxModal) {
       this.closeEditBoardGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
     }
   }
 
@@ -327,5 +332,33 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
 
   editBoardGameBox(): void {
     this.openEditBoardGameBoxModal();
+  }
+
+  confirmDeleteBoardGameBox(): void {
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+  }
+
+  deleteBoardGameBox(): void {
+    if (!this.boardGameBox || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteBoardGameBox(this.boardGameBox.id).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        // Navigate back to the board game boxes list after successful deletion
+        this.router.navigate(['/board-game-boxes']);
+      },
+      error: (error) => {
+        this.errorMessage = `Failed to delete board game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+      }
+    });
   }
 }

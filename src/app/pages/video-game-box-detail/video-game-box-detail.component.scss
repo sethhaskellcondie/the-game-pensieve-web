@@ -30,6 +30,9 @@
 }
 
 .header-right {
+  display: flex;
+  gap: 12px;
+
   .edit-button {
     background: rgba(255, 255, 255, 0.2);
     color: white;
@@ -41,10 +44,29 @@
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.3);
       border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+  }
+
+  .delete-button {
+    background: rgba(220, 53, 69, 0.2);
+    color: white;
+    border: 2px solid rgba(220, 53, 69, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      background: rgba(220, 53, 69, 0.3);
+      border-color: rgba(220, 53, 69, 0.5);
       transform: translateY(-2px);
     }
   }
@@ -469,6 +491,11 @@
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+
+  &.delete-modal {
+    max-width: 400px;
+    border-radius: 12px;
+  }
 }
 
 .modal-header {
@@ -519,16 +546,44 @@
   margin-top: 5px;
 }
 
+.modal-body {
+  padding: 24px;
+  text-align: center;
+
+  p {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.5;
+
+    &.warning-text {
+      color: #dc3545;
+      font-weight: 500;
+      margin-top: 16px;
+    }
+
+    strong {
+      color: #0370ec;
+      font-weight: 600;
+    }
+  }
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  padding: 0 24px 24px 24px;
+  border-top: none;
+
+  .delete-modal & {
+    padding-top: 0;
+    margin-top: 24px;
+  }
 }
 
-.cancel-button, .create-button {
+.cancel-button, .create-button, .delete-button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -542,7 +597,7 @@
   background-color: #f8f9fa;
   color: #6c757d;
   border: 2px solid #e0e0e0;
-  
+
   &:hover {
     background-color: #e2e6ea;
   }
@@ -551,12 +606,28 @@
 .create-button {
   background-color: #28a745;
   color: white;
-  
+
   &:hover:not(:disabled) {
     background-color: #218838;
     transform: translateY(-1px);
   }
-  
+
+  &:disabled {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: #c82333;
+    transform: translateY(-1px);
+  }
+
   &:disabled {
     background-color: #9e9e9e;
     cursor: not-allowed;
@@ -828,6 +899,20 @@
     color: #ff6b6b;
   }
 
+  .modal-body {
+    p {
+      color: #e0e0e0;
+
+      &.warning-text {
+        color: #ff6b6b;
+      }
+
+      strong {
+        color: #64b5f6;
+      }
+    }
+  }
+
   .modal-actions {
     border-top-color: #404040;
   }
@@ -849,6 +934,20 @@
 
     &:hover:not(:disabled) {
       background-color: #66bb6a;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  .delete-button {
+    background-color: #ff6b6b;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #ff5252;
     }
 
     &:disabled {
