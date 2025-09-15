@@ -846,5 +846,125 @@
       color: #e0e0e0;
     }
   }
+
+  // Modal dark mode styles
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-content {
+    background: #2d2d2d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-header {
+    border-bottom-color: #404040;
+
+    h2 {
+      color: #64b5f6;
+    }
+  }
+
+  .close-button {
+    color: #b0b0b0;
+
+    &:hover {
+      color: #e0e0e0;
+    }
+  }
+
+  .form-group label {
+    color: #e0e0e0;
+  }
+
+  .form-input, .form-select {
+    background-color: #1a1a1a;
+    border-color: #555;
+    color: #e0e0e0;
+
+    &:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: #ff6b6b;
+    }
+  }
+
+  .form-select option {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+
+    &[value=""] {
+      color: #888;
+    }
+  }
+
+  .error-text {
+    color: #ff6b6b;
+  }
+
+  .modal-actions {
+    border-top-color: #404040;
+  }
+
+  .cancel-button {
+    background-color: #404040;
+    color: #b0b0b0;
+    border-color: #555;
+
+    &:hover {
+      background-color: #555;
+      color: #e0e0e0;
+    }
+  }
+
+  .create-button {
+    background-color: #81c784;
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background-color: #66bb6a;
+    }
+
+    &:disabled {
+      background-color: #555;
+      color: #888;
+    }
+  }
+
+  // Video game boxes section dark mode
+  .readonly-boxes-list {
+    background-color: transparent;
+
+    .readonly-box-item {
+      background-color: #2d2d2d;
+      border-color: #555;
+      color: #e0e0e0;
+
+      &:hover {
+        border-color: #64b5f6;
+        box-shadow: 0 2px 4px rgba(100, 181, 246, 0.2);
+      }
+
+      .box-title {
+        color: #64b5f6;
+      }
+
+      .box-system {
+        color: #b0b0b0;
+      }
+
+      .box-type {
+        background-color: rgba(100, 181, 246, 0.2);
+        color: #64b5f6;
+      }
+    }
+  }
+
+  .info-text {
+    color: #b0b0b0;
+  }
 }
 
