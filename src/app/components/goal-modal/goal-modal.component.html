@@ -17,7 +17,7 @@
           [class.error]="validationErrors['name']"
           [disabled]="isSubmitting"
           maxlength="100"
-          placeholder="Enter your goal..."
+          placeholder=""
         />
         <div *ngIf="validationErrors['name']" class="error-message">
           {{validationErrors['name']}}
@@ -33,7 +33,7 @@
           [disabled]="isSubmitting"
           rows="3"
           maxlength="500"
-          placeholder="Optional description..."
+          placeholder=""
         ></textarea>
       </div>
 
