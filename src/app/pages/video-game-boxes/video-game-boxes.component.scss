@@ -1268,5 +1268,35 @@
         color: #ff6b6b;
       }
     }
+
+    // Radio button styles for dark mode
+    .radio-label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .radio-input {
+        margin-right: 12px;
+      }
+
+      .radio-text {
+        color: #e0e0e0;
+      }
+    }
+  }
+}
+
+// Radio button styles for light mode
+.radio-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+
+  .radio-input {
+    margin-right: 12px;
+  }
+
+  .radio-text {
+    color: #333;
   }
 }

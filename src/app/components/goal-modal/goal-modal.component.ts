@@ -121,7 +121,7 @@ export class GoalModalComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get modalTitle(): string {
-    return this.goal ? 'Edit Goal' : 'Create New Goal';
+    return this.goal ? 'Edit Goal' : 'New Goal';
   }
 
   get submitButtonText(): string {
