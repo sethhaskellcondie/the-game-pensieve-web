@@ -1,6 +1,7 @@
 <nav class="sidebar">
   <div class="sidebar-logo clickable" (click)="navigateToHome()">
-    <span class="logo-icon" [innerHTML]="getIconHtml('cube')"></span>
+    <img class="logo-icon" *ngIf="isDarkMode" src="assets/light_blue_pensieve.svg" alt="Pensieve Logo">
+    <img class="logo-icon" *ngIf="!isDarkMode" src="assets/blue_pensieve.svg" alt="Pensieve Logo">
   </div>
   <ul class="nav-list">
     <li class="nav-item">
