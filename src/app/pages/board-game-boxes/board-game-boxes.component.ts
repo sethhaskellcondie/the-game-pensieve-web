@@ -299,11 +299,15 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  navigateToBoardGameBoxDetail(boardGameBox: BoardGameBox): void {
+    this.router.navigate(['/board-game-box', boardGameBox.id]);
+  }
+
   openUpdateBoardGameBoxModal(boardGameBox: BoardGameBox): void {
     this.isUpdateMode = true;
     this.boardGameBoxToUpdate = boardGameBox;
     this.showNewBoardGameBoxModal = true;
-    
+
     // Determine board game selection mode based on existing data
     if (boardGameBox.boardGame) {
       this.boardGameSelectionMode = 'existing';

@@ -80,14 +80,14 @@
                   (click)="toggleBoardGameBoxSelection(box.id, $event)"
                   class="edit-checkbox">
               </td>
-              <td class="game-title" (click)="openUpdateBoardGameBoxModal(box)">{{box.title}}</td>
-              <td class="game-expansion" (click)="openUpdateBoardGameBoxModal(box)">
+              <td class="game-title" (click)="navigateToBoardGameBoxDetail(box)">{{box.title}}</td>
+              <td class="game-expansion" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display [value]="box.isExpansion" size="small"></app-boolean-display>
               </td>
-              <td class="game-standalone" (click)="openUpdateBoardGameBoxModal(box)">
+              <td class="game-standalone" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display [value]="box.isStandAlone" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateBoardGameBoxModal(box)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(box, fieldName)"
                   [value]="getCustomFieldValue(box, fieldName)"
