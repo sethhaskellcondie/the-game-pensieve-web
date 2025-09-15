@@ -93,13 +93,71 @@ export class FilterService {
   getFilterDisplayText(entityType: string): string {
     const filters = this.getActiveFilters(entityType);
     if (filters.length === 0) return '';
-    
+
     if (filters.length === 1) {
       const filter = filters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
+      const fieldLabel = this.formatFieldName(filter.field);
+      const operatorLabel = this.getOperatorLabel(filter.operator);
+      return `${fieldLabel} ${operatorLabel} "${filter.operand}"`;
     }
-    
+
     return `${filters.length} filters active`;
+  }
+
+  /**
+   * Format field name to human-readable label
+   */
+  private formatFieldName(fieldName: string): string {
+    // Handle specific field name mappings
+    switch (fieldName) {
+      case 'is_expansion':
+        return 'Expansion';
+      case 'is_stand_alone':
+        return 'Standalone';
+      case 'is_physical':
+        return 'Physical';
+      case 'is_collection':
+        return 'Collection';
+      default:
+        return fieldName
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, str => str.toUpperCase())
+          .trim();
+    }
+  }
+
+  /**
+   * Get human-readable operator label
+   */
+  private getOperatorLabel(operator: string): string {
+    switch (operator) {
+      case 'equals':
+        return 'Equals';
+      case 'not_equals':
+        return 'Not Equals';
+      case 'contains':
+        return 'Contains';
+      case 'starts_with':
+        return 'Starts With';
+      case 'ends_with':
+        return 'Ends With';
+      case 'greater_than':
+        return 'Greater Than';
+      case 'less_than':
+        return 'Less Than';
+      case 'greater_than_equal_to':
+        return 'Greater Than or Equal To';
+      case 'less_than_equal_to':
+        return 'Less Than or Equal To';
+      case 'sort':
+        return 'Sort';
+      case 'order_by':
+        return 'Sort Ascending';
+      case 'order_by_desc':
+        return 'Sort Descending';
+      default:
+        return operator;
+    }
   }
 
   /**
