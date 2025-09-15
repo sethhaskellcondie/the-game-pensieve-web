@@ -44,4 +44,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   navigateToHome(): void {
     this.router.navigate(['/home']);
   }
+
+  isBoardGameRouteActive(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/board-game') || url.startsWith('/board-game-box');
+  }
 }
