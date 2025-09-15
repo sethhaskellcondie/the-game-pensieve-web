@@ -76,7 +76,7 @@
                 </div>
               </td>
               <td class="field-type" (click)="startEditingField(field)">
-                <span class="type-badge" [class]="'type-' + field.type">{{field.type}}</span>
+                <span class="type-badge" [class]="'type-' + field.type">{{getTypeDisplayName(field.type)}}</span>
               </td>
               <td class="field-entity" (click)="startEditingField(field)">
                 <span class="entity-badge" [style.background-color]="getEntityColor(field.entityKey) + '20'" [style.color]="getEntityColor(field.entityKey)">{{getEntityDisplayName(field.entityKey)}}</span>

@@ -35,7 +35,7 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   typeOptions: DropdownOption[] = [
     { value: 'text', label: 'Text' },
     { value: 'number', label: 'Number' },
-    { value: 'boolean', label: 'Boolean' }
+    { value: 'boolean', label: 'Yes/No' }
   ];
   
   entityOptions: DropdownOption[] = [
@@ -312,6 +312,15 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
         // Error snackbar will be shown automatically by API service
       }
     });
+  }
+
+  getTypeDisplayName(type: string): string {
+    const typeNames: { [key: string]: string } = {
+      'text': 'Text',
+      'number': 'Number',
+      'boolean': 'Yes/No'
+    };
+    return typeNames[type] || type;
   }
 
   getEntityDisplayName(entityKey: string): string {
