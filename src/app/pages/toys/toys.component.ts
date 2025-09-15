@@ -98,6 +98,10 @@ export class ToysComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewToyModal) {
       this.closeNewToyModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
