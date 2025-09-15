@@ -169,6 +169,13 @@
           </app-filterable-dropdown>
         </div>
 
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields
+          entityKey="boardGameBox"
+          sectionTitle=""
+          [(customFieldValues)]="editBoardGameBoxData.customFieldValues">
+        </app-dynamic-custom-fields>
+
         <div class="form-group">
           <label for="editBoardGameId">Related Board Game</label>
           <app-filterable-dropdown
@@ -179,13 +186,6 @@
             placeholder="">
           </app-filterable-dropdown>
         </div>
-
-        <!-- Dynamic Custom Fields -->
-        <app-dynamic-custom-fields 
-          entityKey="boardGameBox" 
-          sectionTitle=""
-          [(customFieldValues)]="editBoardGameBoxData.customFieldValues">
-        </app-dynamic-custom-fields>
 
         <div class="modal-actions">
           <button type="button" class="cancel-button" (click)="closeEditBoardGameBoxModal()">

@@ -168,32 +168,41 @@
           </app-filterable-dropdown>
         </div>
 
+        <!-- Board Game Box Custom Fields -->
+        <div class="custom-fields-wrapper">
+          <app-dynamic-custom-fields
+            entityKey="boardGameBox"
+            sectionTitle="Board Game Box Custom Fields"
+            [(customFieldValues)]="newBoardGameBox.customFieldValues">
+          </app-dynamic-custom-fields>
+        </div>
+
         <!-- Board Game Selection Mode -->
         <div class="form-group">
           <label>Board Game Selection *</label>
           <div class="radio-group">
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="self-contained"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
               <span class="radio-text">Self-contained Game</span>
             </label>
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="existing"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
               <span class="radio-text">Select Existing Board Game</span>
             </label>
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="new"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
@@ -205,9 +214,9 @@
         <!-- Existing Board Game Selection -->
         <div class="form-group" *ngIf="boardGameSelectionMode === 'existing'">
           <label for="boardGameId">Select Board Game *</label>
-          <select 
-            id="boardGameId" 
-            name="boardGameId" 
+          <select
+            id="boardGameId"
+            name="boardGameId"
             [(ngModel)]="newBoardGameBox.boardGameId"
             class="form-select">
             <option value="">Select a board game</option>
@@ -231,20 +240,10 @@
 
         <!-- New Board Game Custom Fields -->
         <div *ngIf="boardGameSelectionMode === 'new'" class="custom-fields-wrapper">
-          <app-dynamic-custom-fields 
-            entityKey="boardGame" 
+          <app-dynamic-custom-fields
+            entityKey="boardGame"
             sectionTitle=""
             [(customFieldValues)]="newBoardGameBox.newBoardGame.customFieldValues">
-          </app-dynamic-custom-fields>
-        </div>
-
-
-        <!-- Board Game Box Custom Fields -->
-        <div class="custom-fields-wrapper">
-          <app-dynamic-custom-fields 
-            entityKey="boardGameBox" 
-            sectionTitle="Board Game Box Custom Fields"
-            [(customFieldValues)]="newBoardGameBox.customFieldValues">
           </app-dynamic-custom-fields>
         </div>
 
