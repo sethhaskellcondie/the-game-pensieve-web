@@ -202,6 +202,10 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     }
   }
 
+  navigateToVideoGameDetail(videoGame: VideoGame): void {
+    this.router.navigate(['/video-game', videoGame.id]);
+  }
+
   openEditVideoGameModal(videoGame: VideoGame): void {
     this.videoGameToUpdate = videoGame;
     this.showEditVideoGameModal = true;

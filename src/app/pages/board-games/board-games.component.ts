@@ -230,6 +230,10 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     }
   }
 
+  navigateToBoardGameDetail(boardGame: BoardGame): void {
+    this.router.navigate(['/board-game', boardGame.id]);
+  }
+
   openEditBoardGameModal(boardGame: BoardGame): void {
     this.boardGameToUpdate = boardGame;
     this.showEditBoardGameModal = true;

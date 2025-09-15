@@ -71,8 +71,8 @@
                   (click)="toggleBoardGameSelection(game.id, $event)"
                   class="edit-checkbox">
               </td>
-              <td class="game-title" (click)="openEditBoardGameModal(game)">{{game.title}}</td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openEditBoardGameModal(game)">
+              <td class="game-title" (click)="navigateToBoardGameDetail(game)">{{game.title}}</td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToBoardGameDetail(game)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(game, fieldName)"
                   [value]="getCustomFieldValue(game, fieldName)"
