@@ -36,7 +36,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   isDeleting = false;
   editVideoGameBoxData = {
     title: '',
-    systemId: null as number | null,
+    systemId: null as string | null,
     isPhysical: false,
     isCollection: false,
     videoGames: [] as { 
@@ -52,6 +52,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   systems: any[] = [];
   allVideoGames: any[] = [];
   editingVideoGameIndex: number | null = null;
+  videoGameBackup: any = null;
 
   get systemOptions(): DropdownOption[] {
     return this.systems.map(system => ({
@@ -233,7 +234,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: existingVideoGames,
@@ -244,7 +245,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             console.error('Error loading video games:', error);
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: [],
@@ -274,7 +275,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: existingVideoGames,
@@ -285,7 +286,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             console.error('Error loading video games:', error);
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: [],
@@ -318,7 +319,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   }
 
   onSubmitEditVideoGameBox(): void {
-    if (this.isUpdating || !this.editVideoGameBoxData.title || !this.videoGameBox || this.editVideoGameBoxData.systemId === null) {
+    if (this.isUpdating || !this.editVideoGameBoxData.title || !this.videoGameBox || !this.editVideoGameBoxData.systemId) {
       return;
     }
     
@@ -340,7 +341,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     
     const videoGameBoxData = {
       title: this.editVideoGameBoxData.title,
-      systemId: this.editVideoGameBoxData.systemId,
+      systemId: parseInt(this.editVideoGameBoxData.systemId!),
       isPhysical: this.editVideoGameBoxData.isPhysical,
       isCollection: this.editVideoGameBoxData.isCollection,
       existingVideoGameIds,
@@ -426,6 +427,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   editVideoGame(index: number): void {
     this.editingVideoGameIndex = index;
+    this.videoGameBackup = JSON.parse(JSON.stringify(this.editVideoGameBoxData.videoGames[index]));
   }
 
   isVideoGameBeingEdited(index: number): boolean {
@@ -434,10 +436,26 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   saveVideoGameEdit(index: number): void {
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   cancelVideoGameEdit(index: number): void {
+    if (this.editingVideoGameIndex === null) return;
+
+    const videoGame = this.editVideoGameBoxData.videoGames[index];
+
+    if (this.videoGameBackup) {
+      const isCompletelyNew = !this.isVideoGameSelected(videoGame) && !this.isVideoGameSelected(this.videoGameBackup);
+
+      if (isCompletelyNew) {
+        this.editVideoGameBoxData.videoGames.splice(index, 1);
+      } else {
+        this.editVideoGameBoxData.videoGames[index] = this.videoGameBackup;
+      }
+    }
+
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   confirmDeleteVideoGameBox(): void {

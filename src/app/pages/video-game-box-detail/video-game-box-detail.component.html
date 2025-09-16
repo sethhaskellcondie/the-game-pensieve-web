@@ -212,31 +212,31 @@
                 <div class="game-header">
                   <div class="video-game-type-selection">
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="existing"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Select Existing</span>
                     </label>
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="new"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Create New</span>
                     </label>
                   </div>
-                  
-                  <!-- Show save/cancel buttons when editing, otherwise show remove button -->
-                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i)">
+
+                  <!-- Show save/cancel buttons when editing or video game is not selected, otherwise show remove button -->
+                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i) || !isVideoGameSelected(videoGame)">
                     <button type="button" class="save-button" (click)="saveVideoGameEdit(i)">✓</button>
                     <button type="button" class="cancel-button" (click)="cancelVideoGameEdit(i)">×</button>
                   </div>
-                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i)" (click)="removeVideoGame(i)">×</button>
+                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i) && isVideoGameSelected(videoGame)" (click)="removeVideoGame(i)">×</button>
                 </div>
                 
                 <!-- Existing Video Game Selection -->

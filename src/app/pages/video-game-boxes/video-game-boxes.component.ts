@@ -45,6 +45,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   videoGameBoxToUpdate: VideoGameBox | null = null;
   allVideoGames: VideoGame[] = [];
   editingVideoGameIndex: number | null = null;
+  videoGameBackup: any = null;
 
   get videoGameOptions(): DropdownOption[] {
     return this.allVideoGames.map(game => ({
@@ -62,7 +63,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
 
   newVideoGameBox = {
     title: '',
-    systemId: null as number | null,
+    systemId: null as string | null,
     isPhysical: false,
     isCollection: false,
     videoGames: [] as { 
@@ -295,7 +296,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         
         this.newVideoGameBox = {
           title: videoGameBox.title,
-          systemId: videoGameBox.system.id,
+          systemId: videoGameBox.system.id.toString(),
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: existingVideoGames,
@@ -312,7 +313,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         
         this.newVideoGameBox = {
           title: videoGameBox.title,
-          systemId: videoGameBox.system.id,
+          systemId: videoGameBox.system.id.toString(),
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: [],
@@ -340,7 +341,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitNewVideoGameBox(): void {
-    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null) {
+    if (this.isCreating || !this.newVideoGameBox.title || !this.newVideoGameBox.systemId) {
       return;
     }
 
@@ -388,7 +389,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     const videoGameBoxData = {
       title: this.newVideoGameBox.title,
-      systemId: this.newVideoGameBox.systemId,
+      systemId: parseInt(this.newVideoGameBox.systemId!),
       isPhysical: this.newVideoGameBox.isPhysical,
       isCollection: this.newVideoGameBox.isCollection,
       existingVideoGameIds: existingVideoGameIds,
@@ -435,7 +436,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitAndAddAnother(): void {
-    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null || !this.hasAtLeastOneValidVideoGame()) {
+    if (this.isCreating || !this.newVideoGameBox.title || !this.newVideoGameBox.systemId || !this.hasAtLeastOneValidVideoGame()) {
       return;
     }
 
@@ -478,7 +479,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     const videoGameBoxData = {
       title: this.newVideoGameBox.title,
-      systemId: this.newVideoGameBox.systemId,
+      systemId: parseInt(this.newVideoGameBox.systemId!),
       isPhysical: this.newVideoGameBox.isPhysical,
       isCollection: this.newVideoGameBox.isCollection,
       existingVideoGameIds: existingVideoGameIds,
@@ -590,7 +591,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             type: 'new' as 'existing' | 'new',
             existingVideoGameId: null,
             title: this.newVideoGameBox.title,
-            systemId: this.newVideoGameBox.systemId,
+            systemId: parseInt(this.newVideoGameBox.systemId!),
             customFieldValues: customFields.map((field: any) => ({
               customFieldId: field.id,
               customFieldName: field.name,
@@ -605,7 +606,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             type: 'new' as 'existing' | 'new',
             existingVideoGameId: null,
             title: this.newVideoGameBox.title,
-            systemId: this.newVideoGameBox.systemId,
+            systemId: parseInt(this.newVideoGameBox.systemId!),
             customFieldValues: []
           });
         }
@@ -642,6 +643,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   editVideoGame(index: number): void {
+    // Create a deep copy backup of the current video game state
+    this.videoGameBackup = JSON.parse(JSON.stringify(this.newVideoGameBox.videoGames[index]));
     this.editingVideoGameIndex = index;
   }
 
@@ -650,11 +653,29 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   saveVideoGameEdit(index: number): void {
+    // Clear editing state and backup when saving
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   cancelVideoGameEdit(index: number): void {
+    // Check if this is a completely new video game that should be removed
+    const videoGame = this.newVideoGameBox.videoGames[index];
+    const isCompletelyNew = !this.isVideoGameSelected(videoGame) && this.videoGameBackup && !this.isVideoGameSelected(this.videoGameBackup);
+
+    if (isCompletelyNew) {
+      // Remove the new video game entirely
+      this.newVideoGameBox.videoGames.splice(index, 1);
+    } else {
+      // Restore the video game to its previous state from backup
+      if (this.videoGameBackup !== null && this.editingVideoGameIndex !== null) {
+        this.newVideoGameBox.videoGames[this.editingVideoGameIndex] = JSON.parse(JSON.stringify(this.videoGameBackup));
+      }
+    }
+
+    // Clear editing state
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   confirmDeleteVideoGameBox(videoGameBox: VideoGameBox): void {

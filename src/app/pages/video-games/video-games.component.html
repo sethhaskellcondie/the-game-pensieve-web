@@ -197,21 +197,14 @@
 
         <div class="form-group">
           <label for="systemId">System *</label>
-          <select 
-            id="systemId" 
-            name="systemId" 
+          <app-filterable-dropdown
+            id="systemId"
+            name="systemId"
             [(ngModel)]="editVideoGame.systemId"
-            #systemField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a system</option>
-            <option *ngFor="let system of systems" [value]="system.id">
-              {{system.name}} (Gen {{system.generation}})
-            </option>
-          </select>
-          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
-            System selection is required
-          </div>
+            [options]="systemOptions"
+            [required]="true"
+            placeholder="">
+          </app-filterable-dropdown>
         </div>
 
         <!-- Dynamic Custom Fields -->
