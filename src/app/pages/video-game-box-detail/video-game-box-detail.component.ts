@@ -41,9 +41,9 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     isCollection: false,
     videoGames: [] as { 
       type: 'existing' | 'new';
-      existingVideoGameId?: number | null;
+      existingVideoGameId?: string | null;
       title?: string; 
-      systemId?: number | null; 
+      systemId?: string | null; 
       customFieldValues: any[] 
     }[],
     customFieldValues: [] as any[]
@@ -58,6 +58,13 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     return this.systems.map(system => ({
       value: system.id.toString(),
       label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
+
+  get videoGameOptions(): DropdownOption[] {
+    return this.allVideoGames.map(game => ({
+      value: game.id.toString(),
+      label: `${game.title} (${game.system.name})`
     }));
   }
   availableCustomFields: any[] = [];
@@ -226,7 +233,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id,
+              existingVideoGameId: game.id.toString(),
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -267,7 +274,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id,
+              existingVideoGameId: game.id.toString(),
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -329,13 +336,13 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     // Process video games similar to the main video game boxes component
     const existingVideoGameIds = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'existing' && vg.existingVideoGameId)
-      .map(vg => vg.existingVideoGameId!);
+      .map(vg => parseInt(vg.existingVideoGameId!));
     
     const newVideoGames = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'new' && vg.title && vg.systemId)
       .map(vg => ({
         title: vg.title!,
-        systemId: vg.systemId!,
+        systemId: parseInt(vg.systemId!),
         customFieldValues: vg.customFieldValues
       }));
     
@@ -383,6 +390,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           }))
         };
         this.editVideoGameBoxData.videoGames.push(newVideoGame);
+        // Set the newly added video game to editing mode
+        this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
       },
       error: (error: any) => {
         console.error('Error loading custom fields for video game:', error);
@@ -393,6 +402,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           systemId: null,
           customFieldValues: []
         });
+        // Set the newly added video game to editing mode
+        this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
       }
     });
   }
@@ -408,6 +419,10 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
       return !!(videoGame.title && videoGame.title.trim() !== '' && videoGame.systemId);
     }
     return false;
+  }
+
+  isVideoGameSelectedAndNotBeingEdited(videoGame: any, index: number): boolean {
+    return this.isVideoGameSelected(videoGame) && !this.isVideoGameBeingEdited(index);
   }
 
   getVideoGameDisplayText(videoGame: any): string {

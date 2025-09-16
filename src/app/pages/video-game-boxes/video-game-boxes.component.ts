@@ -583,6 +583,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         systemId: undefined,
         customFieldValues: []
       });
+      // Set the newly added video game to editing mode
+      this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
     } else {
       // For new type, load custom fields but leave them empty for manual entry
       this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
@@ -600,6 +602,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             }))
           };
           this.newVideoGameBox.videoGames.push(newVideoGame);
+          // Set the newly added video game to editing mode
+          this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
         },
         error: (error: any) => {
           this.newVideoGameBox.videoGames.push({
@@ -609,6 +613,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             systemId: this.newVideoGameBox.systemId,
             customFieldValues: []
           });
+          // Set the newly added video game to editing mode
+          this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
         }
       });
     }
