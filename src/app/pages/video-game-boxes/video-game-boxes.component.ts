@@ -70,7 +70,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       type: 'existing' | 'new';
       existingVideoGameId?: number | null;
       title?: string; 
-      systemId?: number | null; 
+      systemId?: string | null; 
       customFieldValues: any[] 
     }[],
     customFieldValues: [] as any[]
@@ -383,7 +383,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .filter(game => game.type === 'new')
       .map(game => ({
         title: game.title!,
-        systemId: game.systemId!,
+        systemId: parseInt(game.systemId!),
         customFieldValues: game.customFieldValues
       }));
     
@@ -473,7 +473,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .filter(game => game.type === 'new')
       .map(game => ({
         title: game.title!,
-        systemId: game.systemId!,
+        systemId: parseInt(game.systemId!),
         customFieldValues: game.customFieldValues
       }));
     
@@ -591,7 +591,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             type: 'new' as 'existing' | 'new',
             existingVideoGameId: null,
             title: this.newVideoGameBox.title,
-            systemId: parseInt(this.newVideoGameBox.systemId!),
+            systemId: this.newVideoGameBox.systemId,
             customFieldValues: customFields.map((field: any) => ({
               customFieldId: field.id,
               customFieldName: field.name,
@@ -606,7 +606,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             type: 'new' as 'existing' | 'new',
             existingVideoGameId: null,
             title: this.newVideoGameBox.title,
-            systemId: parseInt(this.newVideoGameBox.systemId!),
+            systemId: this.newVideoGameBox.systemId,
             customFieldValues: []
           });
         }

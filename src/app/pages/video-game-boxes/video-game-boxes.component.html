@@ -205,9 +205,9 @@
   <div *ngIf="showNewVideoGameBoxModal" class="modal-overlay" (click)="closeNewVideoGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Video Game Box') : 'New Video Game Box'}}</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Edit Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Edit Video Game Box') : 'New Video Game Box'}}</h2>
         <div class="modal-header-actions">
-          <button *ngIf="isUpdateMode" type="button" class="details-button" (click)="openDetailFromEdit()">
+          <button *ngIf="isUpdateMode && !isMassEditing" type="button" class="details-button" (click)="openDetailFromEdit()">
             Details
           </button>
           <button type="button" class="close-button" (click)="closeNewVideoGameBoxModal()">×</button>
