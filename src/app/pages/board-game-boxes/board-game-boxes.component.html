@@ -220,16 +220,13 @@
         <!-- Existing Board Game Selection -->
         <div class="form-group" *ngIf="boardGameSelectionMode === 'existing'">
           <label for="boardGameId">Select Board Game *</label>
-          <select
+          <app-filterable-dropdown
             id="boardGameId"
             name="boardGameId"
             [(ngModel)]="newBoardGameBox.boardGameId"
-            class="form-select">
-            <option value="">Select a board game</option>
-            <option *ngFor="let game of boardGamesForDropdown" [value]="game.id">
-              {{game.title}}
-            </option>
-          </select>
+            [options]="boardGameOptions"
+            placeholder="Select a board game">
+          </app-filterable-dropdown>
         </div>
 
         <!-- New Board Game Creation -->
