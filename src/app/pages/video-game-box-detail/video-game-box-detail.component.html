@@ -233,7 +233,7 @@
 
                   <!-- Show save/cancel buttons when editing or video game is not selected, otherwise show remove button -->
                   <div class="game-actions" *ngIf="isVideoGameBeingEdited(i) || !isVideoGameSelected(videoGame)">
-                    <button type="button" class="save-button" (click)="saveVideoGameEdit(i)">✓</button>
+                    <button type="button" class="save-button" [disabled]="!isVideoGameSelected(videoGame)" (click)="saveVideoGameEdit(i)">✓</button>
                     <button type="button" class="cancel-button" (click)="cancelVideoGameEdit(i)">×</button>
                   </div>
                   <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i) && isVideoGameSelected(videoGame)" (click)="removeVideoGame(i)">×</button>
