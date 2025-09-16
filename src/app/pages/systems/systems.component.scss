@@ -91,14 +91,48 @@
   min-height: 300px;
 }
 
-.loading-message, .error-message, .no-systems-message {
+.loading-message, .error-message, .no-systems-message, .empty-state {
   text-align: center;
   padding: 40px 20px;
-  
+
   p {
     font-size: 1.2rem;
     color: #666;
     margin: 0;
+    line-height: 1.5;
+  }
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+
+  p {
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: #0370ec;
+    font-size: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    margin: 0;
+
+    &:hover {
+      color: #0256c7;
+      text-decoration: none;
+    }
+
+    &:focus {
+      outline: 2px solid #0370ec;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
   }
 }
 
@@ -604,9 +638,23 @@
     }
   }
 
-  .loading-message, .error-message, .no-systems-message {
+  .loading-message, .error-message, .no-systems-message, .empty-state {
     p {
       color: #b0b0b0;
+    }
+  }
+
+  .empty-state {
+    .link-button {
+      color: #64b5f6;
+
+      &:hover {
+        color: #42a5f5;
+      }
+
+      &:focus {
+        outline-color: #64b5f6;
+      }
     }
   }
 

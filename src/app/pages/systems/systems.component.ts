@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService, System } from '../../services/api.service';
@@ -60,10 +61,11 @@ export class SystemsComponent implements OnInit, OnDestroy {
   massEditOriginalTotal = 0;
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public filterService: FilterService,
     private settingsService: SettingsService,
-    private errorSnackbarService: ErrorSnackbarService
+    private errorSnackbarService: ErrorSnackbarService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -557,6 +559,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 
 }

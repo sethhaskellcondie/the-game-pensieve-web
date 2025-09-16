@@ -42,7 +42,11 @@
         </div>
       </div>
 
-      <div *ngIf="systems.length === 0" class="no-systems-message">
+      <div *ngIf="systems.length === 0 && !filterService.hasActiveFilters('system')" class="empty-state">
+        <p>No Systems data found.<br><br>To start create a <button type="button" class="link-button" (click)="openNewSystemModal()">New</button> system or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="systems.length === 0 && filterService.hasActiveFilters('system')" class="no-systems-message">
         <p>No systems found.</p>
       </div>
       
