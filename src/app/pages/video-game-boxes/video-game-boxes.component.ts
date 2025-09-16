@@ -52,6 +52,14 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       label: `${game.title} (${game.system.name})`
     }));
   }
+
+  get systemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
+
   newVideoGameBox = {
     title: '',
     systemId: null as number | null,

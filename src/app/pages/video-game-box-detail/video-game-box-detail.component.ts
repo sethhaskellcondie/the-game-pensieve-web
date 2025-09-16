@@ -8,6 +8,7 @@ import { ApiService, VideoGame, VideoGameBox } from '../../services/api.service'
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
@@ -15,7 +16,7 @@ import { SettingsService } from '../../services/settings.service';
 @Component({
   selector: 'app-video-game-box-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, BooleanDisplayComponent, DynamicCustomFieldsComponent, SelectableTextInputComponent, CustomCheckboxComponent],
+  imports: [CommonModule, FormsModule, BooleanDisplayComponent, DynamicCustomFieldsComponent, SelectableTextInputComponent, FilterableDropdownComponent, CustomCheckboxComponent],
   templateUrl: './video-game-box-detail.component.html',
   styleUrl: './video-game-box-detail.component.scss'
 })
@@ -51,6 +52,13 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   systems: any[] = [];
   allVideoGames: any[] = [];
   editingVideoGameIndex: number | null = null;
+
+  get systemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
   availableCustomFields: any[] = [];
 
   constructor(

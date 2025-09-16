@@ -155,21 +155,14 @@
 
         <div class="form-group">
           <label for="systemId">System *</label>
-          <select 
-            id="systemId" 
-            name="systemId" 
+          <app-filterable-dropdown
+            id="systemId"
+            name="systemId"
             [(ngModel)]="editVideoGameBoxData.systemId"
-            #systemField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a system</option>
-            <option *ngFor="let system of systems" [value]="system.id">
-              {{system.name}} (Gen {{system.generation}})
-            </option>
-          </select>
-          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
-            System selection is required
-          </div>
+            [options]="systemOptions"
+            [required]="true"
+            placeholder="">
+          </app-filterable-dropdown>
         </div>
 
         <div class="form-group">
@@ -275,17 +268,14 @@
                   </div>
                   <div class="form-group">
                     <label for="newGameSystem{{i}}">System *</label>
-                    <select 
-                      id="newGameSystem{{i}}" 
-                      [name]="'newGameSystemId' + i" 
+                    <app-filterable-dropdown
+                      id="newGameSystem{{i}}"
+                      [name]="'newGameSystemId' + i"
                       [(ngModel)]="videoGame.systemId"
-                      required
-                      class="form-select">
-                      <option value="">Select a system</option>
-                      <option *ngFor="let system of systems" [value]="system.id">
-                        {{system.name}} (Gen {{system.generation}})
-                      </option>
-                    </select>
+                      [options]="systemOptions"
+                      [required]="true"
+                      placeholder="">
+                    </app-filterable-dropdown>
                   </div>
                   <app-dynamic-custom-fields 
                     entityKey="videoGame" 
