@@ -42,7 +42,13 @@
         </div>
       </div>
       
-      <div *ngIf="videoGameBoxes.length === 0" class="no-games-message">
+      <div *ngIf="videoGameBoxes.length === 0 && !filterService.hasActiveFilters('videoGameBox')" class="empty-state">
+        <p>No Video Game Boxes data found.<br><br>
+            Video Game Boxes represent how video games appear on your shelf, each video game box must include what Video Games are included in that box. Some Boxes are collections, or re-releases of other Video Games, this is setup in the Video Game Box. <br><br>
+            To start create a <button type="button" class="link-button" (click)="openNewVideoGameBoxModal()">New</button> video game box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="videoGameBoxes.length === 0 && filterService.hasActiveFilters('videoGameBox')" class="no-games-message">
         <p>No video game boxes found.</p>
       </div>
       
@@ -199,7 +205,7 @@
   <div *ngIf="showNewVideoGameBoxModal" class="modal-overlay" (click)="closeNewVideoGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Existing Video Game Box') : 'Create New Video Game Box'}}</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Video Game Box') : 'New Video Game Box'}}</h2>
         <div class="modal-header-actions">
           <button *ngIf="isUpdateMode" type="button" class="details-button" (click)="openDetailFromEdit()">
             Details

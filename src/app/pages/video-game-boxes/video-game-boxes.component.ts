@@ -878,4 +878,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     
     return { current, total: this.massEditOriginalTotal };
   }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
+  }
 }

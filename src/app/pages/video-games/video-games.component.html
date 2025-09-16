@@ -39,7 +39,13 @@
         </div>
       </div>
       
-      <div *ngIf="videoGames.length === 0" class="no-games-message">
+      <div *ngIf="videoGames.length === 0 && !filterService.hasActiveFilters('videoGame')" class="empty-state">
+        <p>No Video Games data found.<br><br>
+            This is a list of all of the Video Games in your collection, not the games as they appear on your shelf in collections or re-releases, but a list of games that are found in your collection.<br><br>
+            Video Games are created through creating Video Game Boxes, go to the <button type="button" class="link-button" (click)="navigateToShelfView()">Shelf View</button> to create your first Video Game Box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="videoGames.length === 0 && filterService.hasActiveFilters('videoGame')" class="no-games-message">
         <p>No video games found.</p>
       </div>
       

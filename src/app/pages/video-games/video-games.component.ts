@@ -506,4 +506,12 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
+  }
+
+  navigateToShelfView(): void {
+    this.router.navigate(['/video-game-boxes']);
+  }
 }
