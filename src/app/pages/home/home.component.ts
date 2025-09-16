@@ -316,4 +316,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.onShortcutClick(shortcut);
     }
   }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
+  }
 }
