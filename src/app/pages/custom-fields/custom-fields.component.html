@@ -54,10 +54,10 @@
                 Name <span class="sort-icon">{{getSortIcon('name')}}</span>
               </th>
               <th class="sortable-header" (click)="sortTable('type')">
-                Type <span class="sort-icon">{{getSortIcon('type')}}</span>
+                Custom Field Type <span class="sort-icon">{{getSortIcon('type')}}</span>
               </th>
               <th class="sortable-header" (click)="sortTable('entity')">
-                Entity <span class="sort-icon">{{getSortIcon('entity')}}</span>
+                Type <span class="sort-icon">{{getSortIcon('entity')}}</span>
               </th>
               <th>Delete</th>
             </tr>
@@ -128,7 +128,7 @@
         </div>
 
         <div class="form-group">
-          <label for="type">Type *</label>
+          <label for="type">Custom Field Type *</label>
           <app-filterable-dropdown
             id="type"
             name="type"
@@ -144,7 +144,7 @@
         </div>
 
         <div class="form-group">
-          <label for="entityKey">Entity Type *</label>
+          <label for="entityKey">Type *</label>
           <app-filterable-dropdown
             id="entityKey"
             name="entityKey"
