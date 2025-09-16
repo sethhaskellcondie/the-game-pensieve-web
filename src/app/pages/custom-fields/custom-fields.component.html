@@ -35,7 +35,11 @@
         </div>
       </div>
 
-      <div *ngIf="customFields.length === 0" class="no-fields-message">
+      <div *ngIf="customFields.length === 0 && !currentFilter" class="empty-state">
+        <p>No Custom Fields data found.<br><br>To start create a <button type="button" class="link-button" (click)="openNewCustomFieldModal()">New</button> custom field or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="customFields.length === 0 && currentFilter" class="no-fields-message">
         <p>No custom fields found.</p>
       </div>
       
@@ -50,12 +54,12 @@
                 Name <span class="sort-icon">{{getSortIcon('name')}}</span>
               </th>
               <th class="sortable-header" (click)="sortTable('type')">
-                Type <span class="sort-icon">{{getSortIcon('type')}}</span>
+                Custom Field Type <span class="sort-icon">{{getSortIcon('type')}}</span>
               </th>
               <th class="sortable-header" (click)="sortTable('entity')">
-                Entity <span class="sort-icon">{{getSortIcon('entity')}}</span>
+                Type <span class="sort-icon">{{getSortIcon('entity')}}</span>
               </th>
-              <th>Actions</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +80,7 @@
                 </div>
               </td>
               <td class="field-type" (click)="startEditingField(field)">
-                <span class="type-badge" [class]="'type-' + field.type">{{field.type}}</span>
+                <span class="type-badge" [class]="'type-' + field.type">{{getTypeDisplayName(field.type)}}</span>
               </td>
               <td class="field-entity" (click)="startEditingField(field)">
                 <span class="entity-badge" [style.background-color]="getEntityColor(field.entityKey) + '20'" [style.color]="getEntityColor(field.entityKey)">{{getEntityDisplayName(field.entityKey)}}</span>
@@ -124,7 +128,7 @@
         </div>
 
         <div class="form-group">
-          <label for="type">Type *</label>
+          <label for="type">Custom Field Type *</label>
           <app-filterable-dropdown
             id="type"
             name="type"
@@ -140,7 +144,7 @@
         </div>
 
         <div class="form-group">
-          <label for="entityKey">Entity Type *</label>
+          <label for="entityKey">Type *</label>
           <app-filterable-dropdown
             id="entityKey"
             name="entityKey"

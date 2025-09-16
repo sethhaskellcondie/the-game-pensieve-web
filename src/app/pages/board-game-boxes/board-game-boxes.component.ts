@@ -129,6 +129,10 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewBoardGameBoxModal) {
       this.closeNewBoardGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -299,11 +303,15 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  navigateToBoardGameBoxDetail(boardGameBox: BoardGameBox): void {
+    this.router.navigate(['/board-game-box', boardGameBox.id]);
+  }
+
   openUpdateBoardGameBoxModal(boardGameBox: BoardGameBox): void {
     this.isUpdateMode = true;
     this.boardGameBoxToUpdate = boardGameBox;
     this.showNewBoardGameBoxModal = true;
-    
+
     // Determine board game selection mode based on existing data
     if (boardGameBox.boardGame) {
       this.boardGameSelectionMode = 'existing';
@@ -533,7 +541,21 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.isCreating = false;
           this.loadBoardGameBoxes(); // Refresh the board game boxes list
-          
+
+          // Refresh the board games dropdown list for the next input
+          this.apiService.getBoardGames().subscribe({
+            next: (boardGames) => {
+              this.boardGamesForDropdown = boardGames;
+            }
+          });
+
+          // Refresh the board game boxes dropdown list for the base set selection
+          this.apiService.getBoardGameBoxes().subscribe({
+            next: (boardGameBoxes) => {
+              this.boardGameBoxesForDropdown = boardGameBoxes;
+            }
+          });
+
           // Show success toast
           this.errorSnackbarService.showSuccess('Board Game Box created successfully');
           
@@ -662,15 +684,7 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('boardGameBox');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('boardGameBox');
   }
 
   // Mass Edit Mode Methods
@@ -784,5 +798,9 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 }

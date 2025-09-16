@@ -9,6 +9,7 @@ import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fi
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
@@ -17,7 +18,7 @@ import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 @Component({
   selector: 'app-video-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent, EntityFilterModalComponent],
   templateUrl: './video-game-boxes.component.html',
   styleUrl: './video-game-boxes.component.scss'
 })
@@ -44,16 +45,32 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   videoGameBoxToUpdate: VideoGameBox | null = null;
   allVideoGames: VideoGame[] = [];
   editingVideoGameIndex: number | null = null;
+  videoGameBackup: any = null;
+
+  get videoGameOptions(): DropdownOption[] {
+    return this.allVideoGames.map(game => ({
+      value: game.id.toString(),
+      label: `${game.title} (${game.system.name})`
+    }));
+  }
+
+  get systemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
+
   newVideoGameBox = {
     title: '',
-    systemId: null as number | null,
+    systemId: null as string | null,
     isPhysical: false,
     isCollection: false,
     videoGames: [] as { 
       type: 'existing' | 'new';
       existingVideoGameId?: number | null;
       title?: string; 
-      systemId?: number | null; 
+      systemId?: string | null; 
       customFieldValues: any[] 
     }[],
     customFieldValues: [] as any[]
@@ -279,7 +296,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         
         this.newVideoGameBox = {
           title: videoGameBox.title,
-          systemId: videoGameBox.system.id,
+          systemId: videoGameBox.system.id.toString(),
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: existingVideoGames,
@@ -296,7 +313,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         
         this.newVideoGameBox = {
           title: videoGameBox.title,
-          systemId: videoGameBox.system.id,
+          systemId: videoGameBox.system.id.toString(),
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
           videoGames: [],
@@ -324,7 +341,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitNewVideoGameBox(): void {
-    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null) {
+    if (this.isCreating || !this.newVideoGameBox.title || !this.newVideoGameBox.systemId) {
       return;
     }
 
@@ -366,13 +383,13 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .filter(game => game.type === 'new')
       .map(game => ({
         title: game.title!,
-        systemId: game.systemId!,
+        systemId: parseInt(game.systemId!),
         customFieldValues: game.customFieldValues
       }));
     
     const videoGameBoxData = {
       title: this.newVideoGameBox.title,
-      systemId: this.newVideoGameBox.systemId,
+      systemId: parseInt(this.newVideoGameBox.systemId!),
       isPhysical: this.newVideoGameBox.isPhysical,
       isCollection: this.newVideoGameBox.isCollection,
       existingVideoGameIds: existingVideoGameIds,
@@ -419,7 +436,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitAndAddAnother(): void {
-    if (this.isCreating || !this.newVideoGameBox.title || this.newVideoGameBox.systemId === null || !this.hasAtLeastOneValidVideoGame()) {
+    if (this.isCreating || !this.newVideoGameBox.title || !this.newVideoGameBox.systemId || !this.hasAtLeastOneValidVideoGame()) {
       return;
     }
 
@@ -456,13 +473,13 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       .filter(game => game.type === 'new')
       .map(game => ({
         title: game.title!,
-        systemId: game.systemId!,
+        systemId: parseInt(game.systemId!),
         customFieldValues: game.customFieldValues
       }));
     
     const videoGameBoxData = {
       title: this.newVideoGameBox.title,
-      systemId: this.newVideoGameBox.systemId,
+      systemId: parseInt(this.newVideoGameBox.systemId!),
       isPhysical: this.newVideoGameBox.isPhysical,
       isCollection: this.newVideoGameBox.isCollection,
       existingVideoGameIds: existingVideoGameIds,
@@ -474,13 +491,20 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       next: (response) => {
         this.isCreating = false;
         this.loadVideoGameBoxes();
-        
+
+        // Refresh the video games dropdown list for the next input
+        this.apiService.getVideoGames().subscribe({
+          next: (videoGames) => {
+            this.allVideoGames = videoGames;
+          }
+        });
+
         this.errorSnackbarService.showSuccess('Video Game Box created successfully');
-        
+
         // Clear the title field but reset custom field values to defaults
         this.newVideoGameBox.title = '';
         this.newVideoGameBox.customFieldValues = this.createDefaultCustomFieldValues();
-        
+
         this.focusTitleInput();
       },
       error: (error) => {
@@ -507,6 +531,12 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewVideoGameBoxModal) {
       this.closeNewVideoGameBoxModal();
+    } else if (this.showDetailVideoGameBoxModal) {
+      this.closeDetailVideoGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -553,6 +583,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         systemId: undefined,
         customFieldValues: []
       });
+      // Set the newly added video game to editing mode
+      this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
     } else {
       // For new type, load custom fields but leave them empty for manual entry
       this.apiService.getCustomFieldsByEntity('videoGame').subscribe({
@@ -570,6 +602,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             }))
           };
           this.newVideoGameBox.videoGames.push(newVideoGame);
+          // Set the newly added video game to editing mode
+          this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
         },
         error: (error: any) => {
           this.newVideoGameBox.videoGames.push({
@@ -579,6 +613,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
             systemId: this.newVideoGameBox.systemId,
             customFieldValues: []
           });
+          // Set the newly added video game to editing mode
+          this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
         }
       });
     }
@@ -613,6 +649,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   editVideoGame(index: number): void {
+    // Create a deep copy backup of the current video game state
+    this.videoGameBackup = JSON.parse(JSON.stringify(this.newVideoGameBox.videoGames[index]));
     this.editingVideoGameIndex = index;
   }
 
@@ -621,11 +659,29 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   saveVideoGameEdit(index: number): void {
+    // Clear editing state and backup when saving
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   cancelVideoGameEdit(index: number): void {
+    // Check if this is a completely new video game that should be removed
+    const videoGame = this.newVideoGameBox.videoGames[index];
+    const isCompletelyNew = !this.isVideoGameSelected(videoGame) && this.videoGameBackup && !this.isVideoGameSelected(this.videoGameBackup);
+
+    if (isCompletelyNew) {
+      // Remove the new video game entirely
+      this.newVideoGameBox.videoGames.splice(index, 1);
+    } else {
+      // Restore the video game to its previous state from backup
+      if (this.videoGameBackup !== null && this.editingVideoGameIndex !== null) {
+        this.newVideoGameBox.videoGames[this.editingVideoGameIndex] = JSON.parse(JSON.stringify(this.videoGameBackup));
+      }
+    }
+
+    // Clear editing state
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   confirmDeleteVideoGameBox(videoGameBox: VideoGameBox): void {
@@ -720,15 +776,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('videoGameBox');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('videoGameBox');
   }
 
   private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
@@ -872,5 +920,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService, CustomField } from '../../services/api.service';
@@ -35,7 +36,7 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   typeOptions: DropdownOption[] = [
     { value: 'text', label: 'Text' },
     { value: 'number', label: 'Number' },
-    { value: 'boolean', label: 'Boolean' }
+    { value: 'boolean', label: 'Yes/No' }
   ];
   
   entityOptions: DropdownOption[] = [
@@ -72,10 +73,11 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   isMassInputMode = false;
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public iconService: IconService,
     private settingsService: SettingsService,
-    private errorSnackbarService: ErrorSnackbarService
+    private errorSnackbarService: ErrorSnackbarService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -104,6 +106,10 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewCustomFieldModal) {
       this.closeNewCustomFieldModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -314,6 +320,15 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getTypeDisplayName(type: string): string {
+    const typeNames: { [key: string]: string } = {
+      'text': 'Text',
+      'number': 'Number',
+      'boolean': 'Yes/No'
+    };
+    return typeNames[type] || type;
+  }
+
   getEntityDisplayName(entityKey: string): string {
     const entityNames: { [key: string]: string } = {
       'toy': 'Toy',
@@ -454,5 +469,9 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     if (savedFilter) {
       this.currentFilter = savedFilter;
     }
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 }

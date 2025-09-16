@@ -12,9 +12,6 @@
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
-      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-        {{isLoading ? 'Loading...' : 'Swap View'}}
-      </button>
     </div>
   </div>
 
@@ -42,7 +39,13 @@
         </div>
       </div>
       
-      <div *ngIf="boardGames.length === 0" class="no-games-message">
+      <div *ngIf="boardGames.length === 0 && !filterService.hasActiveFilters('boardGame')" class="empty-state">
+        <p>No Board Games data found.<br><br>
+            This is a list of all of the Board Games in your collection, not the games as they appear on your shelf in boxes but the list of games not including expansions or repeats.<br><br>
+            Board Games are created through creating Board Game Boxes, go to the <button type="button" class="link-button" (click)="navigateToShelfView()">Shelf View</button> to create your first Board Game Box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="boardGames.length === 0 && filterService.hasActiveFilters('boardGame')" class="no-games-message">
         <p>No board games found.</p>
       </div>
       
@@ -74,8 +77,8 @@
                   (click)="toggleBoardGameSelection(game.id, $event)"
                   class="edit-checkbox">
               </td>
-              <td class="game-title" (click)="openEditBoardGameModal(game)">{{game.title}}</td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openEditBoardGameModal(game)">
+              <td class="game-title" (click)="navigateToBoardGameDetail(game)">{{game.title}}</td>
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToBoardGameDetail(game)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(game, fieldName)"
                   [value]="getCustomFieldValue(game, fieldName)"

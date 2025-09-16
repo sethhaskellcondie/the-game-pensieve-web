@@ -8,6 +8,7 @@ import { ApiService, VideoGame, System, VideoGameBox, CustomField } from '../../
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
@@ -16,7 +17,7 @@ import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 @Component({
   selector: 'app-video-games',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, SelectableTextInputComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, SelectableTextInputComponent, FilterableDropdownComponent, EntityFilterModalComponent],
   templateUrl: './video-games.component.html',
   styleUrl: './video-games.component.scss'
 })
@@ -41,7 +42,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   videoGameToUpdate: VideoGame | null = null;
   editVideoGame = {
     title: '',
-    systemId: null as number | null,
+    systemId: null as string | null,
     customFieldValues: [] as any[]
   };
   
@@ -54,6 +55,13 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   isMassEditing = false;
   lastClickedVideoGameIndex: number = -1;
   massEditOriginalTotal = 0;
+
+  get systemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
 
   constructor(
     private apiService: ApiService, 
@@ -89,6 +97,10 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditVideoGameModal) {
       this.closeEditVideoGameModal();
+    } else if (this.showDetailVideoGameModal) {
+      this.closeDetailVideoGameModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -202,12 +214,16 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     }
   }
 
+  navigateToVideoGameDetail(videoGame: VideoGame): void {
+    this.router.navigate(['/video-game', videoGame.id]);
+  }
+
   openEditVideoGameModal(videoGame: VideoGame): void {
     this.videoGameToUpdate = videoGame;
     this.showEditVideoGameModal = true;
     this.editVideoGame = {
       title: videoGame.title,
-      systemId: videoGame.system.id,
+      systemId: videoGame.system.id.toString(),
       customFieldValues: this.mergeWithDefaultCustomFieldValues(videoGame.customFieldValues)
     };
   }
@@ -223,7 +239,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   }
 
   onSubmitEditVideoGame(): void {
-    if (this.isUpdating || !this.editVideoGame.title || this.editVideoGame.systemId === null || !this.videoGameToUpdate) {
+    if (this.isUpdating || !this.editVideoGame.title || !this.editVideoGame.systemId || !this.videoGameToUpdate) {
       return;
     }
     
@@ -231,7 +247,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
     
     const videoGameData = {
       title: this.editVideoGame.title,
-      systemId: this.editVideoGame.systemId,
+      systemId: parseInt(this.editVideoGame.systemId!),
       customFieldValues: this.editVideoGame.customFieldValues
     };
     
@@ -378,15 +394,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('videoGame');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('videoGame');
   }
 
   // Mass Edit Mode Methods
@@ -505,5 +513,13 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
+  }
+
+  navigateToShelfView(): void {
+    this.router.navigate(['/video-game-boxes']);
   }
 }

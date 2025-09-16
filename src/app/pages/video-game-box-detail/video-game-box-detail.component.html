@@ -7,6 +7,9 @@
         <button type="button" class="edit-button" (click)="editVideoGameBoxMethod()">
           Edit
         </button>
+        <button type="button" class="delete-button" (click)="confirmDeleteVideoGameBox()">
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -152,21 +155,14 @@
 
         <div class="form-group">
           <label for="systemId">System *</label>
-          <select 
-            id="systemId" 
-            name="systemId" 
+          <app-filterable-dropdown
+            id="systemId"
+            name="systemId"
             [(ngModel)]="editVideoGameBoxData.systemId"
-            #systemField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a system</option>
-            <option *ngFor="let system of systems" [value]="system.id">
-              {{system.name}} (Gen {{system.generation}})
-            </option>
-          </select>
-          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
-            System selection is required
-          </div>
+            [options]="systemOptions"
+            [required]="true"
+            placeholder="">
+          </app-filterable-dropdown>
         </div>
 
         <div class="form-group">
@@ -201,7 +197,7 @@
             <div class="new-game-item" *ngFor="let videoGame of editVideoGameBoxData.videoGames; let i = index">
               
               <!-- Collapsed View - Show when video game is selected and not being edited -->
-              <div class="game-collapsed" *ngIf="isVideoGameSelected(videoGame) && !isVideoGameBeingEdited(i)" (click)="editVideoGame(i)">
+              <div class="game-collapsed" *ngIf="isVideoGameSelectedAndNotBeingEdited(videoGame, i)" (click)="editVideoGame(i)">
                 <div class="collapsed-content">
                   <span class="game-title">{{getVideoGameDisplayText(videoGame)}}</span>
                   <span class="game-type-badge" [class]="videoGame.type === 'existing' ? 'badge-existing' : 'badge-new'">
@@ -212,51 +208,48 @@
               </div>
 
               <!-- Expanded View - Show when video game is not selected OR being edited -->
-              <div class="game-expanded" *ngIf="!isVideoGameSelected(videoGame) || isVideoGameBeingEdited(i)">
+              <div class="game-expanded" *ngIf="!isVideoGameSelectedAndNotBeingEdited(videoGame, i)">
                 <div class="game-header">
                   <div class="video-game-type-selection">
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="existing"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Select Existing</span>
                     </label>
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="new"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Create New</span>
                     </label>
                   </div>
-                  
-                  <!-- Show save/cancel buttons when editing, otherwise show remove button -->
-                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i)">
-                    <button type="button" class="save-button" (click)="saveVideoGameEdit(i)">✓</button>
+
+                  <!-- Show save/cancel buttons when editing or video game is not selected, otherwise show remove button -->
+                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i) || !isVideoGameSelected(videoGame)">
+                    <button type="button" class="save-button" [disabled]="!isVideoGameSelected(videoGame)" (click)="saveVideoGameEdit(i)">✓</button>
                     <button type="button" class="cancel-button" (click)="cancelVideoGameEdit(i)">×</button>
                   </div>
-                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i)" (click)="removeVideoGame(i)">×</button>
+                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i) && isVideoGameSelectedAndNotBeingEdited(videoGame, i)" (click)="removeVideoGame(i)">×</button>
                 </div>
                 
                 <!-- Existing Video Game Selection -->
                 <div class="form-group" *ngIf="videoGame.type === 'existing'">
                   <label for="existingGame{{i}}">Select Video Game *</label>
-                  <select 
-                    id="existingGame{{i}}" 
-                    [name]="'existingVideoGameId' + i" 
+                  <app-filterable-dropdown
+                    id="existingGame{{i}}"
+                    [name]="'existingVideoGameId' + i"
                     [(ngModel)]="videoGame.existingVideoGameId"
-                    required
-                    class="form-select">
-                    <option value="">Select a video game</option>
-                    <option *ngFor="let game of allVideoGames" [value]="game.id">
-                      {{game.title}} ({{game.system.name}})
-                    </option>
-                  </select>
+                    [options]="videoGameOptions"
+                    [required]="true"
+                    placeholder="">
+                  </app-filterable-dropdown>
                 </div>
 
                 <!-- New Video Game Creation -->
@@ -272,17 +265,14 @@
                   </div>
                   <div class="form-group">
                     <label for="newGameSystem{{i}}">System *</label>
-                    <select 
-                      id="newGameSystem{{i}}" 
-                      [name]="'newGameSystemId' + i" 
+                    <app-filterable-dropdown
+                      id="newGameSystem{{i}}"
+                      [name]="'newGameSystemId' + i"
                       [(ngModel)]="videoGame.systemId"
-                      required
-                      class="form-select">
-                      <option value="">Select a system</option>
-                      <option *ngFor="let system of systems" [value]="system.id">
-                        {{system.name}} (Gen {{system.generation}})
-                      </option>
-                    </select>
+                      [options]="systemOptions"
+                      [required]="true"
+                      placeholder="">
+                    </app-filterable-dropdown>
                   </div>
                   <app-dynamic-custom-fields 
                     entityKey="videoGame" 
@@ -306,6 +296,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p *ngIf="videoGameBox">Are you sure you want to delete <strong>{{videoGameBox.title}}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-button" (click)="deleteVideoGameBox()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

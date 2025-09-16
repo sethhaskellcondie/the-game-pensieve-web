@@ -1,6 +1,6 @@
 <div class="toys-container" [class.dark-mode]="isDarkMode">
   <div class="header-section">
-    <h1>Toys</h1>
+    <h1>Toys & Accessories</h1>
     <div class="header-buttons">
       <button type="button" class="new-button" (click)="openNewToyModal()">
         New
@@ -42,7 +42,11 @@
         </div>
       </div>
 
-      <div *ngIf="toys.length === 0" class="no-toys-message">
+      <div *ngIf="toys.length === 0 && !filterService.hasActiveFilters('toy')" class="empty-state">
+        <p>No Toys data found.<br><br>To start create a <button type="button" class="link-button" (click)="openNewToyModal()">New</button> toy or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="toys.length === 0 && filterService.hasActiveFilters('toy')" class="no-toys-message">
         <p>No toys found.</p>
       </div>
       
@@ -64,7 +68,7 @@
               <th>Name</th>
               <th>Set</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
-              <th>Actions</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>

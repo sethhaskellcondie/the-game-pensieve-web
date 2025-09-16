@@ -12,10 +12,10 @@
         {{showCounts ? 'Show Details' : 'Display Counts'}}
       </button>
       <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
-        + Shortcut
+        New Shortcut
       </button>
       <button type="button" class="create-button primary" (click)="onCreateGoal()">
-        + Goal
+        New Goal
       </button>
     </div>
   </div>
@@ -105,16 +105,11 @@
   <!-- Empty State -->
   <div class="empty-state" *ngIf="goals.length === 0 && shortcuts.length === 0">
     <div class="empty-content">
-      <h2>Welcome to your Goals & Shortcuts dashboard!</h2>
-      <p>Create your first goal to organize your shortcuts, or create a standalone shortcut.</p>
-      <div class="empty-actions">
-        <button type="button" class="create-button primary" (click)="onCreateGoal()">
-          Create Your First Goal
-        </button>
-        <button type="button" class="create-button secondary" (click)="onCreateShortcut()">
-          Or Create a Shortcut
-        </button>
-      </div>
+      <h2>Welcome to The Game Pensieve!</h2>
+      <p>
+          The best way to get started is to input some data. On the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page you can import some data, or to start manually inputting data start open any other page and click the New button.<br><br>
+          After some data has been imported you can come back here and create some shortcuts and goals to view your collection in new ways!
+      </p>
     </div>
   </div>
 

@@ -1,6 +1,6 @@
 <div class="board-games-container" [class.dark-mode]="isDarkMode">
   <div class="header-section">
-    <h1>Board Game Boxes (Shelf View)</h1>
+    <h1>Board Games (Shelf View)</h1>
     <div class="header-buttons">
       <button type="button" class="new-button" (click)="openNewBoardGameBoxModal()">
         New
@@ -14,9 +14,6 @@
       </button>
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
-      </button>
-      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-        {{isLoading ? 'Loading...' : 'Swap View'}}
       </button>
     </div>
   </div>
@@ -45,7 +42,13 @@
         </div>
       </div>
       
-      <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
+      <div *ngIf="boardGameBoxes.length === 0 && !filterService.hasActiveFilters('boardGameBox')" class="empty-state">
+        <p>No Board Game Boxes data found.<br><br>
+            Board Game Boxes represent how board games appear on your shelf, each board game box must include what Board Game is included in that box. Many boxes can include the same board game. <br><br>
+            To start create a <button type="button" class="link-button" (click)="openNewBoardGameBoxModal()">New</button> board game box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="boardGameBoxes.length === 0 && filterService.hasActiveFilters('boardGameBox')" class="no-games-message">
         <p>No board game boxes found.</p>
       </div>
       
@@ -68,7 +71,7 @@
               <th>Expansion</th>
               <th>Standalone</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
-              <th>Actions</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -80,14 +83,14 @@
                   (click)="toggleBoardGameBoxSelection(box.id, $event)"
                   class="edit-checkbox">
               </td>
-              <td class="game-title" (click)="openUpdateBoardGameBoxModal(box)">{{box.title}}</td>
-              <td class="game-expansion" (click)="openUpdateBoardGameBoxModal(box)">
+              <td class="game-title" (click)="navigateToBoardGameBoxDetail(box)">{{box.title}}</td>
+              <td class="game-expansion" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display [value]="box.isExpansion" size="small"></app-boolean-display>
               </td>
-              <td class="game-standalone" (click)="openUpdateBoardGameBoxModal(box)">
+              <td class="game-standalone" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display [value]="box.isStandAlone" size="small"></app-boolean-display>
               </td>
-              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="openUpdateBoardGameBoxModal(box)">
+              <td *ngFor="let fieldName of customFieldNames" class="custom-field-value" (click)="navigateToBoardGameBoxDetail(box)">
                 <app-boolean-display 
                   *ngIf="shouldDisplayBooleanBadge(box, fieldName)"
                   [value]="getCustomFieldValue(box, fieldName)"
@@ -167,8 +170,17 @@
             name="baseSetId"
             [(ngModel)]="newBoardGameBox.baseSetId"
             [options]="baseSetOptions"
-            placeholder="Select a base set (optional)">
+            placeholder="">
           </app-filterable-dropdown>
+        </div>
+
+        <!-- Board Game Box Custom Fields -->
+        <div class="custom-fields-wrapper">
+          <app-dynamic-custom-fields
+            entityKey="boardGameBox"
+            sectionTitle=""
+            [(customFieldValues)]="newBoardGameBox.customFieldValues">
+          </app-dynamic-custom-fields>
         </div>
 
         <!-- Board Game Selection Mode -->
@@ -176,31 +188,31 @@
           <label>Board Game Selection *</label>
           <div class="radio-group">
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="self-contained"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
               <span class="radio-text">Self-contained Game</span>
             </label>
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="existing"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
               <span class="radio-text">Select Existing Board Game</span>
             </label>
             <label class="radio-label">
-              <input 
-                type="radio" 
-                name="boardGameMode" 
+              <input
+                type="radio"
+                name="boardGameMode"
                 value="new"
                 [(ngModel)]="boardGameSelectionMode"
                 class="radio-input">
-              <span class="radio-text">Create New Board Game</span>
+              <span class="radio-text">New Board Game</span>
             </label>
           </div>
         </div>
@@ -208,16 +220,13 @@
         <!-- Existing Board Game Selection -->
         <div class="form-group" *ngIf="boardGameSelectionMode === 'existing'">
           <label for="boardGameId">Select Board Game *</label>
-          <select 
-            id="boardGameId" 
-            name="boardGameId" 
+          <app-filterable-dropdown
+            id="boardGameId"
+            name="boardGameId"
             [(ngModel)]="newBoardGameBox.boardGameId"
-            class="form-select">
-            <option value="">Select a board game</option>
-            <option *ngFor="let game of boardGamesForDropdown" [value]="game.id">
-              {{game.title}}
-            </option>
-          </select>
+            [options]="boardGameOptions"
+            placeholder="Select a board game">
+          </app-filterable-dropdown>
         </div>
 
         <!-- New Board Game Creation -->
@@ -234,20 +243,10 @@
 
         <!-- New Board Game Custom Fields -->
         <div *ngIf="boardGameSelectionMode === 'new'" class="custom-fields-wrapper">
-          <app-dynamic-custom-fields 
-            entityKey="boardGame" 
+          <app-dynamic-custom-fields
+            entityKey="boardGame"
             sectionTitle=""
             [(customFieldValues)]="newBoardGameBox.newBoardGame.customFieldValues">
-          </app-dynamic-custom-fields>
-        </div>
-
-
-        <!-- Board Game Box Custom Fields -->
-        <div class="custom-fields-wrapper">
-          <app-dynamic-custom-fields 
-            entityKey="boardGameBox" 
-            sectionTitle="Board Game Box Custom Fields"
-            [(customFieldValues)]="newBoardGameBox.customFieldValues">
           </app-dynamic-custom-fields>
         </div>
 

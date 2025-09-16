@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService, System } from '../../services/api.service';
@@ -60,10 +61,11 @@ export class SystemsComponent implements OnInit, OnDestroy {
   massEditOriginalTotal = 0;
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public filterService: FilterService,
     private settingsService: SettingsService,
-    private errorSnackbarService: ErrorSnackbarService
+    private errorSnackbarService: ErrorSnackbarService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -101,6 +103,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewSystemModal) {
       this.closeNewSystemModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -439,15 +445,7 @@ export class SystemsComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('system');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('system');
   }
 
   // Mass Edit Mode Methods
@@ -561,6 +559,10 @@ export class SystemsComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -83,6 +83,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showCreateShortcutModal || this.showEditShortcutModal) {
+      this.onCloseShortcutModal();
+    } else if (this.showCreateGoalModal || this.showEditGoalModal) {
+      this.onCloseGoalModal();
+    }
   }
 
   // Goal-related methods
@@ -306,5 +315,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       // When in count mode, navigate to search results
       this.onShortcutClick(shortcut);
     }
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 }

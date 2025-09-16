@@ -7,6 +7,9 @@
         <button type="button" class="edit-button" (click)="editBoardGameBox()">
           Edit
         </button>
+        <button type="button" class="delete-button" (click)="confirmDeleteBoardGameBox()">
+          Delete
+        </button>
       </div>
     </div>
   </div>
@@ -162,9 +165,16 @@
             name="editBaseSetId"
             [(ngModel)]="editBoardGameBoxData.baseSetId"
             [options]="baseSetOptions"
-            placeholder="Select a base set (optional)">
+            placeholder="">
           </app-filterable-dropdown>
         </div>
+
+        <!-- Dynamic Custom Fields -->
+        <app-dynamic-custom-fields
+          entityKey="boardGameBox"
+          sectionTitle=""
+          [(customFieldValues)]="editBoardGameBoxData.customFieldValues">
+        </app-dynamic-custom-fields>
 
         <div class="form-group">
           <label for="editBoardGameId">Related Board Game</label>
@@ -177,13 +187,6 @@
           </app-filterable-dropdown>
         </div>
 
-        <!-- Dynamic Custom Fields -->
-        <app-dynamic-custom-fields 
-          entityKey="boardGameBox" 
-          sectionTitle=""
-          [(customFieldValues)]="editBoardGameBoxData.customFieldValues">
-        </app-dynamic-custom-fields>
-
         <div class="modal-actions">
           <button type="button" class="cancel-button" (click)="closeEditBoardGameBoxModal()">
             Cancel
@@ -193,6 +196,30 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteConfirmModal" class="modal-overlay" (click)="closeDeleteConfirmModal()">
+    <div class="modal-content delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Deletion</h2>
+        <button type="button" class="close-button" (click)="closeDeleteConfirmModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p *ngIf="boardGameBox">Are you sure you want to delete <strong>{{boardGameBox.title}}</strong>?</p>
+        <p class="warning-text">This action cannot be undone.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-button" (click)="closeDeleteConfirmModal()">
+          Cancel
+        </button>
+        <button type="button" class="delete-button" (click)="deleteBoardGameBox()" [disabled]="isDeleting">
+          {{isDeleting ? 'Deleting...' : 'Delete'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>

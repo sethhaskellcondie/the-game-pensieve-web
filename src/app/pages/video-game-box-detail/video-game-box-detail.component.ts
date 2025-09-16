@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { ApiService, VideoGame, VideoGameBox } from '../../services/api.service'
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fields/dynamic-custom-fields.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { SettingsService } from '../../services/settings.service';
@@ -15,7 +16,7 @@ import { SettingsService } from '../../services/settings.service';
 @Component({
   selector: 'app-video-game-box-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, BooleanDisplayComponent, DynamicCustomFieldsComponent, SelectableTextInputComponent, CustomCheckboxComponent],
+  imports: [CommonModule, FormsModule, BooleanDisplayComponent, DynamicCustomFieldsComponent, SelectableTextInputComponent, FilterableDropdownComponent, CustomCheckboxComponent],
   templateUrl: './video-game-box-detail.component.html',
   styleUrl: './video-game-box-detail.component.scss'
 })
@@ -30,16 +31,19 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   
   showEditVideoGameBoxModal = false;
   isUpdating = false;
+
+  showDeleteConfirmModal = false;
+  isDeleting = false;
   editVideoGameBoxData = {
     title: '',
-    systemId: null as number | null,
+    systemId: null as string | null,
     isPhysical: false,
     isCollection: false,
     videoGames: [] as { 
       type: 'existing' | 'new';
-      existingVideoGameId?: number | null;
+      existingVideoGameId?: string | null;
       title?: string; 
-      systemId?: number | null; 
+      systemId?: string | null; 
       customFieldValues: any[] 
     }[],
     customFieldValues: [] as any[]
@@ -48,6 +52,21 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   systems: any[] = [];
   allVideoGames: any[] = [];
   editingVideoGameIndex: number | null = null;
+  videoGameBackup: any = null;
+
+  get systemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
+
+  get videoGameOptions(): DropdownOption[] {
+    return this.allVideoGames.map(game => ({
+      value: game.id.toString(),
+      label: `${game.title} (${game.system.name})`
+    }));
+  }
   availableCustomFields: any[] = [];
 
   constructor(
@@ -78,6 +97,15 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.showEditVideoGameBoxModal) {
+      this.closeEditVideoGameBoxModal();
+    } else if (this.showDeleteConfirmModal) {
+      this.closeDeleteConfirmModal();
+    }
   }
 
   loadVideoGameBox(id: number): void {
@@ -205,7 +233,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id,
+              existingVideoGameId: game.id.toString(),
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -213,7 +241,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: existingVideoGames,
@@ -224,7 +252,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             console.error('Error loading video games:', error);
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: [],
@@ -246,7 +274,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id,
+              existingVideoGameId: game.id.toString(),
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -254,7 +282,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: existingVideoGames,
@@ -265,7 +293,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             console.error('Error loading video games:', error);
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
-              systemId: this.videoGameBox!.system.id,
+              systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
               videoGames: [],
@@ -298,7 +326,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   }
 
   onSubmitEditVideoGameBox(): void {
-    if (this.isUpdating || !this.editVideoGameBoxData.title || !this.videoGameBox || this.editVideoGameBoxData.systemId === null) {
+    if (this.isUpdating || !this.editVideoGameBoxData.title || !this.videoGameBox || !this.editVideoGameBoxData.systemId) {
       return;
     }
     
@@ -308,19 +336,19 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     // Process video games similar to the main video game boxes component
     const existingVideoGameIds = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'existing' && vg.existingVideoGameId)
-      .map(vg => vg.existingVideoGameId!);
+      .map(vg => parseInt(vg.existingVideoGameId!));
     
     const newVideoGames = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'new' && vg.title && vg.systemId)
       .map(vg => ({
         title: vg.title!,
-        systemId: vg.systemId!,
+        systemId: parseInt(vg.systemId!),
         customFieldValues: vg.customFieldValues
       }));
     
     const videoGameBoxData = {
       title: this.editVideoGameBoxData.title,
-      systemId: this.editVideoGameBoxData.systemId,
+      systemId: parseInt(this.editVideoGameBoxData.systemId!),
       isPhysical: this.editVideoGameBoxData.isPhysical,
       isCollection: this.editVideoGameBoxData.isCollection,
       existingVideoGameIds,
@@ -362,6 +390,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           }))
         };
         this.editVideoGameBoxData.videoGames.push(newVideoGame);
+        // Set the newly added video game to editing mode
+        this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
       },
       error: (error: any) => {
         console.error('Error loading custom fields for video game:', error);
@@ -372,6 +402,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           systemId: null,
           customFieldValues: []
         });
+        // Set the newly added video game to editing mode
+        this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
       }
     });
   }
@@ -387,6 +419,10 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
       return !!(videoGame.title && videoGame.title.trim() !== '' && videoGame.systemId);
     }
     return false;
+  }
+
+  isVideoGameSelectedAndNotBeingEdited(videoGame: any, index: number): boolean {
+    return this.isVideoGameSelected(videoGame) && !this.isVideoGameBeingEdited(index);
   }
 
   getVideoGameDisplayText(videoGame: any): string {
@@ -406,6 +442,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   editVideoGame(index: number): void {
     this.editingVideoGameIndex = index;
+    this.videoGameBackup = JSON.parse(JSON.stringify(this.editVideoGameBoxData.videoGames[index]));
   }
 
   isVideoGameBeingEdited(index: number): boolean {
@@ -414,9 +451,53 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   saveVideoGameEdit(index: number): void {
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
   }
 
   cancelVideoGameEdit(index: number): void {
+    if (this.editingVideoGameIndex === null) return;
+
+    const videoGame = this.editVideoGameBoxData.videoGames[index];
+
+    if (this.videoGameBackup) {
+      const isCompletelyNew = !this.isVideoGameSelected(videoGame) && !this.isVideoGameSelected(this.videoGameBackup);
+
+      if (isCompletelyNew) {
+        this.editVideoGameBoxData.videoGames.splice(index, 1);
+      } else {
+        this.editVideoGameBoxData.videoGames[index] = this.videoGameBackup;
+      }
+    }
+
     this.editingVideoGameIndex = null;
+    this.videoGameBackup = null;
+  }
+
+  confirmDeleteVideoGameBox(): void {
+    this.showDeleteConfirmModal = true;
+  }
+
+  closeDeleteConfirmModal(): void {
+    this.showDeleteConfirmModal = false;
+  }
+
+  deleteVideoGameBox(): void {
+    if (!this.videoGameBox || this.isDeleting) return;
+
+    this.isDeleting = true;
+
+    this.apiService.deleteVideoGameBox(this.videoGameBox.id).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+        // Navigate back to the video game boxes list after successful deletion
+        this.router.navigate(['/video-game-boxes']);
+      },
+      error: (error) => {
+        this.errorMessage = `Failed to delete video game box: ${error.message || 'Unknown error'}`;
+        this.isDeleting = false;
+        this.closeDeleteConfirmModal();
+      }
+    });
   }
 }

@@ -15,9 +15,6 @@
       <button type="button" class="filter-button" (click)="openFilterModal()">
         Filter
       </button>
-      <button type="button" class="refresh-button" (click)="swapView()" [disabled]="isLoading">
-        {{isLoading ? 'Loading...' : 'Swap View'}}
-      </button>
     </div>
   </div>
 
@@ -45,7 +42,13 @@
         </div>
       </div>
       
-      <div *ngIf="videoGameBoxes.length === 0" class="no-games-message">
+      <div *ngIf="videoGameBoxes.length === 0 && !filterService.hasActiveFilters('videoGameBox')" class="empty-state">
+        <p>No Video Game Boxes data found.<br><br>
+            Video Game Boxes represent how video games appear on your shelf, each video game box must include what Video Games are included in that box. Some Boxes are collections, or re-releases of other Video Games, this is setup in the Video Game Box. <br><br>
+            To start create a <button type="button" class="link-button" (click)="openNewVideoGameBoxModal()">New</button> video game box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="videoGameBoxes.length === 0 && filterService.hasActiveFilters('videoGameBox')" class="no-games-message">
         <p>No video game boxes found.</p>
       </div>
       
@@ -69,7 +72,7 @@
               <th>Physical</th>
               <th>Collection</th>
               <th *ngFor="let fieldName of customFieldNames" class="custom-field-header">{{fieldName}}</th>
-              <th>Actions</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -202,9 +205,9 @@
   <div *ngIf="showNewVideoGameBoxModal" class="modal-overlay" (click)="closeNewVideoGameBoxModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? (isMassEditing ? 'Update Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update Existing Video Game Box') : 'Create New Video Game Box'}}</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Edit Video Game Box (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Edit Video Game Box') : 'New Video Game Box'}}</h2>
         <div class="modal-header-actions">
-          <button *ngIf="isUpdateMode" type="button" class="details-button" (click)="openDetailFromEdit()">
+          <button *ngIf="isUpdateMode && !isMassEditing" type="button" class="details-button" (click)="openDetailFromEdit()">
             Details
           </button>
           <button type="button" class="close-button" (click)="closeNewVideoGameBoxModal()">×</button>
@@ -231,21 +234,14 @@
 
         <div class="form-group">
           <label for="systemId">System *</label>
-          <select 
-            id="systemId" 
-            name="systemId" 
+          <app-filterable-dropdown
+            id="systemId"
+            name="systemId"
             [(ngModel)]="newVideoGameBox.systemId"
-            #systemField="ngModel"
-            required
-            class="form-select">
-            <option value="">Select a system</option>
-            <option *ngFor="let system of systems" [value]="system.id">
-              {{system.name}} (Gen {{system.generation}})
-            </option>
-          </select>
-          <div *ngIf="systemField.invalid && systemField.touched" class="error-text">
-            System selection is required
-          </div>
+            [options]="systemOptions"
+            [required]="true"
+            placeholder="">
+          </app-filterable-dropdown>
         </div>
 
         <div class="form-group">
@@ -295,47 +291,44 @@
                 <div class="game-header">
                   <div class="video-game-type-selection">
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="existing"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Select Existing</span>
                     </label>
                     <label class="radio-label">
-                      <input 
-                        type="radio" 
-                        [name]="'videoGameType' + i" 
+                      <input
+                        type="radio"
+                        [name]="'videoGameType' + i"
                         value="new"
                         [(ngModel)]="videoGame.type"
                         class="radio-input">
                       <span class="radio-text">Create New</span>
                     </label>
                   </div>
-                  
-                  <!-- Show save/cancel buttons when editing, otherwise show remove button -->
-                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i)">
-                    <button type="button" class="save-button" (click)="saveVideoGameEdit(i)">✓</button>
+
+                  <!-- Show save/cancel buttons when editing or video game is not selected, otherwise show remove button -->
+                  <div class="game-actions" *ngIf="isVideoGameBeingEdited(i) || !isVideoGameSelected(videoGame)">
+                    <button type="button" class="save-button" [disabled]="!isVideoGameSelected(videoGame)" (click)="saveVideoGameEdit(i)">✓</button>
                     <button type="button" class="cancel-button" (click)="cancelVideoGameEdit(i)">×</button>
                   </div>
-                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i)" (click)="removeVideoGame(i)">×</button>
+                  <button type="button" class="remove-button" *ngIf="!isVideoGameBeingEdited(i) && isVideoGameSelected(videoGame)" (click)="removeVideoGame(i)">×</button>
                 </div>
                 
                 <!-- Existing Video Game Selection -->
                 <div class="form-group" *ngIf="videoGame.type === 'existing'">
                   <label for="existingGame{{i}}">Select Video Game *</label>
-                  <select 
-                    id="existingGame{{i}}" 
-                    [name]="'existingVideoGameId' + i" 
+                  <app-filterable-dropdown
+                    id="existingGame{{i}}"
+                    [name]="'existingVideoGameId' + i"
                     [(ngModel)]="videoGame.existingVideoGameId"
-                    required
-                    class="form-select">
-                    <option value="">Select a video game</option>
-                    <option *ngFor="let game of allVideoGames" [value]="game.id">
-                      {{game.title}} ({{game.system.name}})
-                    </option>
-                  </select>
+                    [options]="videoGameOptions"
+                    [required]="true"
+                    placeholder="">
+                  </app-filterable-dropdown>
                 </div>
 
                 <!-- New Video Game Creation -->
@@ -352,17 +345,14 @@
                   </div>
                   <div class="form-group">
                     <label for="newGameSystem{{i}}">System *</label>
-                    <select 
-                      id="newGameSystem{{i}}" 
-                      [name]="'newGameSystemId' + i" 
+                    <app-filterable-dropdown
+                      id="newGameSystem{{i}}"
+                      [name]="'newGameSystemId' + i"
                       [(ngModel)]="videoGame.systemId"
-                      required
-                      class="form-select">
-                      <option value="">Select a system</option>
-                      <option *ngFor="let system of systems" [value]="system.id">
-                        {{system.name}} (Gen {{system.generation}})
-                      </option>
-                    </select>
+                      [options]="systemOptions"
+                      [required]="true"
+                      placeholder="">
+                    </app-filterable-dropdown>
                   </div>
                   <app-dynamic-custom-fields 
                     entityKey="videoGame" 

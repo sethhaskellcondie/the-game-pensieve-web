@@ -87,6 +87,10 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   onEscapePress(event: KeyboardEvent): void {
     if (this.showEditBoardGameModal) {
       this.closeEditBoardGameModal();
+    } else if (this.showDetailBoardGameModal) {
+      this.closeDetailBoardGameModal();
+    } else if (this.showFilterModal) {
+      this.closeFilterModal();
     }
   }
 
@@ -230,6 +234,10 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     }
   }
 
+  navigateToBoardGameDetail(boardGame: BoardGame): void {
+    this.router.navigate(['/board-game', boardGame.id]);
+  }
+
   openEditBoardGameModal(boardGame: BoardGame): void {
     this.boardGameToUpdate = boardGame;
     this.showEditBoardGameModal = true;
@@ -321,15 +329,7 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    const activeFilters = this.filterService.getActiveFilters('boardGame');
-    if (activeFilters.length === 0) return '';
-    
-    if (activeFilters.length === 1) {
-      const filter = activeFilters[0];
-      return `${filter.field} ${filter.operator} "${filter.operand}"`;
-    }
-    
-    return `${activeFilters.length} active filters`;
+    return this.filterService.getFilterDisplayText('boardGame');
   }
 
   createDefaultCustomFieldValues(): any[] {
@@ -480,5 +480,13 @@ export class BoardGamesComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
+  }
+
+  navigateToShelfView(): void {
+    this.router.navigate(['/board-game-boxes']);
   }
 }

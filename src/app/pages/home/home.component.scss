@@ -324,6 +324,29 @@
       line-height: 1.5;
       margin-bottom: 30px;
     }
+
+    .link-button {
+      background: none;
+      border: none;
+      color: #0370ec;
+      font-size: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      margin: 0;
+
+      &:hover {
+        color: #0256c7;
+        text-decoration: none;
+      }
+
+      &:focus {
+        outline: 2px solid #0370ec;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+    }
     
     .empty-actions {
       display: flex;
@@ -389,9 +412,21 @@
       h2 {
         color: #5ba7f7;
       }
-      
+
       p {
         color: #b0b0b0;
+      }
+
+      .link-button {
+        color: #64b5f6;
+
+        &:hover {
+          color: #42a5f5;
+        }
+
+        &:focus {
+          outline-color: #64b5f6;
+        }
       }
     }
   }
