@@ -328,17 +328,14 @@
                 <!-- Existing Video Game Selection -->
                 <div class="form-group" *ngIf="videoGame.type === 'existing'">
                   <label for="existingGame{{i}}">Select Video Game *</label>
-                  <select 
-                    id="existingGame{{i}}" 
-                    [name]="'existingVideoGameId' + i" 
+                  <app-filterable-dropdown
+                    id="existingGame{{i}}"
+                    [name]="'existingVideoGameId' + i"
                     [(ngModel)]="videoGame.existingVideoGameId"
-                    required
-                    class="form-select">
-                    <option value="">Select a video game</option>
-                    <option *ngFor="let game of allVideoGames" [value]="game.id">
-                      {{game.title}} ({{game.system.name}})
-                    </option>
-                  </select>
+                    [options]="videoGameOptions"
+                    [required]="true"
+                    placeholder="Select a video game">
+                  </app-filterable-dropdown>
                 </div>
 
                 <!-- New Video Game Creation -->

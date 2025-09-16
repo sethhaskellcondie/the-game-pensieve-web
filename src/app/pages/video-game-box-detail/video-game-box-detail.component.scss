@@ -1003,6 +1003,10 @@
         border-color: #64b5f6;
         box-shadow: 0 2px 4px rgba(100, 181, 246, 0.2);
       }
+
+      .collapsed-content .game-title {
+        color: #e0e0e0;
+      }
     }
 
     .remove-button {
@@ -1010,6 +1014,18 @@
 
       &:hover {
         color: #ff6b6b;
+      }
+    }
+
+    .game-type-badge {
+      &.badge-existing {
+        background-color: rgba(100, 181, 246, 0.2);
+        color: #64b5f6;
+      }
+
+      &.badge-new {
+        background-color: rgba(129, 199, 132, 0.2);
+        color: #81c784;
       }
     }
   }

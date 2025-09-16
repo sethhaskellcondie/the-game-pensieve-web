@@ -9,6 +9,7 @@ import { DynamicCustomFieldsComponent } from '../../components/dynamic-custom-fi
 import { BooleanDisplayComponent } from '../../components/boolean-display/boolean-display.component';
 import { CustomCheckboxComponent } from '../../components/custom-checkbox/custom-checkbox.component';
 import { SelectableTextInputComponent } from '../../components/selectable-text-input/selectable-text-input.component';
+import { FilterableDropdownComponent, DropdownOption } from '../../components/filterable-dropdown/filterable-dropdown.component';
 import { FilterService, FilterRequestDto } from '../../services/filter.service';
 import { EntityFilterModalComponent } from '../../components/entity-filter-modal/entity-filter-modal.component';
 import { SettingsService } from '../../services/settings.service';
@@ -17,7 +18,7 @@ import { ErrorSnackbarService } from '../../services/error-snackbar.service';
 @Component({
   selector: 'app-video-game-boxes',
   standalone: true,
-  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, EntityFilterModalComponent],
+  imports: [CommonModule, FormsModule, DynamicCustomFieldsComponent, BooleanDisplayComponent, CustomCheckboxComponent, SelectableTextInputComponent, FilterableDropdownComponent, EntityFilterModalComponent],
   templateUrl: './video-game-boxes.component.html',
   styleUrl: './video-game-boxes.component.scss'
 })
@@ -44,6 +45,13 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   videoGameBoxToUpdate: VideoGameBox | null = null;
   allVideoGames: VideoGame[] = [];
   editingVideoGameIndex: number | null = null;
+
+  get videoGameOptions(): DropdownOption[] {
+    return this.allVideoGames.map(game => ({
+      value: game.id.toString(),
+      label: `${game.title} (${game.system.name})`
+    }));
+  }
   newVideoGameBox = {
     title: '',
     systemId: null as number | null,
