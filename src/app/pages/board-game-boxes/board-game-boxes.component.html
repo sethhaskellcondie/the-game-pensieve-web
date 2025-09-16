@@ -42,7 +42,13 @@
         </div>
       </div>
       
-      <div *ngIf="boardGameBoxes.length === 0" class="no-games-message">
+      <div *ngIf="boardGameBoxes.length === 0 && !filterService.hasActiveFilters('boardGameBox')" class="empty-state">
+        <p>No Board Game Boxes data found.<br><br>
+            Board Game Boxes represent how board games appear on your shelf, each board game box must include what Board Game is included in that box. Many boxes can include the same board game. <br><br>
+            To start create a <button type="button" class="link-button" (click)="openNewBoardGameBoxModal()">New</button> board game box or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="boardGameBoxes.length === 0 && filterService.hasActiveFilters('boardGameBox')" class="no-games-message">
         <p>No board game boxes found.</p>
       </div>
       
