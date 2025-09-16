@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService, Toy } from '../../services/api.service';
@@ -56,10 +57,11 @@ export class ToysComponent implements OnInit, OnDestroy {
   massEditOriginalTotal = 0;
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public filterService: FilterService,
     private settingsService: SettingsService,
-    private errorSnackbarService: ErrorSnackbarService
+    private errorSnackbarService: ErrorSnackbarService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -538,11 +540,15 @@ export class ToysComponent implements OnInit, OnDestroy {
     if (!this.isMassEditing) {
       return { current: 0, total: 0 };
     }
-    
+
     const remaining = this.massEditQueue.length;
     const current = this.massEditOriginalTotal - remaining;
-    
+
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 
 }

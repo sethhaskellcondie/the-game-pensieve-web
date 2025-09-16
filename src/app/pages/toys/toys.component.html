@@ -42,7 +42,11 @@
         </div>
       </div>
 
-      <div *ngIf="toys.length === 0" class="no-toys-message">
+      <div *ngIf="toys.length === 0 && !filterService.hasActiveFilters('toy')" class="empty-state">
+        <p>No Toys data found.<br><br>To start create a <button type="button" class="link-button" (click)="openNewToyModal()">New</button> toy or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="toys.length === 0 && filterService.hasActiveFilters('toy')" class="no-toys-message">
         <p>No toys found.</p>
       </div>
       

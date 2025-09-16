@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ApiService, CustomField } from '../../services/api.service';
@@ -72,10 +73,11 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
   isMassInputMode = false;
 
   constructor(
-    private apiService: ApiService, 
+    private apiService: ApiService,
     public iconService: IconService,
     private settingsService: SettingsService,
-    private errorSnackbarService: ErrorSnackbarService
+    private errorSnackbarService: ErrorSnackbarService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -467,5 +469,9 @@ export class CustomFieldsComponent implements OnInit, OnDestroy {
     if (savedFilter) {
       this.currentFilter = savedFilter;
     }
+  }
+
+  navigateToOptions(): void {
+    this.router.navigate(['/options']);
   }
 }

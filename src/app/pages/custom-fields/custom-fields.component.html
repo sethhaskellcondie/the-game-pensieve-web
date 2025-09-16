@@ -35,7 +35,11 @@
         </div>
       </div>
 
-      <div *ngIf="customFields.length === 0" class="no-fields-message">
+      <div *ngIf="customFields.length === 0 && !currentFilter" class="empty-state">
+        <p>No Custom Fields data found.<br><br>To start create a <button type="button" class="link-button" (click)="openNewCustomFieldModal()">New</button> custom field or go to the <button type="button" class="link-button" (click)="navigateToOptions()">Options</button> page and use the buttons at the bottom to import data.</p>
+      </div>
+
+      <div *ngIf="customFields.length === 0 && currentFilter" class="no-fields-message">
         <p>No custom fields found.</p>
       </div>
       
