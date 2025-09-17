@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { FilterService, FilterSpecification, FilterRequestDto } from '../../services/filter.service';
 import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
@@ -45,8 +45,7 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.entityType) {
-      this.loadFilterSpecification();
-      this.loadSystems();
+      this.loadFilterSpecificationAndSystems();
     }
   }
 
@@ -55,9 +54,35 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  loadFilterSpecificationAndSystems(): void {
+    if (!this.entityType) return;
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    // Load both filter specification and systems simultaneously
+    forkJoin({
+      filterSpec: this.filterService.getFiltersForEntity(this.entityType),
+      systems: this.apiService.getSystems()
+    }).subscribe({
+      next: (results) => {
+        this.filterSpec = results.filterSpec;
+        this.systems = results.systems;
+        this.buildFieldOptions();
+        this.loadExistingFilters();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading filter specification and systems:', error);
+        this.errorMessage = `Failed to load filter options: ${error.message || 'Unknown error'}`;
+        this.isLoading = false;
+      }
+    });
+  }
+
   loadFilterSpecification(): void {
     if (!this.entityType) return;
-    
+
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -108,10 +133,10 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
   }
 
   loadExistingFilters(): void {
-    const filtersToLoad = this.initialFilters.length > 0 
-      ? this.initialFilters 
+    const filtersToLoad = this.initialFilters.length > 0
+      ? this.initialFilters
       : this.filterService.getActiveFilters(this.entityType);
-      
+
     if (filtersToLoad.length > 0) {
       this.filterCriteria = filtersToLoad.map(filter => ({
         field: filter.field,
@@ -120,6 +145,7 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
       }));
     }
   }
+
 
   getOperatorOptions(fieldName: string): DropdownOption[] {
     if (!this.filterSpec || !fieldName) return [];
@@ -224,16 +250,6 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
     ];
   }
 
-  loadSystems(): void {
-    this.apiService.getSystems().subscribe({
-      next: (systems) => {
-        this.systems = systems;
-      },
-      error: (error) => {
-        console.error('Error loading systems:', error);
-      }
-    });
-  }
 
   getSystemOptions(): DropdownOption[] {
     return this.systems.map(system => ({
