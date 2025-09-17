@@ -71,10 +71,22 @@
           [disabled]="!criteria.operator"
           (ngModelChange)="onOperandChange()">
         </app-filterable-dropdown>
-        
+
+        <!-- System Field -->
+        <app-filterable-dropdown
+          *ngIf="!isSortField(criteria.operator) && !isBooleanField(criteria.field) && isSystemField(criteria.field)"
+          [id]="'value-' + i"
+          [name]="'value-' + i"
+          [(ngModel)]="criteria.operand"
+          [options]="getSystemOptions()"
+          placeholder="Select system"
+          [disabled]="!criteria.operator"
+          (ngModelChange)="onOperandChange()">
+        </app-filterable-dropdown>
+
         <!-- Other Fields -->
         <input
-          *ngIf="!isSortField(criteria.operator) && !isBooleanField(criteria.field)"
+          *ngIf="!isSortField(criteria.operator) && !isBooleanField(criteria.field) && !isSystemField(criteria.field)"
           [type]="getInputType(criteria.field)"
           [id]="'value-' + i"
           [name]="'value-' + i"

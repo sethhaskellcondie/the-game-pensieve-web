@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { FilterService, FilterSpecification, FilterRequestDto } from '../../services/filter.service';
 import { FilterableDropdownComponent, DropdownOption } from '../filterable-dropdown/filterable-dropdown.component';
 import { SettingsService } from '../../services/settings.service';
+import { ApiService, System } from '../../services/api.service';
 
 export interface FilterCriteria {
   field: string;
@@ -34,15 +35,18 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
   
   filterCriteria: FilterCriteria[] = [{ field: '', operator: '', operand: '' }];
   fieldOptions: DropdownOption[] = [];
+  systems: System[] = [];
 
   constructor(
-    public filterService: FilterService, 
-    private settingsService: SettingsService
+    public filterService: FilterService,
+    private settingsService: SettingsService,
+    private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
     if (this.entityType) {
       this.loadFilterSpecification();
+      this.loadSystems();
     }
   }
 
@@ -74,7 +78,7 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
 
   buildFieldOptions(): void {
     if (!this.filterSpec) return;
-    
+
     this.fieldOptions = Object.keys(this.filterSpec.fields)
       .filter(fieldName => !['all_fields', 'pagination_fields', 'created_at', 'updated_at'].includes(fieldName))
       .map(fieldName => ({
@@ -93,6 +97,8 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
         return 'Physical';
       case 'is_collection':
         return 'Collection';
+      case 'system_id':
+        return 'System';
       default:
         return fieldName
           .replace(/([A-Z])/g, ' $1')
@@ -216,6 +222,28 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
       { value: 'true', label: 'True' },
       { value: 'false', label: 'False' }
     ];
+  }
+
+  loadSystems(): void {
+    this.apiService.getSystems().subscribe({
+      next: (systems) => {
+        this.systems = systems;
+      },
+      error: (error) => {
+        console.error('Error loading systems:', error);
+      }
+    });
+  }
+
+  getSystemOptions(): DropdownOption[] {
+    return this.systems.map(system => ({
+      value: system.id.toString(),
+      label: `${system.name} (Gen ${system.generation})`
+    }));
+  }
+
+  isSystemField(fieldName: string): boolean {
+    return fieldName === 'system_id';
   }
 
   getValidFilters(): FilterCriteria[] {

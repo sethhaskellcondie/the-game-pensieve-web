@@ -28,7 +28,8 @@ export interface EntityFilter {
 export class FilterService {
   private baseUrl = 'http://localhost:8080/v1';
   private activeFiltersSubject = new BehaviorSubject<{ [entity: string]: FilterRequestDto[] }>({});
-  
+  private systemsCache: any[] = [];
+
   public activeFilters$ = this.activeFiltersSubject.asObservable();
 
   constructor(
@@ -36,6 +37,7 @@ export class FilterService {
     private defaultSortService: DefaultSortService
   ) {
     this.loadAllFiltersFromStorage();
+    this.loadSystemsForCache();
   }
 
   /**
@@ -98,7 +100,8 @@ export class FilterService {
       const filter = filters[0];
       const fieldLabel = this.formatFieldName(filter.field);
       const operatorLabel = this.getOperatorLabel(filter.operator);
-      return `${fieldLabel} ${operatorLabel} "${filter.operand}"`;
+      const operandDisplay = this.getOperandDisplayText(filter.field, filter.operand);
+      return `${fieldLabel} ${operatorLabel} "${operandDisplay}"`;
     }
 
     return `${filters.length} filters active`;
@@ -118,6 +121,8 @@ export class FilterService {
         return 'Physical';
       case 'is_collection':
         return 'Collection';
+      case 'system_id':
+        return 'System';
       default:
         return fieldName
           .replace(/([A-Z])/g, ' $1')
@@ -204,7 +209,12 @@ export class FilterService {
           { value: 'less_than', label: 'Before' },
           sortOperator
         ];
-      
+
+      case 'system':
+        return [
+          ...baseOperators
+        ];
+
       default:
         return [...baseOperators, sortOperator];
     }
@@ -244,15 +254,15 @@ export class FilterService {
    */
   getFiltersWithDefaults(entityType: string, providedFilters: FilterRequestDto[]): FilterRequestDto[] {
     // Check if there's already a sort filter in the provided filters
-    const hasSortFilter = providedFilters.some(filter => 
+    const hasSortFilter = providedFilters.some(filter =>
       filter.operator === 'sort' || filter.operator === 'order_by' || filter.operator === 'order_by_desc'
     );
-    
+
     if (hasSortFilter) {
       // Convert sort filters to API format and return
       return this.convertFiltersForAPI(providedFilters);
     }
-    
+
     // Check for default sort filter
     const defaultSort = this.defaultSortService.getDefaultSort(entityType);
     if (defaultSort) {
@@ -265,9 +275,39 @@ export class FilterService {
       };
       return [...providedFilters, defaultSortFilter];
     }
-    
+
     // No sort filter - return provided filters as-is
     return providedFilters;
+  }
+
+  /**
+   * Load systems for display text caching
+   */
+  private loadSystemsForCache(): void {
+    this.http.post<{data: any[], errors: any}>(`${this.baseUrl}/systems/function/search`, {
+      filters: []
+    }).pipe(
+      map(response => response.data)
+    ).subscribe({
+      next: (systems) => {
+        this.systemsCache = systems;
+      },
+      error: (error) => {
+        console.error('Error loading systems for cache:', error);
+        this.systemsCache = [];
+      }
+    });
+  }
+
+  /**
+   * Get display text for operand based on field type
+   */
+  private getOperandDisplayText(fieldName: string, operand: string): string {
+    if (fieldName === 'system_id') {
+      const system = this.systemsCache.find(s => s.id.toString() === operand);
+      return system ? `${system.name} (Gen ${system.generation})` : operand;
+    }
+    return operand;
   }
 
   private saveFiltersToStorage(entityType: string, filters: FilterRequestDto[]): void {
