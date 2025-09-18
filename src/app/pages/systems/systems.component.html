@@ -120,7 +120,7 @@
   <div *ngIf="showNewSystemModal" class="modal-overlay" (click)="closeNewSystemModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{isUpdateMode ? (isMassEditing ? 'Update System (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Update System') : 'New System'}}</h2>
+        <h2>{{isUpdateMode ? (isMassEditing ? 'Edit System (' + getMassEditProgress().current + ' of ' + getMassEditProgress().total + ')' : 'Edit System') : 'New System'}}</h2>
         <button type="button" class="close-button" (click)="closeNewSystemModal()">×</button>
       </div>
       
