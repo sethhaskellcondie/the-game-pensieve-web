@@ -138,6 +138,12 @@ export class ApiService {
     });
   }
 
+  seedMyCollection(): Observable<HttpResponse<ApiResponse>> {
+    return this.http.post<ApiResponse>(`${this.baseUrl}/function/seedMyCollection`, {}, {
+      observe: 'response'
+    });
+  }
+
   backup(): Observable<any> {
     return this.http.post(`${this.baseUrl}/function/backup`, {})
       .pipe(

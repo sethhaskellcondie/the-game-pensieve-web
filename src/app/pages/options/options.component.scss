@@ -163,7 +163,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 180px;
+  width: 200px;
   
   &:hover:not(:disabled) {
     background-color: #0256c7;

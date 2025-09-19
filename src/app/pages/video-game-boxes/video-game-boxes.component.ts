@@ -501,8 +501,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
 
         this.errorSnackbarService.showSuccess('Video Game Box created successfully');
 
-        // Clear the title field but reset custom field values to defaults
+        // Clear the title field, video games list, and reset custom field values to defaults
         this.newVideoGameBox.title = '';
+        this.newVideoGameBox.videoGames = [];
         this.newVideoGameBox.customFieldValues = this.createDefaultCustomFieldValues();
 
         this.focusTitleInput();

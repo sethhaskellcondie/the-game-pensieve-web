@@ -26,6 +26,10 @@ export class OptionsComponent implements OnInit, OnDestroy {
   seedResult = '';
   seedStatus: 'success' | 'error' = 'success';
 
+  isSeedingMyCollection = false;
+  seedMyCollectionResult = '';
+  seedMyCollectionStatus: 'success' | 'error' = 'success';
+
   isBackingUp = false;
   backupResult = '';
   backupStatus: 'success' | 'error' = 'success';
@@ -117,7 +121,7 @@ export class OptionsComponent implements OnInit, OnDestroy {
   seedSampleData(): void {
     this.isSeeding = true;
     this.seedResult = '';
-    
+
     this.apiService.seedSampleData().subscribe({
       next: (httpResponse) => {
         if (httpResponse.status === 200) {
@@ -147,9 +151,49 @@ export class OptionsComponent implements OnInit, OnDestroy {
         } else if (error.status) {
           errorMessage = `HTTP ${error.status} ${error.statusText || ''}`;
         }
-        
+
         this.errorSnackbarService.showErrors(`Seeding failed: ${errorMessage}`);
         this.isSeeding = false;
+      }
+    });
+  }
+
+  seedMyCollection(): void {
+    this.isSeedingMyCollection = true;
+    this.seedMyCollectionResult = '';
+
+    this.apiService.seedMyCollection().subscribe({
+      next: (httpResponse) => {
+        if (httpResponse.status === 200) {
+          const responseBody = httpResponse.body;
+          if (responseBody?.data) {
+            this.errorSnackbarService.showSuccess(`Seth's collection seeded successfully`);
+          } else {
+            this.errorSnackbarService.showSuccess('Seth\'s collection seeded successfully!');
+          }
+        } else {
+          const responseBody = httpResponse.body;
+          if (responseBody?.errors) {
+            this.errorSnackbarService.showErrors(`Seeding Seth's collection failed (Status ${httpResponse.status}): ${JSON.stringify(responseBody.errors)}`);
+          } else {
+            this.errorSnackbarService.showErrors(`Seeding Seth's collection failed with status code: ${httpResponse.status}`);
+          }
+        }
+        this.isSeedingMyCollection = false;
+      },
+      error: (error) => {
+        // Handle HTTP error responses (4xx, 5xx)
+        let errorMessage = 'Unknown error';
+        if (error.error?.errors) {
+          errorMessage = JSON.stringify(error.error.errors);
+        } else if (error.message) {
+          errorMessage = error.message;
+        } else if (error.status) {
+          errorMessage = `HTTP ${error.status} ${error.statusText || ''}`;
+        }
+
+        this.errorSnackbarService.showErrors(`Seeding Seth's collection failed: ${errorMessage}`);
+        this.isSeedingMyCollection = false;
       }
     });
   }

@@ -118,17 +118,27 @@
           class="api-button import-backup-button" 
           (click)="importFromBackup()" 
           [disabled]="isImportingFromBackup">
-          {{isImportingFromBackup ? 'Importing...' : 'Import From Backup'}}
+          {{isImportingFromBackup ? 'Importing...' : 'Import Backup'}}
         </button>
       </div>
 
       <div class="button-container">
-        <button 
-          type="button" 
-          class="api-button seed-button" 
-          (click)="seedSampleData()" 
+        <button
+          type="button"
+          class="api-button seed-button"
+          (click)="seedSampleData()"
           [disabled]="isSeeding">
           {{isSeeding ? 'Seeding...' : 'Seed Sample Data'}}
+        </button>
+      </div>
+
+      <div class="button-container">
+        <button
+          type="button"
+          class="api-button seed-button"
+          (click)="seedMyCollection()"
+          [disabled]="isSeedingMyCollection">
+          {{isSeedingMyCollection ? 'Seeding...' : 'Seed Seth\'s Data'}}
         </button>
       </div>
     </div>
