@@ -90,8 +90,8 @@ export class DefaultSortModalComponent implements OnInit, OnDestroy {
     // Base fields to exclude for all entities
     let excludedFields = ['all_fields', 'pagination_fields', 'created_at', 'updated_at'];
 
-    // Additionally exclude system_id for video games since it cannot be sorted
-    if (this.entityType === 'videoGame') {
+    // Additionally exclude system_id for video games and video game boxes since it cannot be sorted
+    if (this.entityType === 'videoGame' || this.entityType === 'videoGameBox') {
       excludedFields.push('system_id');
     }
 

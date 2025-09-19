@@ -392,6 +392,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
         this.editVideoGameBoxData.videoGames.push(newVideoGame);
         // Set the newly added video game to editing mode
         this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
+        // Focus on the newly added video game's title input
+        this.focusVideoGameTitleInput(this.editVideoGameBoxData.videoGames.length - 1);
       },
       error: (error: any) => {
         console.error('Error loading custom fields for video game:', error);
@@ -404,6 +406,8 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
         });
         // Set the newly added video game to editing mode
         this.editingVideoGameIndex = this.editVideoGameBoxData.videoGames.length - 1;
+        // Focus on the newly added video game's title input
+        this.focusVideoGameTitleInput(this.editVideoGameBoxData.videoGames.length - 1);
       }
     });
   }
@@ -471,6 +475,15 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
     this.editingVideoGameIndex = null;
     this.videoGameBackup = null;
+  }
+
+  private focusVideoGameTitleInput(index: number): void {
+    setTimeout(() => {
+      const titleInput = document.querySelector(`#newGameTitle${index}`) as HTMLInputElement;
+      if (titleInput) {
+        titleInput.focus();
+      }
+    }, 100);
   }
 
   confirmDeleteVideoGameBox(): void {

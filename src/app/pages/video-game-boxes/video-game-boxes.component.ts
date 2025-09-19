@@ -531,6 +531,15 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
+  private focusVideoGameTitleInput(index: number): void {
+    setTimeout(() => {
+      const titleInput = document.querySelector(`#newGameTitle${index}`) as HTMLInputElement;
+      if (titleInput) {
+        titleInput.focus();
+      }
+    }, 100);
+  }
+
   @HostListener('document:keydown.escape', ['$event'])
   onEscapePress(event: KeyboardEvent): void {
     if (this.showNewVideoGameBoxModal) {
@@ -577,7 +586,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   addNewVideoGame(): void {
     // Default to 'existing' type when in update mode, 'new' when creating
     const defaultType = this.isUpdateMode ? 'existing' : 'new';
-    
+
     if (defaultType === 'existing') {
       // For existing type, no need to load custom fields
       this.newVideoGameBox.videoGames.push({
@@ -608,6 +617,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           this.newVideoGameBox.videoGames.push(newVideoGame);
           // Set the newly added video game to editing mode
           this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
+          // Focus on the newly added video game's title input
+          this.focusVideoGameTitleInput(this.newVideoGameBox.videoGames.length - 1);
         },
         error: (error: any) => {
           this.newVideoGameBox.videoGames.push({
@@ -619,6 +630,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           });
           // Set the newly added video game to editing mode
           this.editingVideoGameIndex = this.newVideoGameBox.videoGames.length - 1;
+          // Focus on the newly added video game's title input
+          this.focusVideoGameTitleInput(this.newVideoGameBox.videoGames.length - 1);
         }
       });
     }
