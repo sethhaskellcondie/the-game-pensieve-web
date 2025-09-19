@@ -249,7 +249,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.isUpdateMode = false;
     this.videoGameBoxToUpdate = null;
     this.showNewVideoGameBoxModal = true;
-    
+
     // Load all video games for the dropdown
     this.apiService.getVideoGames().subscribe({
       next: (videoGames) => {
@@ -259,7 +259,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
         // Error loading video games
       }
     });
-    
+
     this.newVideoGameBox = {
       title: '',
       systemId: null,
@@ -268,6 +268,9 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       videoGames: [],
       customFieldValues: this.createDefaultCustomFieldValues()
     };
+
+    // Focus on the title input after modal renders
+    this.focusTitleInput();
   }
 
   openUpdateVideoGameBoxModal(videoGameBox: VideoGameBox): void {
