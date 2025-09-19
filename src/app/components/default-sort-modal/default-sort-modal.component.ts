@@ -87,8 +87,16 @@ export class DefaultSortModalComponent implements OnInit, OnDestroy {
   }
 
   buildFieldOptions(spec: FilterSpecification): void {
+    // Base fields to exclude for all entities
+    let excludedFields = ['all_fields', 'pagination_fields', 'created_at', 'updated_at'];
+
+    // Additionally exclude system_id for video games since it cannot be sorted
+    if (this.entityType === 'videoGame') {
+      excludedFields.push('system_id');
+    }
+
     this.fieldOptions = Object.keys(spec.fields)
-      .filter(fieldName => !['all_fields', 'pagination_fields', 'created_at', 'updated_at'].includes(fieldName))
+      .filter(fieldName => !excludedFields.includes(fieldName))
       .map(fieldName => ({
         value: fieldName,
         label: this.formatFieldName(fieldName)
