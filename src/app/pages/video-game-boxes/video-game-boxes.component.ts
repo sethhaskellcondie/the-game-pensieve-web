@@ -682,16 +682,14 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   cancelVideoGameEdit(index: number): void {
-    // Check if this is a completely new video game that should be removed
-    const videoGame = this.newVideoGameBox.videoGames[index];
-    const isCompletelyNew = !this.isVideoGameSelected(videoGame) && this.videoGameBackup && !this.isVideoGameSelected(this.videoGameBackup);
-
-    if (isCompletelyNew) {
+    // If there's no backup, it means this is a newly added video game that should be removed
+    if (this.videoGameBackup === null) {
       // Remove the new video game entirely
       this.newVideoGameBox.videoGames.splice(index, 1);
     } else {
+      // There is a backup, so this was an existing video game being edited
       // Restore the video game to its previous state from backup
-      if (this.videoGameBackup !== null && this.editingVideoGameIndex !== null) {
+      if (this.editingVideoGameIndex !== null) {
         this.newVideoGameBox.videoGames[this.editingVideoGameIndex] = JSON.parse(JSON.stringify(this.videoGameBackup));
       }
     }
