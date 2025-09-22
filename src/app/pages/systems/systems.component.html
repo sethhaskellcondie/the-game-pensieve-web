@@ -54,7 +54,8 @@
         <div class="table-header">
           <span class="item-count">{{systemsCount}} {{systemsCount === 1 ? 'System' : 'Systems'}}</span>
         </div>
-        <table class="systems-table">
+        <div class="table-wrapper">
+          <table class="systems-table">
           <thead>
             <tr>
               <th *ngIf="isMassEditMode" class="edit-column-header">
@@ -111,7 +112,8 @@
               </td>
             </tr>
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   </div>

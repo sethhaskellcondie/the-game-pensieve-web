@@ -53,7 +53,8 @@
         <div class="table-header">
           <span class="item-count">{{boardGamesCount}} {{boardGamesCount === 1 ? 'Board Game' : 'Board Games'}}</span>
         </div>
-        <table class="board-games-table">
+        <div class="table-wrapper">
+          <table class="board-games-table">
           <thead>
             <tr>
               <th *ngIf="isMassEditMode" class="edit-column-header">
@@ -90,7 +91,8 @@
               </td>
             </tr>
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   </div>

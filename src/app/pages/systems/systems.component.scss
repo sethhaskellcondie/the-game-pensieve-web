@@ -147,6 +147,30 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-top: 20px;
+
+  .table-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #0370ec;
+      border-radius: 4px;
+
+      &:hover {
+        background: #0256c7;
+      }
+    }
+  }
 }
 
 .table-header {
@@ -166,6 +190,7 @@
 
 .systems-table {
   width: 100%;
+  min-width: 650px;
   border-collapse: collapse;
   
   thead {
@@ -665,6 +690,27 @@
   .table-container {
     background: #2d2d2d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    .table-wrapper {
+      // Dark mode scrollbar styling
+      &::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #404040;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #64b5f6;
+        border-radius: 4px;
+
+        &:hover {
+          background: #42a5f5;
+        }
+      }
+    }
   }
 
   .table-header {
