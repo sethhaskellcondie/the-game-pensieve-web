@@ -41,7 +41,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     isCollection: false,
     videoGames: [] as { 
       type: 'existing' | 'new';
-      existingVideoGameId?: string | null;
+      existingVideoGameId?: number | null;
       title?: string; 
       systemId?: string | null; 
       customFieldValues: any[] 
@@ -233,7 +233,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id.toString(),
+              existingVideoGameId: game.id,
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -250,12 +250,21 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error loading video games:', error);
+            // Convert existing video games to the format we need (even without dropdown data)
+            const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
+              type: 'existing' as 'existing' | 'new',
+              existingVideoGameId: game.id,
+              title: undefined,
+              systemId: undefined,
+              customFieldValues: []
+            }));
+
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
               systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
-              videoGames: [],
+              videoGames: existingVideoGames,
               customFieldValues: this.mergeWithDefaultCustomFieldValues(this.videoGameBox!.customFieldValues)
             };
           }
@@ -274,7 +283,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
-              existingVideoGameId: game.id.toString(),
+              existingVideoGameId: game.id,
               title: undefined,
               systemId: undefined,
               customFieldValues: []
@@ -291,12 +300,21 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error loading video games:', error);
+            // Convert existing video games to the format we need (even without dropdown data)
+            const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
+              type: 'existing' as 'existing' | 'new',
+              existingVideoGameId: game.id,
+              title: undefined,
+              systemId: undefined,
+              customFieldValues: []
+            }));
+
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
               systemId: this.videoGameBox!.system.id.toString(),
               isPhysical: this.videoGameBox!.isPhysical,
               isCollection: this.videoGameBox!.isCollection,
-              videoGames: [],
+              videoGames: existingVideoGames,
               customFieldValues: [...this.videoGameBox!.customFieldValues]
             };
           }
@@ -336,7 +354,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     // Process video games similar to the main video game boxes component
     const existingVideoGameIds = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'existing' && vg.existingVideoGameId)
-      .map(vg => parseInt(vg.existingVideoGameId!));
+      .map(vg => vg.existingVideoGameId!);
     
     const newVideoGames = this.editVideoGameBoxData.videoGames
       .filter(vg => vg.type === 'new' && vg.title && vg.systemId)
@@ -476,7 +494,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     this.videoGameBackup = null;
   }
 
-  private focusVideoGameTitleInput(index: number): void {
+  focusVideoGameTitleInput(index: number): void {
     setTimeout(() => {
       const titleInput = document.querySelector(`#newGameTitle${index}`) as HTMLInputElement;
       if (titleInput) {

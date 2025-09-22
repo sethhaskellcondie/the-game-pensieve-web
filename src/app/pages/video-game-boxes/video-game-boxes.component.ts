@@ -310,19 +310,28 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading video games:', error);
-        
+
+        // Convert existing video games to the format we need (even without dropdown data)
+        const existingVideoGames = videoGameBox.videoGames.map(game => ({
+          type: 'existing' as 'existing' | 'new',
+          existingVideoGameId: game.id,
+          title: undefined,
+          systemId: undefined,
+          customFieldValues: []
+        }));
+
         // Ensure we have merged custom field values with all defaults
         const mergedCustomFieldValues = this.mergeWithDefaultCustomFieldValues(videoGameBox.customFieldValues);
-        
+
         this.newVideoGameBox = {
           title: videoGameBox.title,
           systemId: videoGameBox.system.id.toString(),
           isPhysical: videoGameBox.isPhysical,
           isCollection: videoGameBox.isCollection,
-          videoGames: [],
+          videoGames: existingVideoGames,
           customFieldValues: mergedCustomFieldValues
         };
-        
+
         // Set newVideoGameBox.customFieldValues (error case)
       }
     });
@@ -531,14 +540,6 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
-  private focusVideoGameTitleInput(index: number): void {
-    setTimeout(() => {
-      const titleInput = document.querySelector(`#newGameTitle${index}`) as HTMLInputElement;
-      if (titleInput) {
-        titleInput.focus();
-      }
-    }, 100);
-  }
 
   @HostListener('document:keydown.escape', ['$event'])
   onEscapePress(event: KeyboardEvent): void {
@@ -817,6 +818,16 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
 
   onCustomFieldValuesChange(newValues: any[]): void {
     this.newVideoGameBox.customFieldValues = newValues;
+  }
+
+  focusVideoGameTitleInput(index: number): void {
+    setTimeout(() => {
+      const titleInput = document.querySelector(`input[name="videoGame${index}Title"]`) as HTMLInputElement;
+      if (titleInput) {
+        titleInput.focus();
+        titleInput.select();
+      }
+    }, 100);
   }
 
   ngOnDestroy(): void {
