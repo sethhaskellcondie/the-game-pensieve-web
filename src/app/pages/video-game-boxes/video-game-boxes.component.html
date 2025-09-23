@@ -377,7 +377,7 @@
             *ngIf="isUpdateMode || !isMassInputMode"
             type="submit" 
             class="create-button" 
-            [disabled]="!isFormCompletelyValid(videoGameBoxForm) || isCreating">
+            [disabled]="!isUpdateButtonEnabled || !isFormCompletelyValid(videoGameBoxForm)">
             {{isCreating ? (isUpdateMode ? 'Updating...' : 'Creating...') : (isUpdateMode ? 'Update' : 'Create')}}
           </button>
           <button 

@@ -61,6 +61,17 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     }));
   }
 
+  get isEditModalDataLoaded(): boolean {
+    return !this.isLoadingSystems && !this.isLoadingCustomFields && !this.isLoadingVideoGames;
+  }
+
+  get isUpdateButtonEnabled(): boolean {
+    return this.isEditModalDataLoaded &&
+           !!this.newVideoGameBox.title &&
+           !!this.newVideoGameBox.systemId &&
+           !this.isCreating;
+  }
+
   newVideoGameBox = {
     title: '',
     systemId: null as string | null,
@@ -87,6 +98,11 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   isMassEditing = false;
   lastClickedVideoGameBoxIndex: number = -1;
   massEditOriginalTotal = 0;
+
+  // Loading states for edit modal
+  isLoadingSystems = false;
+  isLoadingCustomFields = false;
+  isLoadingVideoGames = false;
 
   constructor(
     private apiService: ApiService, 
@@ -277,9 +293,36 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     this.isUpdateMode = true;
     this.videoGameBoxToUpdate = videoGameBox;
     this.showNewVideoGameBoxModal = true;
-    
-    // Opening edit modal for video game box
-    
+
+    // Set loading states
+    this.isLoadingSystems = true;
+    this.isLoadingCustomFields = true;
+    this.isLoadingVideoGames = true;
+
+    // Load systems for dropdown
+    this.apiService.getSystems().subscribe({
+      next: (systems) => {
+        this.systems = systems;
+        this.isLoadingSystems = false;
+      },
+      error: (error) => {
+        console.error('Error loading systems:', error);
+        this.isLoadingSystems = false;
+      }
+    });
+
+    // Load available custom fields for video game boxes
+    this.apiService.getCustomFieldsByEntity('videoGameBox').subscribe({
+      next: (customFields) => {
+        this.availableCustomFields = customFields;
+        this.isLoadingCustomFields = false;
+      },
+      error: (error) => {
+        console.error('Error loading custom fields:', error);
+        this.isLoadingCustomFields = false;
+      }
+    });
+
     // Load all video games for the dropdown
     this.apiService.getVideoGames().subscribe({
       next: (videoGames) => {
@@ -305,7 +348,8 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           videoGames: existingVideoGames,
           customFieldValues: mergedCustomFieldValues
         };
-        
+        this.isLoadingVideoGames = false;
+
         // Set newVideoGameBox.customFieldValues
       },
       error: (error) => {
@@ -331,6 +375,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
           videoGames: existingVideoGames,
           customFieldValues: mergedCustomFieldValues
         };
+        this.isLoadingVideoGames = false;
 
         // Set newVideoGameBox.customFieldValues (error case)
       }
@@ -350,6 +395,11 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
       videoGames: [],
       customFieldValues: [] as any[]
     };
+
+    // Reset loading states
+    this.isLoadingSystems = false;
+    this.isLoadingCustomFields = false;
+    this.isLoadingVideoGames = false;
   }
 
   onSubmitNewVideoGameBox(): void {

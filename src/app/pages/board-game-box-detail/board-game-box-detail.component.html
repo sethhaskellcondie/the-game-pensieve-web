@@ -191,7 +191,7 @@
           <button type="button" class="cancel-button" (click)="closeEditBoardGameBoxModal()">
             Cancel
           </button>
-          <button type="submit" class="create-button" [disabled]="!editBoardGameBoxForm.form.valid || isUpdating">
+          <button type="submit" class="create-button" [disabled]="!isUpdateButtonEnabled || !editBoardGameBoxForm.form.valid">
             {{isUpdating ? 'Updating...' : 'Update'}}
           </button>
         </div>

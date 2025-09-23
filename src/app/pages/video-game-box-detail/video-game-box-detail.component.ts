@@ -54,6 +54,11 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
   editingVideoGameIndex: number | null = null;
   videoGameBackup: any = null;
 
+  // Loading states for edit modal
+  isLoadingSystems = false;
+  isLoadingCustomFields = false;
+  isLoadingVideoGames = false;
+
   get systemOptions(): DropdownOption[] {
     return this.systems.map(system => ({
       value: system.id.toString(),
@@ -66,6 +71,17 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
       value: game.id.toString(),
       label: `${game.title} (${game.system.name})`
     }));
+  }
+
+  get isEditModalDataLoaded(): boolean {
+    return !this.isLoadingSystems && !this.isLoadingCustomFields && !this.isLoadingVideoGames;
+  }
+
+  get isUpdateButtonEnabled(): boolean {
+    return this.isEditModalDataLoaded &&
+           !!this.editVideoGameBoxData.title &&
+           !!this.editVideoGameBoxData.systemId &&
+           !this.isUpdating;
   }
   availableCustomFields: any[] = [];
 
@@ -207,16 +223,23 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
 
   openEditVideoGameBoxModal(): void {
     if (!this.videoGameBox) return;
-    
+
     this.showEditVideoGameBoxModal = true;
-    
+
+    // Set loading states
+    this.isLoadingSystems = true;
+    this.isLoadingCustomFields = true;
+    this.isLoadingVideoGames = true;
+
     // Load systems for dropdown
     this.apiService.getSystems().subscribe({
       next: (systems) => {
         this.systems = systems;
+        this.isLoadingSystems = false;
       },
       error: (error) => {
         console.error('Error loading systems:', error);
+        this.isLoadingSystems = false;
       }
     });
 
@@ -224,12 +247,13 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
     this.apiService.getCustomFieldsByEntity('videoGameBox').subscribe({
       next: (customFields) => {
         this.availableCustomFields = customFields;
+        this.isLoadingCustomFields = false;
         
         // Load all video games for dropdown
         this.apiService.getVideoGames().subscribe({
           next: (videoGames) => {
             this.allVideoGames = videoGames;
-            
+
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
@@ -238,7 +262,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               systemId: undefined,
               customFieldValues: []
             }));
-            
+
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
               systemId: this.videoGameBox!.system.id.toString(),
@@ -247,6 +271,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               videoGames: existingVideoGames,
               customFieldValues: this.mergeWithDefaultCustomFieldValues(this.videoGameBox!.customFieldValues)
             };
+            this.isLoadingVideoGames = false;
           },
           error: (error) => {
             console.error('Error loading video games:', error);
@@ -267,6 +292,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               videoGames: existingVideoGames,
               customFieldValues: this.mergeWithDefaultCustomFieldValues(this.videoGameBox!.customFieldValues)
             };
+            this.isLoadingVideoGames = false;
           }
         });
       },
@@ -274,12 +300,13 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
         console.error('Error loading custom fields for video game box:', error);
         // Fallback to original behavior if custom fields can't be loaded
         this.availableCustomFields = [];
+        this.isLoadingCustomFields = false;
         
         // Load all video games for dropdown
         this.apiService.getVideoGames().subscribe({
           next: (videoGames) => {
             this.allVideoGames = videoGames;
-            
+
             // Convert existing video games to the format we need
             const existingVideoGames = this.videoGameBox!.videoGames.map(game => ({
               type: 'existing' as 'existing' | 'new',
@@ -288,7 +315,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               systemId: undefined,
               customFieldValues: []
             }));
-            
+
             this.editVideoGameBoxData = {
               title: this.videoGameBox!.title,
               systemId: this.videoGameBox!.system.id.toString(),
@@ -297,6 +324,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               videoGames: existingVideoGames,
               customFieldValues: [...this.videoGameBox!.customFieldValues]
             };
+            this.isLoadingVideoGames = false;
           },
           error: (error) => {
             console.error('Error loading video games:', error);
@@ -317,6 +345,7 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
               videoGames: existingVideoGames,
               customFieldValues: [...this.videoGameBox!.customFieldValues]
             };
+            this.isLoadingVideoGames = false;
           }
         });
       }
@@ -341,6 +370,11 @@ export class VideoGameBoxDetailComponent implements OnInit, OnDestroy {
       customFieldValues: []
     };
     this.editingVideoGameIndex = null;
+
+    // Reset loading states
+    this.isLoadingSystems = false;
+    this.isLoadingCustomFields = false;
+    this.isLoadingVideoGames = false;
   }
 
   onSubmitEditVideoGameBox(): void {

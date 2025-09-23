@@ -51,6 +51,16 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
       label: box.title
     }));
   }
+
+  get isEditModalDataLoaded(): boolean {
+    return !this.isLoadingCustomFields && !this.isLoadingBoardGames && !this.isLoadingBoardGameBoxes;
+  }
+
+  get isUpdateButtonEnabled(): boolean {
+    return this.isEditModalDataLoaded &&
+           !!this.editBoardGameBoxData.title &&
+           !this.isUpdating;
+  }
   
   editBoardGameBoxData = {
     title: '',
@@ -62,6 +72,11 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
   };
   
   availableCustomFields: any[] = [];
+
+  // Loading states for edit modal
+  isLoadingCustomFields = false;
+  isLoadingBoardGames = false;
+  isLoadingBoardGameBoxes = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -210,20 +225,30 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
 
   openEditBoardGameBoxModal(): void {
     if (!this.boardGameBox) return;
-    
+
     this.showEditBoardGameBoxModal = true;
+
+    // Set loading states
+    this.isLoadingCustomFields = true;
+    this.isLoadingBoardGames = true;
+    this.isLoadingBoardGameBoxes = true;
+
+    // Load board game boxes for dropdown (synchronous operation)
     this.boardGameBoxesForDropdown = [...this.boardGameBoxes];
-    
+    this.isLoadingBoardGameBoxes = false; // This is loaded synchronously
+
     // Load available custom fields for board game boxes
     this.apiService.getCustomFieldsByEntity('boardGameBox').subscribe({
       next: (customFields) => {
         this.availableCustomFields = customFields;
-        
+        this.isLoadingCustomFields = false;
+
         // Load existing board games for the dropdown
         this.apiService.getBoardGames().subscribe({
           next: (boardGames) => {
             this.boardGamesForDropdown = boardGames;
-            
+            this.isLoadingBoardGames = false;
+
             // Set form data after board games are loaded
             this.editBoardGameBoxData = {
               title: this.boardGameBox!.title,
@@ -243,6 +268,7 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error loading board games:', error);
+            this.isLoadingBoardGames = false;
           }
         });
       },
@@ -250,12 +276,14 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
         console.error('Error loading custom fields for board game box:', error);
         // Fallback to original behavior if custom fields can't be loaded
         this.availableCustomFields = [];
-        
+        this.isLoadingCustomFields = false;
+
         // Load existing board games for the dropdown
         this.apiService.getBoardGames().subscribe({
           next: (boardGames) => {
             this.boardGamesForDropdown = boardGames;
-            
+            this.isLoadingBoardGames = false;
+
             // Set form data after board games are loaded
             this.editBoardGameBoxData = {
               title: this.boardGameBox!.title,
@@ -275,6 +303,7 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error loading board games:', error);
+            this.isLoadingBoardGames = false;
           }
         });
       }
@@ -291,6 +320,11 @@ export class BoardGameBoxDetailComponent implements OnInit, OnDestroy {
       boardGameId: null,
       customFieldValues: []
     };
+
+    // Reset loading states
+    this.isLoadingCustomFields = false;
+    this.isLoadingBoardGames = false;
+    this.isLoadingBoardGameBoxes = false;
   }
 
   onSubmitEditBoardGameBox(): void {

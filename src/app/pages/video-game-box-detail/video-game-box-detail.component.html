@@ -291,7 +291,7 @@
           <button type="button" class="cancel-button" (click)="closeEditVideoGameBoxModal()">
             Cancel
           </button>
-          <button type="submit" class="create-button" [disabled]="!videoGameBoxForm.form.valid || isUpdating">
+          <button type="submit" class="create-button" [disabled]="!isUpdateButtonEnabled || !videoGameBoxForm.form.valid">
             {{isUpdating ? 'Updating...' : 'Update'}}
           </button>
         </div>
