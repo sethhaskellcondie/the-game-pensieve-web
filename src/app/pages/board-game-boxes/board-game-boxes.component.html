@@ -2,13 +2,16 @@
   <div class="header-section">
     <h1>Board Games (Shelf View)</h1>
     <div class="header-buttons">
+      <button type="button" class="switch-view-button" (click)="navigateToBoardGames()">
+        Switch View
+      </button>
       <button type="button" class="new-button" (click)="openNewBoardGameBoxModal()">
         New
       </button>
-      <button 
-        *ngIf="isMassEditMode && hasSelectedBoardGameBoxes()" 
-        type="button" 
-        class="mass-edit-button" 
+      <button
+        *ngIf="isMassEditMode && hasSelectedBoardGameBoxes()"
+        type="button"
+        class="mass-edit-button"
         (click)="startMassEdit()">
         Mass Edit ({{selectedBoardGameBoxes.size}})
       </button>

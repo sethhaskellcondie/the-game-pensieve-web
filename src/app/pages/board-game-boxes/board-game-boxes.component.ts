@@ -840,6 +840,10 @@ export class BoardGameBoxesComponent implements OnInit, OnDestroy {
     return { current, total: this.massEditOriginalTotal };
   }
 
+  navigateToBoardGames(): void {
+    this.router.navigate(['/board-games']);
+  }
+
   navigateToOptions(): void {
     this.router.navigate(['/options']);
   }
