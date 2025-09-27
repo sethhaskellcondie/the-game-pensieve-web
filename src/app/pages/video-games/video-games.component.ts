@@ -394,7 +394,7 @@ export class VideoGamesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    return this.filterService.getFilterDisplayText('videoGame');
+    return this.filterService.getFilterDisplayText('videoGame', this.systems);
   }
 
   // Mass Edit Mode Methods

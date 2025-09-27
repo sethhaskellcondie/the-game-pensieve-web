@@ -92,7 +92,7 @@ export class FilterService {
   /**
    * Get filter display text for UI
    */
-  getFilterDisplayText(entityType: string): string {
+  getFilterDisplayText(entityType: string, systems?: any[]): string {
     const filters = this.getActiveFilters(entityType);
     if (filters.length === 0) return '';
 
@@ -100,7 +100,7 @@ export class FilterService {
       const filter = filters[0];
       const fieldLabel = this.formatFieldName(filter.field);
       const operatorLabel = this.getOperatorLabel(filter.operator);
-      const operandDisplay = this.getOperandDisplayText(filter.field, filter.operand);
+      const operandDisplay = this.getOperandDisplayText(filter.field, filter.operand, systems);
       return `${fieldLabel} ${operatorLabel} "${operandDisplay}"`;
     }
 
@@ -302,9 +302,11 @@ export class FilterService {
   /**
    * Get display text for operand based on field type
    */
-  private getOperandDisplayText(fieldName: string, operand: string): string {
+  private getOperandDisplayText(fieldName: string, operand: string, systems?: any[]): string {
     if (fieldName === 'system_id') {
-      const system = this.systemsCache.find(s => s.id.toString() === operand);
+      // First try the provided systems array (from component), then fall back to cache
+      const systemsToSearch = systems && systems.length > 0 ? systems : this.systemsCache;
+      const system = systemsToSearch.find(s => s.id.toString() === operand);
       return system ? `${system.name} (Gen ${system.generation})` : operand;
     }
     return operand;

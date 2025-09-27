@@ -69,6 +69,29 @@
   }
 }
 
+.switch-view-button {
+  border: 2px solid #9e9e9e;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  color: #9e9e9e;
+
+  &:hover:not(:disabled) {
+    border-color: #0370ec;
+    color: #0370ec;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .refresh-button {
   background-color: #0370ec;
   color: white;
@@ -79,12 +102,12 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background-color: #0256c7;
     transform: translateY(-1px);
   }
-  
+
   &:disabled {
     background-color: #9e9e9e;
     cursor: not-allowed;
@@ -191,36 +214,51 @@
   color: #dc3545;
 }
 
+.board-games-list {
+  max-height: calc(100vh - 245px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .table-container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
   margin-top: 20px;
 
-  .table-wrapper {
-    overflow-x: auto;
-    overflow-y: visible;
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 
-    // Custom scrollbar styling
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
 
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
+  &::-webkit-scrollbar-thumb {
+    background: #0370ec;
+    border-radius: 4px;
 
-    &::-webkit-scrollbar-thumb {
-      background: #0370ec;
-      border-radius: 4px;
-
-      &:hover {
-        background: #0256c7;
-      }
+    &:hover {
+      background: #0256c7;
     }
   }
+
+  .table-wrapper {
+    // Ensure wrapper doesn't interfere with container scrolling
+    height: 100%;
+    overflow: visible;
+  }
+}
+
+.filter-status {
+  flex-shrink: 0;
 }
 
 .table-header {
@@ -230,6 +268,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .item-count {
@@ -242,9 +283,12 @@
   width: 100%;
   min-width: 600px;
   border-collapse: collapse;
-  
+
   thead {
     background-color: #0370ec;
+    position: sticky;
+    top: 47px;
+    z-index: 5;
     
     th {
       color: white;
@@ -253,6 +297,7 @@
       text-align: left;
       padding: 16px 20px;
       border: none;
+      background-color: #0370ec;
       
       &.custom-field-header {
         text-align: center;
@@ -527,6 +572,17 @@
     color: #64b5f6;
   }
 
+  .switch-view-button {
+    background-color: #333;
+    border-color: #b0b0b0;
+    color: #b0b0b0;
+
+    &:hover:not(:disabled) {
+      border-color: #64b5f6;
+      color: #64b5f6;
+    }
+  }
+
   .mass-edit-button {
     background-color: #ffa726;
     color: #1a1a1a;
@@ -607,24 +663,23 @@
     background: #2d2d2d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
-    .table-wrapper {
-      // Dark mode scrollbar styling
-      &::-webkit-scrollbar {
-        height: 8px;
-      }
+    // Dark mode scrollbar styling
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
 
-      &::-webkit-scrollbar-track {
-        background: #404040;
-        border-radius: 4px;
-      }
+    &::-webkit-scrollbar-track {
+      background: #404040;
+      border-radius: 4px;
+    }
 
-      &::-webkit-scrollbar-thumb {
-        background: #64b5f6;
-        border-radius: 4px;
+    &::-webkit-scrollbar-thumb {
+      background: #64b5f6;
+      border-radius: 4px;
 
-        &:hover {
-          background: #42a5f5;
-        }
+      &:hover {
+        background: #42a5f5;
       }
     }
   }
@@ -641,9 +696,13 @@
   .board-games-table {
     thead {
       background-color: #1976d2;
-      
-      th.sortable-header:hover {
-        background-color: #1565c0;
+
+      th {
+        background-color: #1976d2;
+
+        &.sortable-header:hover {
+          background-color: #1565c0;
+        }
       }
     }
 

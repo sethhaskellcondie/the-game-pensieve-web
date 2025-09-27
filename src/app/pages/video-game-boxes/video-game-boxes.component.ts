@@ -842,7 +842,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    return this.filterService.getFilterDisplayText('videoGameBox');
+    return this.filterService.getFilterDisplayText('videoGameBox', this.systems);
   }
 
   private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
@@ -996,6 +996,10 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
     const current = this.massEditOriginalTotal - remaining;
     
     return { current, total: this.massEditOriginalTotal };
+  }
+
+  navigateToVideoGames(): void {
+    this.router.navigate(['/video-games']);
   }
 
   navigateToOptions(): void {
