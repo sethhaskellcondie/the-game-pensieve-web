@@ -131,14 +131,25 @@
   color: #dc3545;
 }
 
+.custom-fields-list {
+  max-height: calc(100vh - 245px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .table-container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100vh - 245px);
+  flex: 1;
   margin-top: 20px;
+}
+
+.filter-status {
+  flex-shrink: 0;
 }
 
 .table-header {

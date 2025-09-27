@@ -842,7 +842,7 @@ export class VideoGameBoxesComponent implements OnInit, OnDestroy {
   }
 
   getActiveFilterDisplayText(): string {
-    return this.filterService.getFilterDisplayText('videoGameBox');
+    return this.filterService.getFilterDisplayText('videoGameBox', this.systems);
   }
 
   private mergeWithDefaultCustomFieldValues(existingCustomFieldValues: any[]): any[] {
