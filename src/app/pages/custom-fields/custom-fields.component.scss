@@ -135,7 +135,9 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 245px);
   margin-top: 20px;
 }
 
@@ -146,6 +148,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .item-count {
@@ -156,11 +161,15 @@
 
 .custom-fields-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   
   thead {
     background-color: #0370ec;
-    
+    position: sticky;
+    top: 47px;
+    z-index: 5;
+
     th {
       color: white;
       font-weight: 600;
@@ -168,6 +177,7 @@
       text-align: left;
       padding: 16px 20px;
       border: none;
+      background-color: #0370ec;
       
       &.sortable-header {
         cursor: pointer;
@@ -699,9 +709,13 @@
   .custom-fields-table {
     thead {
       background-color: #1976d2; // Darker blue for header
-      
-      th.sortable-header:hover {
-        background-color: #1565c0;
+
+      th {
+        background-color: #1976d2;
+
+        &.sortable-header:hover {
+          background-color: #1565c0;
+        }
       }
     }
     

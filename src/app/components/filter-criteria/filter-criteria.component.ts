@@ -245,8 +245,8 @@ export class FilterCriteriaComponent implements OnInit, OnDestroy {
 
   getBooleanOptions(): DropdownOption[] {
     return [
-      { value: 'true', label: 'True' },
-      { value: 'false', label: 'False' }
+      { value: 'true', label: 'Yes' },
+      { value: 'false', label: 'No' }
     ];
   }
 

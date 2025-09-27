@@ -145,31 +145,35 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 245px);
   margin-top: 20px;
 
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #0370ec;
+    border-radius: 4px;
+
+    &:hover {
+      background: #0256c7;
+    }
+  }
+
   .table-wrapper {
-    overflow-x: auto;
-    overflow-y: visible;
-
-    // Custom scrollbar styling
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #0370ec;
-      border-radius: 4px;
-
-      &:hover {
-        background: #0256c7;
-      }
-    }
+    // Ensure wrapper doesn't interfere with container scrolling
+    height: 100%;
+    overflow: visible;
   }
 }
 
@@ -180,6 +184,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .item-count {
@@ -192,9 +199,12 @@
   width: 100%;
   min-width: 580px;
   border-collapse: collapse;
-  
+
   thead {
     background-color: #0370ec;
+    position: sticky;
+    top: 47px;
+    z-index: 5;
     
     th {
       color: white;
@@ -203,6 +213,7 @@
       text-align: left;
       padding: 16px 20px;
       border: none;
+      background-color: #0370ec;
       
       &.custom-field-header {
         text-align: center;
@@ -628,24 +639,23 @@
     background: #2d2d2d;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
-    .table-wrapper {
-      // Dark mode scrollbar styling
-      &::-webkit-scrollbar {
-        height: 8px;
-      }
+    // Dark mode scrollbar styling
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
 
-      &::-webkit-scrollbar-track {
-        background: #404040;
-        border-radius: 4px;
-      }
+    &::-webkit-scrollbar-track {
+      background: #404040;
+      border-radius: 4px;
+    }
 
-      &::-webkit-scrollbar-thumb {
-        background: #64b5f6;
-        border-radius: 4px;
+    &::-webkit-scrollbar-thumb {
+      background: #64b5f6;
+      border-radius: 4px;
 
-        &:hover {
-          background: #42a5f5;
-        }
+      &:hover {
+        background: #42a5f5;
       }
     }
   }
@@ -662,9 +672,13 @@
   .toys-table {
     thead {
       background-color: #1976d2;
-      
-      th.sortable-header:hover {
-        background-color: #1565c0;
+
+      th {
+        background-color: #1976d2;
+
+        &.sortable-header:hover {
+          background-color: #1565c0;
+        }
       }
     }
 
