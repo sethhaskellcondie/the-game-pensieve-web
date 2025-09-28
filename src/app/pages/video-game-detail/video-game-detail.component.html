@@ -120,7 +120,7 @@
   <div *ngIf="showEditVideoGameModal" class="modal-overlay" (click)="closeEditVideoGameModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Update Video Game</h2>
+        <h2>Edit Video Game</h2>
         <button type="button" class="close-button" (click)="closeEditVideoGameModal()">×</button>
       </div>
       
@@ -166,7 +166,7 @@
             Cancel
           </button>
           <button type="submit" class="create-button" [disabled]="!videoGameForm.form.valid || isUpdating">
-            {{isUpdating ? 'Updating...' : 'Update'}}
+            {{isUpdating ? 'Editing...' : 'Edit'}}
           </button>
         </div>
       </form>
