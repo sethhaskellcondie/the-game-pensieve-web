@@ -31,7 +31,7 @@ describe('ApiService', () => {
 
   describe('getMetadata', () => {
     const testKey = 'test-key';
-    const expectedUrl = `http://localhost:8080/v1/metadata/${testKey}`;
+    const expectedUrl = `/api/metadata/${testKey}`;
     const mockMetadata: Metadata = { 
       id: 1,
       key: testKey, 

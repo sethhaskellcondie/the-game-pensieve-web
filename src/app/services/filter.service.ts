@@ -26,7 +26,7 @@ export interface EntityFilter {
   providedIn: 'root'
 })
 export class FilterService {
-  private baseUrl = 'http://localhost:8080/v1';
+  private baseUrl = '/api';
   private activeFiltersSubject = new BehaviorSubject<{ [entity: string]: FilterRequestDto[] }>({});
   private systemsCache: any[] = [];
 

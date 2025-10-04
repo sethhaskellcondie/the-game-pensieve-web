@@ -109,7 +109,7 @@ export interface Metadata {
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly baseUrl = 'http://localhost:8080/v1';
+  private readonly baseUrl = '/api';
 
   constructor(private http: HttpClient, private errorSnackbarService: ErrorSnackbarService) { }
 
