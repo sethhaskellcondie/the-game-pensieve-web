@@ -2,6 +2,10 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.1.
 
+## Related Links
+- A video presentation of this project, presented as if I would present this in a technical job interview: https://youtu.be/7wByiXr5nDI
+- The back end code repository: https://github.com/sethhaskellcondie/the-game-pensieve-api
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
