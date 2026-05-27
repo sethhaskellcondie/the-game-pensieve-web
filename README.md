@@ -2,6 +2,14 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.1.
 
+## From Scratch Setup
+- I like running a package manager for dependencies, for Mac I prefer homebrew. See https://brew.sh/
+- Next install node `brew install node` validate successful install with `node -v` or `npm -v`
+- Next install the angular cli `npm install -g @angular/cli@latest` validation successful install with `ng version`
+- Then install the dependencies with `npm install` in the project directory
+- Then you can run the command `ng serve` to start this project
+- The project will be running on http://localhost:4200
+
 ## Related Links
 - A video presentation of this project, presented as if I would present this in a technical job interview: https://youtu.be/7wByiXr5nDI
 - The back end code repository: https://github.com/sethhaskellcondie/the-game-pensieve-api
