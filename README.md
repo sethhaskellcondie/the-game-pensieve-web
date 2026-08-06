@@ -1,5 +1,7 @@
 # TheGamePensiveWeb
 
+This project has been depricated a new version of this project can be found in the [V2](https://github.com/sethhaskellcondie/the-game-pensieve-web-v2) repository.
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.0.1.
 
 ## From Scratch Setup
